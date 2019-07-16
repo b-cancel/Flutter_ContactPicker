@@ -19,7 +19,7 @@ permissionRequired(BuildContext context, bool force) async{
         context, PageTransition(
           type: PageTransitionType.leftToRight,
           child: Manual(
-            force: force,
+            forcePermission: force,
           ),
         ),
       );
@@ -28,10 +28,10 @@ permissionRequired(BuildContext context, bool force) async{
 }
 
 class Manual extends StatefulWidget {
-  final bool force;
+  final bool forcePermission;
 
   Manual({
-    this.force,
+    this.forcePermission,
   });
 
   @override
@@ -64,12 +64,13 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
     if(status == PermissionStatus.granted){
       Navigator.of(context).pop();
     }
+    //ELSE... wait for user to open up app settings and do what we expect
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop:  () async => !widget.force,
+      onWillPop:  () async => !widget.forcePermission,
       child: Scaffold(
         body: Column(
           children: <Widget>[
