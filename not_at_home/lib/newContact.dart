@@ -9,6 +9,8 @@ import 'package:page_transition/page_transition.dart';
 
 import 'app.dart';
 
+import 'main.dart';
+
 class NewContact extends StatefulWidget {
   @override
   _NewContactState createState() => _NewContactState();
@@ -37,7 +39,25 @@ class _NewContactState extends State<NewContact> {
 
   //---Contact Save Functionality
   saveContact() async{
-    //remove everything from the stack and push the next page
+    //TODO... Create the contact from all the data
+
+    //TODO... stop using dummy contact
+    Contact newContact = getDummyContact();
+
+    //save the avatar
+    if(imageFile != null){
+      List<int> avatarList = await imageFile.readAsBytes();
+      newContact.avatar = Uint8List.fromList(avatarList);
+    }
+
+    print("-----------------------------------");
+
+    //save the contact
+    await ContactsService.addContact(newContact);  
+
+    //TODO... replace this for code that returns this contact to the desired location
+
+    /*
     Navigator.pushAndRemoveUntil(
       context, 
       PageTransition(
@@ -46,76 +66,7 @@ class _NewContactState extends State<NewContact> {
       ),
       (r) => false,
     );
-
-    /*
-    // Contact avatar/thumbnail
-    Uint8List avatar;
-
-    // Name
-    String displayName, givenName, middleName, prefix, suffix, familyName;
-
-    // Company
-    String company, jobTitle;
-
-    // Phone numbers
-    Iterable<Item> phones = [];
-
-    // Email addresses
-    Iterable<Item> emails = [];
-
-    // Post addresses
-    Iterable<PostalAddress> postalAddresses = [];
     */
-
-    // The contact must have a firstName / lastName to be successfully added  
-
-    //get read to create fill the contact
-    Contact newContact = Contact();
-
-    //save the avatar
-    if(imageFile != null){
-      List<int> avatarList = await imageFile.readAsBytes();
-      newContact.avatar = Uint8List.fromList(avatarList);
-    }
-    
-    //TODO... grab actual data
-    newContact.displayName = "display";
-
-    newContact.givenName = "given";
-    newContact.middleName = "middle";
-    newContact.prefix = "prefix";
-    newContact.suffix = "suffix";
-    newContact.familyName = "family";
-
-    newContact.company = "company";
-    newContact.jobTitle = "job title";
-
-    List<Item> phones = new List<Item>();
-    phones.add(Item(label: "mobile", value: "956 777 2692"));
-    newContact.phones = phones;
-
-    List<Item> emails = new List<Item>();
-    emails.add(Item(label: "email", value: "some@s.com"));
-    newContact.emails = emails;
-
-    List<PostalAddress> addresses = new List<PostalAddress>();
-    addresses.add(
-      PostalAddress(
-        label: "label", 
-        street: "street", 
-        city: "city", 
-        postcode: "78912", 
-        region: "region", 
-        country: 'US',
-      ),
-    );
-
-    newContact.note = "some note";
-
-    print("-----------------------------------");
-
-    //save the contact
-    await ContactsService.addContact(newContact);  
   }
 
   //---Image Picker Functionality

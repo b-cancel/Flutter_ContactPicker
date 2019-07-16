@@ -30,6 +30,7 @@ dependencies:
   image_picker: ^0.6.0+16
   contacts_service: ^0.2.8
   font_awesome_flutter: ^8.4.0
+  image: ^2.1.4
 
   # share 
   # https://pub.dev/packages/share

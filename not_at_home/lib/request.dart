@@ -1,3 +1,4 @@
+import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:not_at_home/selectContact.dart';
 import 'package:not_at_home/theme.dart';
@@ -95,8 +96,7 @@ class _PageRequestingContactState extends State<PageRequestingContact> with Widg
                       context, PageTransition(
                         type: PageTransitionType.rightToLeft,
                         child: SelectContact(
-                          name: name,
-                          number: number,
+                          contact: new ValueNotifier<Contact>(new Contact()),
                         ),
                       ),
                     );

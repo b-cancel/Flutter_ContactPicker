@@ -5,62 +5,13 @@ import 'newContact.dart';
 import 'dart:math' as math;
 
 class SelectContactUX extends StatelessWidget {
-  List<Widget> arr = [
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-    Container(color: Colors.red, height: 150.0),
-    Container(color: Colors.purple, height: 150.0),
-    Container(color: Colors.green, height: 150.0),
-  ];
+  SelectContactUX({
+    @required this.contactWidgets,
+    @required this.backFromNewContact,
+  });
+
+  final List<Widget> contactWidgets;
+  final ValueNotifier<bool> backFromNewContact;
 
   ValueNotifier<bool> showNewContact = new ValueNotifier(true);
 
@@ -170,7 +121,7 @@ class SelectContactUX extends StatelessWidget {
                 ),
                 SliverList(
                   delegate: SliverChildListDelegate(
-                    arr,
+                    contactWidgets,
                   ),
                 ),
               ],
@@ -188,6 +139,7 @@ class SelectContactUX extends StatelessWidget {
                     padding: EdgeInsets.all(16),
                     child: FloatingActionButton.extended(
                       onPressed: (){
+                        backFromNewContact.value = true;
                         Navigator.push(
                           context, PageTransition(
                             type: PageTransitionType.rightToLeft,
