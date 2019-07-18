@@ -60,6 +60,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //contact list then gets passed UX
   bool retreivingContacts = false;
   List<Contact> contacts = new List<Contact>();
+  List<Color> colorsForContacts = new List<Color>();
 
   //init
   @override
@@ -125,6 +126,12 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         withThumbnails: false,
       ); 
       contacts = temp.toList();
+
+      //assign a color to each contact
+      for(int i = 0; i < contacts.length; i++){
+        colorsForContacts.add(theColors[rnd.nextInt(theColors.length)]);
+      }
+
       //inform the user we have the contacts
       rebuild(false);
 
@@ -176,6 +183,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
           ContactListTile(
             context: context, 
             contact: contacts[i],
+            color: colorsForContacts[i],
           ),
         );
       }

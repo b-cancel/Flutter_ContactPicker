@@ -11,10 +11,12 @@ class ContactListTile extends StatelessWidget {
     Key key,
     @required this.context,
     @required this.contact,
+    @required this.color,
   }) : super(key: key);
 
   final BuildContext context;
   final Contact contact;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +46,7 @@ class ContactListTile extends StatelessWidget {
         width: 50,
         height: 50,
         decoration: new BoxDecoration(
-          color: theColors[rnd.nextInt(theColors.length)],
+          color: color,
           shape: BoxShape.circle,
         ),
         child: (noImage) ? Icon(
