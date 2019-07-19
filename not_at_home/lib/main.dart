@@ -1,7 +1,9 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:not_at_home/request.dart';
 import 'package:not_at_home/selectContact.dart';
 import 'package:not_at_home/theme.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 
 import 'dart:math' as math;
@@ -28,12 +30,13 @@ class StatelessLink extends StatelessWidget {
     final theme = Provider.of<ThemeChanger>(context);
     theColors = getThemeColors(Theme.of(context));
     return MaterialApp(
+      routes: {
+        ContactDisplayHelper.routeName: (context) => ContactDisplayHelper(),
+      },   
       title: 'Contact Picker',
       theme: theme.getTheme(),
       home: SelectContact(
-        firstPage: true,
         forceSelection: true,
-        contact: new ValueNotifier<Contact>(new Contact()),
       ),
     );
   }
@@ -78,21 +81,21 @@ List<Color> getThemeColors(ThemeData themeData){
 math.Random rnd = math.Random();
 
 //-----Dummy Test Contact
-Contact getDummyContact(){
-  Contact dummyContact = Contact(
-    givenName: "givenName",
-    middleName: "middleName",
-    familyName: "familyName",
-    prefix: "prefix",
-    suffix: "suffix",
-    company: "company",
-    jobTitle: "job title",
-    //emails
-    //phones
-    //addresses
-    note: "note",
-  );
+Contact dummyContact = Contact(
+  givenName: "givenName",
+  middleName: "middleName",
+  familyName: "familyName",
+  prefix: "prefix",
+  suffix: "suffix",
+  company: "company",
+  jobTitle: "job title",
+  //emails
+  //phones
+  //addresses
+  note: "note",
+);
 
+Contact getDummyContact(){
   List<Item> phones = new List<Item>();
 
   phones.add(Item(label: "mobile", value: "956 777 2692"));

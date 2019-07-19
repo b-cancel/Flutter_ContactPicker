@@ -5,13 +5,16 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:page_transition/page_transition.dart';
-
-import 'app.dart';
 
 import 'main.dart';
 
 class NewContact extends StatefulWidget {
+  NewContact({
+    this.contact,
+  });
+
+  final ValueNotifier<Contact> contact;
+
   @override
   _NewContactState createState() => _NewContactState();
 }

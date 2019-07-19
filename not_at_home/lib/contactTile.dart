@@ -9,44 +9,47 @@ import 'dart:io';
 class ContactListTile extends StatelessWidget {
   const ContactListTile({
     Key key,
-    @required this.context,
-    @required this.contact,
-    @required this.color,
+    @required this.thisContact,
+    @required this.thisColor,
+    //if the selectContact instance we are comming from is the firstPage
+    //then we will have this function
+    this.onSelect,
+    //ELSE... TODO...
+    //we should instead update the passed value notifier and pop until the page before select contact
   }) : super(key: key);
 
-  final BuildContext context;
-  final Contact contact;
-  final Color color;
+  final Contact thisContact;
+  final Color thisColor;
+  final Function onSelect;
 
   @override
   Widget build(BuildContext context) {
     //process image
-    bool noImage = contact.avatar.length == 0;
+    bool noImage = thisContact.avatar.length == 0;
 
     //process name
-    String name = contact.givenName ?? "UnKnown";
+    String name = thisContact.givenName ?? "UnKnown";
 
     //process the phone string
     String phoneString;
-    if(contact.phones.toList().length == 0){
+    if(thisContact.phones.toList().length == 0){
       phoneString = "no number";
     }
     else{
-      Item firstNumber = contact.phones.toList()[0];
+      Item firstNumber = thisContact.phones.toList()[0];
       phoneString = firstNumber.value.toString() + " | " + firstNumber.label.toString();
     }
 
     //return widget
     return ListTile(
       onTap: (){
-        //TODO... replace this for code that returns this contact to the desired location
-        print("tapped");
+        onSelect(context, thisContact);
       },
       leading: new Container(
         width: 50,
         height: 50,
         decoration: new BoxDecoration(
-          color: color,
+          color: thisColor,
           shape: BoxShape.circle,
         ),
         child: (noImage) ? Icon(
@@ -57,7 +60,7 @@ class ContactListTile extends StatelessWidget {
           child: FittedBox(
             fit: BoxFit.cover,
               child: Image.memory(
-              contact.avatar,
+              thisContact.avatar,
             ),
           )
         )

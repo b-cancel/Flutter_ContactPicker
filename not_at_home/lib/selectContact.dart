@@ -3,24 +3,25 @@ import 'dart:io';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:not_at_home/permission.dart';
+import 'package:not_at_home/request.dart';
 import 'package:not_at_home/selectContactUX.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'contactTile.dart';
 import 'main.dart';
 
-/*
-  NOTE: this app is designed specifically for 2 cases
-  case 1: select a contact on start up, once its selected we cant access the contact selection items
-  case 2: select a contact from a page, and go back to that page (by poping)
+//---NEW NOTES
 
-  So case 3 below is NOT covered
-  case 3: select a contact from a page, and go to another page 
+//onSelect -> if we are passed a contact we want to update it
+//         -> else we want to open a new page
 
-  So...
-  Case 1 is identified with a the firstPage boolean
-  Case 2 is the inverse
-*/
+//the only way we can update that new contact from either the select or new contact page
+//is if we are passed the value notifier
+
+//IF we are not passed a contact to update we know its the first page
+
+//---NEW NOTES
 
 /*
 IF we force selection
@@ -37,36 +38,64 @@ ELSE -> the user should be able to back away from the selection process at any s
 
 class SelectContact extends StatefulWidget {
   SelectContact({
-    this.firstPage: false,
     this.forceSelection: false,
-    @required this.contact,
+    //if this is set then we know we are not in the first page
+    this.contactToUpdate,
   });
 
-  final firstPage;
   final bool forceSelection;
-  final ValueNotifier<Contact> contact;
+  final ValueNotifier<Contact> contactToUpdate;
 
   @override
   _SelectContactState createState() => _SelectContactState();
 }
 
 class _SelectContactState extends State<SelectContact> with WidgetsBindingObserver {
-  //this is set TRUE right before we open up "NewContact"
-  //that way if we pop we know that we had pushed it
-  //when we use this to determine what to do on resume, we reset it back to false
-  //we use a value notifier so we can pass by reference
-  ValueNotifier<bool> backFromNewContact = new ValueNotifier<bool>(false);
-
   //contact list then gets passed UX
   bool retreivingContacts = false;
   List<Contact> contacts = new List<Contact>();
   List<Color> colorsForContacts = new List<Color>();
 
+  //set based on whether or not a contact to update was passed
+  bool firstPage;
+  Function onSelect;
+
   //init
   @override
   void initState(){ 
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    //super init
+    super.initState(); 
+    //observer for onResume
+    WidgetsBinding.instance.addObserver(this); 
+    //if no contact is passed then we know this is the first page
+    firstPage = (widget.contactToUpdate == null);
+    //create the onSelect Function
+    if(firstPage){
+      print("-------------CREATING");
+      onSelect = (BuildContext context, Contact contact){
+        //1. push our new page with our new contact
+        //2. remove all other pages from the stack in the background
+        Navigator.pushNamedAndRemoveUntil(
+          context, 
+          ContactDisplayHelper.routeName,
+          (r) => false,
+          arguments: ContactDisplayArgs(contact),
+        );
+      };
+    }
+    else{
+      print("-------------UPDATING");
+      onSelect = (BuildContext context, Contact contact){
+        //1. update our passed contact
+        widget.contactToUpdate.value = contact;
+        //2. remove all other pages from the stack
+        //   until we arrive at the page where we selected our contact from
+        Navigator.popUntil(context, ModalRoute.withName(ContactDisplayHelper.routeName));
+
+        //NOTE: #2 is made possible by using the guide below
+        //https://flutter.dev/docs/cookbook/navigation/navigate-with-arguments
+      };
+    }
     init();
   }
 
@@ -88,6 +117,14 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     if(state == AppLifecycleState.resumed) reactToResume();
   }
 
+  //-------------------------Everything above is airtight-------------------------
+
+  //this is set TRUE right before we open up "NewContact"
+  //that way if we pop we know that we had pushed it
+  //when we use this to determine what to do on resume, we reset it back to false
+  //we use a value notifier so we can pass by reference
+  ValueNotifier<bool> backFromNewContact = new ValueNotifier<bool>(false);
+
   reactToResume() async{
     //IF -> we came back from the permissions page
     //  IF we now have permission -> refill the contacts list with our contacts
@@ -103,6 +140,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
 
     //if we came back from the permissions page
     if(backFromNewContact.value == false){
+      print("not back from new contact");
       PermissionStatus permissionStatus = await getContacts();
       if(permissionStatus != PermissionStatus.granted){
         //-------------------------
@@ -110,52 +148,65 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         //-------------------------
       }
     }
-    else backFromNewContact.value = false;
+    else{
+      print("back from new contact");
+      backFromNewContact.value = false;
+    }
   }
 
+  //NOTE: If rebuild fails then we are no longer mounted
+  //hence all the if(rebuild()) snippets
   Future<PermissionStatus> getContacts() async{
     PermissionStatus permissionStatus = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
     if(permissionStatus == PermissionStatus.granted){
       contacts.clear();
 
       //inform the user we are getting the contacts
-      rebuild(true);
+      if(rebuild(true)){
 
-      //get the contacts (WITHOUT THUMBNAILS)
-      Iterable<Contact> temp = await ContactsService.getContacts(
-        withThumbnails: false,
-      ); 
-      contacts = temp.toList();
+        //get the contacts (WITHOUT THUMBNAILS)
+        Iterable<Contact> temp = await ContactsService.getContacts(
+          withThumbnails: false,
+        ); 
+        contacts = temp.toList();
 
-      //assign a color to each contact
-      for(int i = 0; i < contacts.length; i++){
-        colorsForContacts.add(theColors[rnd.nextInt(theColors.length)]);
+        //assign a color to each contact
+        for(int i = 0; i < contacts.length; i++){
+          colorsForContacts.add(theColors[rnd.nextInt(theColors.length)]);
+        }
+
+        //inform the user we have the contacts
+        if(rebuild(false)){
+
+          //get the contacts (WITH THUMBNAILS)
+          temp = await ContactsService.getContacts(
+            photoHighResolution: false,
+          ); 
+          contacts = temp.toList();
+
+          //inform the user we have the contacts
+          if(rebuild(false)){
+            
+            //get the contacts (WITH HIGH RESOLUTION THUMBNAILS)
+            temp = await ContactsService.getContacts(); 
+            contacts = temp.toList();
+            //inform the user we have the contacts
+            rebuild(false);
+          }
+        }
       }
-
-      //inform the user we have the contacts
-      rebuild(false);
-
-      //get the contacts (WITH THUMBNAILS)
-      temp = await ContactsService.getContacts(
-        photoHighResolution: false,
-      ); 
-      contacts = temp.toList();
-      //inform the user we have the contacts
-      rebuild(false);
-
-      //get the contacts (WITH HIGH RESOLUTION THUMBNAILS)
-      temp = await ContactsService.getContacts(); 
-      contacts = temp.toList();
-      //inform the user we have the contacts
-      rebuild(false);
     }
     return permissionStatus;
   }
 
-  rebuild(bool isRetreiving){
-    setState(() {
-      retreivingContacts = isRetreiving;
-    });
+  bool rebuild(bool isRetreiving){
+    if(mounted){
+      setState(() {
+        retreivingContacts = isRetreiving;
+      });
+      return true;
+    }
+    else return false;    
   }
 
   //build
@@ -163,38 +214,25 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   Widget build(BuildContext context) {
     //convert the retreived contacts into widgets
     List<Widget> contactWidgets = new List<Widget>();
-    if(contacts == null || contacts.length == 0){
+
+    //for each contact that we do have create the appropriate widget
+    for(int i = 0; i < contacts.length; i++){
       contactWidgets.add(
-        Container(
-          padding: EdgeInsets.all(16),
-          child: Text(
-            (retreivingContacts) ? "Retreiving Contacts" : "No Contacts Found",
-            style: TextStyle(
-              fontSize: 18,
-            ),
-          ),
-        )
+        ContactListTile(
+          thisContact: contacts[i],
+          thisColor: colorsForContacts[i],
+          onSelect: onSelect,
+        ),
       );
-    }
-    else{
-      //for each contact that we do have create the appropriate widget
-      for(int i = 0; i < contacts.length; i++){
-        contactWidgets.add(
-          ContactListTile(
-            context: context, 
-            contact: contacts[i],
-            color: colorsForContacts[i],
-          ),
-        );
-      }
     }
 
     //pass the widgets
     return WillPopScope(
       //IF first page I should be able to close the app
       //ELSE -> I block the user from going back IF forceSelection is enabled
-      onWillPop: () async => !(widget.forceSelection && !widget.firstPage),
+      onWillPop: () async => !(widget.forceSelection && !firstPage),
       child: SelectContactUX(
+        retreivingContacts: (contacts == null),
         contactWidgets: contactWidgets,
         backFromNewContact: backFromNewContact,
       ),

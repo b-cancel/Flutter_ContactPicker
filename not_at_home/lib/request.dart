@@ -5,27 +5,58 @@ import 'package:not_at_home/theme.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 
-class PageRequestingContact extends StatefulWidget {
-  @override
-  _PageRequestingContactState createState() => _PageRequestingContactState();
+/*
+If arrive at this page and
+  - its the first time we arrive at it
+    - and we do so with an empty contact -> pop up manual input (forced)
+  - its not the first time we arrive at it
+    - and we update our contact wtih an empty contact -> pop up manual input (non-forced should return our previous contact)
+*/
+
+class ContactDisplayArgs {
+  final Contact contact;
+  ContactDisplayArgs(this.contact);
 }
 
-class _PageRequestingContactState extends State<PageRequestingContact> with WidgetsBindingObserver {
+class ContactDisplayHelper extends StatelessWidget {
+  static const routeName = '/contactDisplay';
+
+  @override
+  Widget build(BuildContext context) {
+    final ContactDisplayArgs args = ModalRoute.of(context).settings.arguments;
+    return ContactDisplay(
+      contact: args.contact,
+    );
+  }
+}
+
+class ContactDisplay extends StatefulWidget {
+  ContactDisplay({
+    this.contact,
+  });
+
+  final Contact contact;
+
+  @override
+  _ContactDisplayState createState() => _ContactDisplayState();
+}
+
+class _ContactDisplayState extends State<ContactDisplay> with WidgetsBindingObserver {
   bool isSwitched = true;
   bool forceContactChange = true;
 
+  ValueNotifier<Contact> contact = new ValueNotifier<Contact>(new Contact());
+
   ValueNotifier<bool> manualInput = new ValueNotifier<bool>(false);
-  ValueNotifier<String> name = new ValueNotifier<String>("");
-  ValueNotifier<String> number = new ValueNotifier<String>("");
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    //name always changes with number
-    name.addListener((){
-      //set state so that the new selected name is on the button
+    contact.value = widget.contact;
+    contact.addListener((){
+      print("--------------------------------------NAME CHAGNED");
       setState(() {
         
       });
@@ -58,7 +89,7 @@ class _PageRequestingContactState extends State<PageRequestingContact> with Widg
     ThemeChanger _themeChanger = Provider.of<ThemeChanger>(context);
     
     //button text
-    String buttonText = name.value + " | " + number.value;
+    String buttonText = contact.value.givenName;
     if(buttonText == " | ") buttonText = "Select Contact";
 
     //build
@@ -96,7 +127,7 @@ class _PageRequestingContactState extends State<PageRequestingContact> with Widg
                       context, PageTransition(
                         type: PageTransitionType.rightToLeft,
                         child: SelectContact(
-                          contact: new ValueNotifier<Contact>(new Contact()),
+                          contactToUpdate: contact,
                         ),
                       ),
                     );

@@ -1,3 +1,4 @@
+import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -6,10 +7,12 @@ import 'dart:math' as math;
 
 class SelectContactUX extends StatelessWidget {
   SelectContactUX({
+    this.retreivingContacts: false,
     @required this.contactWidgets,
     @required this.backFromNewContact,
   });
 
+  final bool retreivingContacts;
   final List<Widget> contactWidgets;
   final ValueNotifier<bool> backFromNewContact;
 
@@ -22,6 +25,30 @@ class SelectContactUX extends StatelessWidget {
       fontWeight: FontWeight.bold,
     );
 
+    Widget bodyWidget;
+
+    if(retreivingContacts || contactWidgets.length == 0){
+      bodyWidget = SliverFillRemaining(
+        child: Container(
+          alignment: Alignment.center,
+          padding: EdgeInsets.all(16),
+          child: Text(
+            (retreivingContacts) ? "Retreiving Contacts" : "No Contacts Found",
+            style: TextStyle(
+              fontSize: 18,
+            ),
+          ),
+        ),
+      );
+    }
+    else{
+      bodyWidget = SliverList(
+        delegate: SliverChildListDelegate(
+          contactWidgets,
+        )
+      );
+    }
+
     return Scaffold(
       body: Stack(
         children: <Widget>[
@@ -30,18 +57,19 @@ class SelectContactUX extends StatelessWidget {
               //do your logic
               if(scrollNotification is ScrollUpdateNotification){
                 Offset change = scrollNotification.dragDetails?.delta;
-
+                //if a change actually occured
                 if(change != null){
                   //stop slow scrolling from making any changes
                   double absoluteChange = math.sqrt(math.pow(change.dy, 2));
                   if(absoluteChange > 2.5){
+                    //show one thing or the other given our scroll direction
                     bool prev = showNewContact.value;
                     showNewContact.value = (change.dy > 0);
                     print(showNewContact.value.toString());
                   }
                 }
               }
-
+              //return true since this function requires it
               return true;
             },
             child: CustomScrollView(
@@ -119,11 +147,7 @@ class SelectContactUX extends StatelessWidget {
                     ),
                   ),
                 ),
-                SliverList(
-                  delegate: SliverChildListDelegate(
-                    contactWidgets,
-                  ),
-                ),
+                bodyWidget,
               ],
             ),
           ),
@@ -143,7 +167,8 @@ class SelectContactUX extends StatelessWidget {
                         Navigator.push(
                           context, PageTransition(
                             type: PageTransitionType.rightToLeft,
-                            child: NewContact(),
+                            child: NewContact(
+                            ),
                           ),
                         );
                       },
