@@ -3,7 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-permissionRequired(BuildContext context, bool force) async{
+permissionRequired(BuildContext context, bool force, String action, Function onManualSelect) async{
   PermissionStatus startStatus = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
   if(startStatus != PermissionStatus.granted){
     bool popUpNotBlocked = await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.contacts);
@@ -11,7 +11,7 @@ permissionRequired(BuildContext context, bool force) async{
       Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([PermissionGroup.contacts]);
       PermissionStatus status = permissions[PermissionGroup.contacts];
       if(status != PermissionStatus.granted){
-        permissionRequired(context, force);
+        permissionRequired(context, force, action, onManualSelect);
       }
     }
     else{
@@ -20,6 +20,8 @@ permissionRequired(BuildContext context, bool force) async{
           type: PageTransitionType.leftToRight,
           child: Manual(
             forcePermission: force,
+            action: action,
+            onManualSelect: onManualSelect,
           ),
         ),
       );
@@ -29,9 +31,13 @@ permissionRequired(BuildContext context, bool force) async{
 
 class Manual extends StatefulWidget {
   final bool forcePermission;
+  final String action;
+  final Function onManualSelect;
 
   Manual({
-    this.forcePermission,
+    @required this.forcePermission,
+    @required this.action,
+    @required this.onManualSelect,
   });
 
   @override
@@ -51,7 +57,10 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  //---the user did what we wanted
+  //If the user came back to the permission page they must have traveled away from it
+  //If they traveled away from it temporarily, it must have been because they decided to open 'App Settings'
+  //because if they would have instead clicked BACK or select manual input
+  //that would have traveled away from it permanently and this wouldn't run
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if(state == AppLifecycleState.resumed){
@@ -59,12 +68,13 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
     }
   }
 
+  //If the user came back having given us permission then we automatically pop
+  //ELSE we let the read the message so we can evetually pop or allow then the other navigation options
   void checkIfCanPop() async{
     PermissionStatus status = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
     if(status == PermissionStatus.granted){
       Navigator.of(context).pop();
     }
-    //ELSE... wait for user to open up app settings and do what we expect
   }
 
   @override
@@ -101,7 +111,7 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
                           Container(
                             padding: EdgeInsets.only(bottom: 16),
                             child: Text(
-                              "In order to select a contact",
+                              "In order to " + widget.action + " a contact",
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -115,7 +125,6 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
                               ],
                             ),
                           ),
-                          /*
                           Container(
                             padding: EdgeInsets.only(bottom: 16),
                             child: Column(
@@ -126,7 +135,6 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
                               ],
                             ),
                           ),
-                          */
                           Container(
                             width: MediaQuery.of(context).size.width,
                             padding: EdgeInsets.all(32),
@@ -156,7 +164,10 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
               child: Row(
                 children: <Widget>[
                   BottomButton(
-                    label: "", //Manual Input",
+                    label: "Manual Input",
+                    func: (){
+                      widget.onManualSelect();
+                    },
                   ),
                   BottomButton(
                     label: "App Settings",

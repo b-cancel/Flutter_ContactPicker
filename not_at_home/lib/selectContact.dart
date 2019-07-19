@@ -11,29 +11,18 @@ import 'package:permission_handler/permission_handler.dart';
 import 'contactTile.dart';
 import 'main.dart';
 
-//---NEW NOTES
-
-//onSelect -> if we are passed a contact we want to update it
-//         -> else we want to open a new page
-
-//the only way we can update that new contact from either the select or new contact page
-//is if we are passed the value notifier
-
-//IF we are not passed a contact to update we know its the first page
-
-//---NEW NOTES
+/*
+the onSelect function is set depending on whether or not we are on the first page
+we know its the first page because we aren't passed a contact to update
+IF first page -> we are passed a contact we want to update it (we can do so with a value notifier)
+ELSE -> we want to open a new page
+*/
 
 /*
 IF we force selection
   IF -> select contact came up on start up -> we dont want to stop the user from closing the app
   ELSE -> we dont want to allow the user to back up
------TODO Below (once we implement on start up)
-ELSE -> the user should be able to back away from the selection process at any stage
-  IF we already have permission -> they should be able to easily back away from the page
-  ELSE -> they should be able to easily back away from the
-    1. page with the permissions pop up
-    2. and the page that comes up IF you block the pop up
------TODO Above
+ELSE -> user should be able to back away at any step
 */
 
 class SelectContact extends StatefulWidget {
@@ -71,7 +60,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     firstPage = (widget.contactToUpdate == null);
     //create the onSelect Function
     if(firstPage){
-      print("-------------CREATING");
       onSelect = (BuildContext context, Contact contact){
         //1. push our new page with our new contact
         //2. remove all other pages from the stack in the background
@@ -84,13 +72,15 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       };
     }
     else{
-      print("-------------UPDATING");
       onSelect = (BuildContext context, Contact contact){
         //1. update our passed contact
         widget.contactToUpdate.value = contact;
         //2. remove all other pages from the stack
         //   until we arrive at the page where we selected our contact from
-        Navigator.popUntil(context, ModalRoute.withName(ContactDisplayHelper.routeName));
+        Navigator.popUntil(
+          context, 
+          ModalRoute.withName(ContactDisplayHelper.routeName),
+        );
 
         //NOTE: #2 is made possible by using the guide below
         //https://flutter.dev/docs/cookbook/navigation/navigate-with-arguments
@@ -102,7 +92,14 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //async init
   init() async{
     await getContacts();
-    permissionRequired(context, widget.forceSelection);
+    permissionRequired(
+      context, 
+      widget.forceSelection, 
+      "\"Select\"",
+      (){
+        onSelect(context, new Contact());
+      }
+    );
   }
 
   //dispose
@@ -117,45 +114,47 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     if(state == AppLifecycleState.resumed) reactToResume();
   }
 
-  //-------------------------Everything above is airtight-------------------------
-
   //this is set TRUE right before we open up "NewContact"
   //that way if we pop we know that we had pushed it
   //when we use this to determine what to do on resume, we reset it back to false
   //we use a value notifier so we can pass by reference
-  ValueNotifier<bool> backFromNewContact = new ValueNotifier<bool>(false);
+  ValueNotifier<bool> backFromNewContactPage = new ValueNotifier<bool>(false);
 
   reactToResume() async{
     //IF -> we came back from the permissions page
     //  IF we now have permission -> refill the contacts list with our contacts
-    //-------------------------TODO below
-    //  ELSE -> EITHER manual input OR (back because not forced)
+    //  ELSE -> EITHER manual input OR (back because not forced) [CAN ASSUME back because not forced]
     //    IF back because not forced -> we cant be here without the permissions so go back again to the previous page
-    //    ELSE manual input
-    //      IF first page -> go to the next page and bring up the manual input pop up (which should be in any page that is requesting a contact)
-    //      ELSE -> go to the previous page and bring pu the manual input pop up (which should be in any page that is requesting a contact)
-    //-------------------------TODO above
+    //    ELSE manual input -> this shouldn't even happen since it we will be popped instantly in this scenario
     //ELSE -> we came back from the create contact page
     //  nothing should really happen here
 
     //if we came back from the permissions page
-    if(backFromNewContact.value == false){
-      print("not back from new contact");
+    bool backFromPermissionPage = (backFromNewContactPage.value == false);
+    if(backFromPermissionPage){
+      print("back from permission page");
       PermissionStatus permissionStatus = await getContacts();
       if(permissionStatus != PermissionStatus.granted){
-        //-------------------------
-        //TODO... complete edge cases
-        //-------------------------
+        //Even after making it clear that the user needs to accept permission in order to use this feature
+        //they didn't select manual input
+        //and they didn't give us permssion so simply go back to the previous page
+        //If this contact was REQUIRED then we would be here
+        //so we know we can back up
+        Navigator.pop(context);
       }
     }
     else{
       print("back from new contact");
-      backFromNewContact.value = false;
+      //NOTE: we might come back from it because our user decided to manually input their data
+      //but in that case the manual input modal will pop up in the page requesting the contact
+      //and everything else relating to select contact will be poped
+      //so this being set to false isn't going to break anything either
+      backFromNewContactPage.value = false;
     }
   }
 
   //NOTE: If rebuild fails then we are no longer mounted
-  //hence all the if(rebuild()) snippets
+  //hence all the if(rebuild(bool)) snippets
   Future<PermissionStatus> getContacts() async{
     PermissionStatus permissionStatus = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
     if(permissionStatus == PermissionStatus.granted){
@@ -234,7 +233,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       child: SelectContactUX(
         retreivingContacts: (contacts == null),
         contactWidgets: contactWidgets,
-        backFromNewContact: backFromNewContact,
+        backFromNewContact: backFromNewContactPage,
       ),
     );
   }

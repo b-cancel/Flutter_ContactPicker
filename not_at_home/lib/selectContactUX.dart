@@ -10,23 +10,27 @@ class SelectContactUX extends StatelessWidget {
     this.retreivingContacts: false,
     @required this.contactWidgets,
     @required this.backFromNewContact,
+    @required this.onSelect,
   });
 
   final bool retreivingContacts;
   final List<Widget> contactWidgets;
   final ValueNotifier<bool> backFromNewContact;
+  final Function onSelect;
 
-  ValueNotifier<bool> showNewContact = new ValueNotifier(true);
+  final ValueNotifier<bool> showNewContact = new ValueNotifier(true);
 
   @override
   Widget build(BuildContext context) {
+    //Styling of the User Question Prompt
     TextStyle questionStyle = TextStyle(
       fontSize: 26,
       fontWeight: FontWeight.bold,
     );
 
+    //Generate the Widget shown in the contacts scroll area
+    //Depending on whether or not there are contacts or they are being retreived
     Widget bodyWidget;
-
     if(retreivingContacts || contactWidgets.length == 0){
       bodyWidget = SliverFillRemaining(
         child: Container(
@@ -49,6 +53,7 @@ class SelectContactUX extends StatelessWidget {
       );
     }
 
+    //build widgets
     return Scaffold(
       body: Stack(
         children: <Widget>[
@@ -83,7 +88,7 @@ class SelectContactUX extends StatelessWidget {
                   //Floating MUST be true so for ease of use
                   floating: true, //show scroll bar as soon as user starts scrolling up
                   //Snap is TRUE so that our flexible space result looks as best as it can
-                  snap: true,
+                  snap: false, //but NAW its FALSE cuz it snaps weird...
                   
                   //Lets the user know what they are select a contact for
                   expandedHeight: MediaQuery.of(context).size.height / 2,
@@ -151,6 +156,8 @@ class SelectContactUX extends StatelessWidget {
               ],
             ),
           ),
+
+          //Let the user know they can add a new contact
           Positioned(
             bottom: 0,
             right: 0,
@@ -168,6 +175,7 @@ class SelectContactUX extends StatelessWidget {
                           context, PageTransition(
                             type: PageTransitionType.rightToLeft,
                             child: NewContact(
+                              onSelect: onSelect,
                             ),
                           ),
                         );

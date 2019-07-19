@@ -5,15 +5,37 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:not_at_home/permission.dart';
 
 import 'main.dart';
 
+/*
+We only confirm and request access to contacts before we save and pass it
+If we already have access we save the contact and run onselect
+ELSE we request access
+*/
+
+/*
+When we come back from requesting access
+IF we have access now we save the contact and run onselect
+ELSE we wait for the user to decide to go back
+  NOTE: we could go all the back into contact selection BUT
+  the pain of the software going back and erasing all the new contact work
+  is going to be much worse than the pain of clicking back again because you don't want to grant access
+*/
+
+/*
+Whenever we request access we also want to customize the permission page
+Because manual input from here can simply mean that we run onSelect without actually saving the contact
+which isnt ideal but it does the trick if the user simply doesn't want to grant us access for whatever reason
+*/
+
 class NewContact extends StatefulWidget {
   NewContact({
-    this.contact,
+    @required this.onSelect,
   });
 
-  final ValueNotifier<Contact> contact;
+  final Function onSelect;
 
   @override
   _NewContactState createState() => _NewContactState();
@@ -42,10 +64,11 @@ class _NewContactState extends State<NewContact> {
 
   //---Contact Save Functionality
   saveContact() async{
-    //TODO... Create the contact from all the data
-
     //TODO... stop using dummy contact
     Contact newContact = getDummyContact();
+
+    //Create the contact from all the data
+    //TODO... actually use all the data
 
     //save the avatar
     if(imageFile != null){
@@ -53,23 +76,23 @@ class _NewContactState extends State<NewContact> {
       newContact.avatar = Uint8List.fromList(avatarList);
     }
 
+    //save the name(s)
+    newContact.givenName = nameCtrl.text;
+
     print("-----------------------------------");
+
+    //make sure we have the proper permissions
+    permissionRequired(
+      context, 
+      false,
+      "\"Create\"",
+      (){
+        widget.onSelect(context, new Contact());
+      }
+    );
 
     //save the contact
     await ContactsService.addContact(newContact);  
-
-    //TODO... replace this for code that returns this contact to the desired location
-
-    /*
-    Navigator.pushAndRemoveUntil(
-      context, 
-      PageTransition(
-        type: PageTransitionType.rightToLeft,
-        child: App(),
-      ),
-      (r) => false,
-    );
-    */
   }
 
   //---Image Picker Functionality
