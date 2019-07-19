@@ -1,11 +1,8 @@
-import 'dart:io';
-
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:not_at_home/permission.dart';
 import 'package:not_at_home/request.dart';
 import 'package:not_at_home/selectContactUX.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'contactTile.dart';
@@ -95,7 +92,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     permissionRequired(
       context, 
       widget.forceSelection, 
-      "\"Select\"",
+      true,
       (){
         onSelect(context, new Contact());
       }
@@ -234,6 +231,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         retreivingContacts: (contacts == null),
         contactWidgets: contactWidgets,
         backFromNewContact: backFromNewContactPage,
+        onSelect: onSelect,
       ),
     );
   }

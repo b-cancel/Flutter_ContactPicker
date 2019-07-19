@@ -3,7 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-permissionRequired(BuildContext context, bool force, String action, Function onManualSelect) async{
+permissionRequired(BuildContext context, bool force, bool selectingContact, Function onSecondaryOption) async{
   PermissionStatus startStatus = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
   if(startStatus != PermissionStatus.granted){
     bool popUpNotBlocked = await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.contacts);
@@ -11,7 +11,7 @@ permissionRequired(BuildContext context, bool force, String action, Function onM
       Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([PermissionGroup.contacts]);
       PermissionStatus status = permissions[PermissionGroup.contacts];
       if(status != PermissionStatus.granted){
-        permissionRequired(context, force, action, onManualSelect);
+        permissionRequired(context, force, selectingContact, onSecondaryOption);
       }
     }
     else{
@@ -20,8 +20,8 @@ permissionRequired(BuildContext context, bool force, String action, Function onM
           type: PageTransitionType.leftToRight,
           child: Manual(
             forcePermission: force,
-            action: action,
-            onManualSelect: onManualSelect,
+            selectingContact: selectingContact,
+            onSecondaryOption: onSecondaryOption,
           ),
         ),
       );
@@ -31,13 +31,13 @@ permissionRequired(BuildContext context, bool force, String action, Function onM
 
 class Manual extends StatefulWidget {
   final bool forcePermission;
-  final String action;
-  final Function onManualSelect;
+  final bool selectingContact;
+  final Function onSecondaryOption;
 
   Manual({
     @required this.forcePermission,
-    @required this.action,
-    @required this.onManualSelect,
+    @required this.selectingContact,
+    @required this.onSecondaryOption,
   });
 
   @override
@@ -79,6 +79,8 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    bool isSelecting = widget.selectingContact;
+
     return WillPopScope(
       onWillPop:  () async => !widget.forcePermission,
       child: Scaffold(
@@ -111,7 +113,7 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
                           Container(
                             padding: EdgeInsets.only(bottom: 16),
                             child: Text(
-                              "In order to " + widget.action + " a contact",
+                              "In order to " + ((isSelecting) ? "\"Select\"" : "\"Save\"") + " a Contact",
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -120,7 +122,7 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
                             child: Column(
                               children: <Widget>[
                                 Text(
-                                  "Enable \"Contacts\" in the \"Permissions\" Section of \"App Settings\" Below",
+                                  "Enable \"Contacts\" in the \"Permissions\" section of \"App Settings\" below",
                                 ),
                               ],
                             ),
@@ -130,7 +132,9 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
                             child: Column(
                               children: <Widget>[
                                 Text(
-                                  "Or \"Manually Input\" the Contact below",
+                                  (isSelecting) ?
+                                  "Or Manually Input the Contact below"
+                                  : "Use the Contact without saving it below",
                                 ),
                               ],
                             ),
@@ -164,9 +168,9 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
               child: Row(
                 children: <Widget>[
                   BottomButton(
-                    label: "Manual Input",
+                    label: (isSelecting) ? "Manual Input" : "Use Don't Save",
                     func: (){
-                      widget.onManualSelect();
+                      widget.onSecondaryOption();
                     },
                   ),
                   BottomButton(

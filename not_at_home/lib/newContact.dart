@@ -85,9 +85,9 @@ class _NewContactState extends State<NewContact> {
     permissionRequired(
       context, 
       false,
-      "\"Create\"",
+      false,
       (){
-        widget.onSelect(context, new Contact());
+        widget.onSelect(context, newContact);
       }
     );
 
