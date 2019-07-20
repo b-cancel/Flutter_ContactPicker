@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:simple_permissions/simple_permissions.dart';
 
 permissionRequired(BuildContext context, bool force, bool selectingContact, Function onSecondaryOption) async{
-  PermissionStatus startStatus = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
-  if(startStatus != PermissionStatus.granted){
-    bool popUpNotBlocked = await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.contacts);
-    if(popUpNotBlocked){
-      Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([PermissionGroup.contacts]);
-      PermissionStatus status = permissions[PermissionGroup.contacts];
-      if(status != PermissionStatus.granted){
+  Permission permissionToRequest = (selectingContact) ? Permission.ReadContacts : Permission.WriteContacts;
+  if(await SimplePermissions.checkPermission(permissionToRequest) == false){
+    if(await SimplePermissions.getPermissionStatus(permissionToRequest) != PermissionStatus.deniedNeverAsk){
+      PermissionStatus status = await SimplePermissions.requestPermission(permissionToRequest);
+      if(status != PermissionStatus.authorized){
         permissionRequired(context, force, selectingContact, onSecondaryOption);
       }
     }
@@ -22,6 +20,7 @@ permissionRequired(BuildContext context, bool force, bool selectingContact, Func
             forcePermission: force,
             selectingContact: selectingContact,
             onSecondaryOption: onSecondaryOption,
+            permissionToRequest: permissionToRequest,
           ),
         ),
       );
@@ -33,11 +32,13 @@ class Manual extends StatefulWidget {
   final bool forcePermission;
   final bool selectingContact;
   final Function onSecondaryOption;
+  final Permission permissionToRequest;
 
   Manual({
     @required this.forcePermission,
     @required this.selectingContact,
     @required this.onSecondaryOption,
+    @required this.permissionToRequest,
   });
 
   @override
@@ -71,8 +72,7 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
   //If the user came back having given us permission then we automatically pop
   //ELSE we let the read the message so we can evetually pop or allow then the other navigation options
   void checkIfCanPop() async{
-    PermissionStatus status = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
-    if(status == PermissionStatus.granted){
+    if(await SimplePermissions.checkPermission(widget.permissionToRequest)){
       Navigator.of(context).pop();
     }
   }
@@ -176,7 +176,7 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
                   BottomButton(
                     label: "App Settings",
                     func: (){
-                      PermissionHandler().openAppSettings();
+                      SimplePermissions.openSettings();
                     },
                     icon: Icons.keyboard_arrow_right,
                   ),

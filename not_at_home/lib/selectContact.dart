@@ -1,9 +1,10 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:not_at_home/helper.dart';
 import 'package:not_at_home/permission.dart';
 import 'package:not_at_home/request.dart';
 import 'package:not_at_home/selectContactUX.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:simple_permissions/simple_permissions.dart';
 
 import 'contactTile.dart';
 import 'main.dart';
@@ -83,20 +84,22 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         //https://flutter.dev/docs/cookbook/navigation/navigate-with-arguments
       };
     }
-    init();
+    //try to get contacts
+    confirmPermission();
   }
 
   //async init
-  init() async{
-    await getContacts();
-    permissionRequired(
-      context, 
-      widget.forceSelection, 
-      true,
-      (){
-        onSelect(context, new Contact());
-      }
-    );
+  confirmPermission() async{
+    if(await getContacts() != PermissionStatus.authorized){
+      permissionRequired(
+        context, 
+        widget.forceSelection, 
+        true,
+        (){
+          onSelect(context, new Contact());
+        }
+      );
+    }
   }
 
   //dispose
@@ -130,14 +133,15 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     bool backFromPermissionPage = (backFromNewContactPage.value == false);
     if(backFromPermissionPage){
       print("back from permission page");
-      PermissionStatus permissionStatus = await getContacts();
-      if(permissionStatus != PermissionStatus.granted){
+      if(await getContacts() != PermissionStatus.authorized){
         //Even after making it clear that the user needs to accept permission in order to use this feature
         //they didn't select manual input
         //and they didn't give us permssion so simply go back to the previous page
         //If this contact was REQUIRED then we would be here
         //so we know we can back up
-        Navigator.pop(context);
+        if(firstPage == false){
+          Navigator.pop(context);
+        }
       }
     }
     else{
@@ -153,8 +157,8 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //NOTE: If rebuild fails then we are no longer mounted
   //hence all the if(rebuild(bool)) snippets
   Future<PermissionStatus> getContacts() async{
-    PermissionStatus permissionStatus = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
-    if(permissionStatus == PermissionStatus.granted){
+    PermissionStatus permissionStatus = await SimplePermissions.getPermissionStatus(Permission.ReadContacts);
+    if(permissionStatus == PermissionStatus.authorized){
       contacts.clear();
 
       //inform the user we are getting the contacts

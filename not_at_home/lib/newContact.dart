@@ -3,16 +3,19 @@ import 'dart:typed_data';
 
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:not_at_home/permission.dart';
+import 'package:simple_permissions/simple_permissions.dart';
 
-import 'main.dart';
+import 'imagePicker.dart';
 
 /*
 We only confirm and request access to contacts before we save and pass it
 If we already have access we save the contact and run onselect
 ELSE we request access
+
+Whenever we request access we also want to customize the permission page
+Because manual input from here can simply mean that we run onSelect without actually saving the contact
+which isnt ideal but it does the trick if the user simply doesn't want to grant us access for whatever reason
 */
 
 /*
@@ -22,12 +25,6 @@ ELSE we wait for the user to decide to go back
   NOTE: we could go all the back into contact selection BUT
   the pain of the software going back and erasing all the new contact work
   is going to be much worse than the pain of clicking back again because you don't want to grant access
-*/
-
-/*
-Whenever we request access we also want to customize the permission page
-Because manual input from here can simply mean that we run onSelect without actually saving the contact
-which isnt ideal but it does the trick if the user simply doesn't want to grant us access for whatever reason
 */
 
 class NewContact extends StatefulWidget {
@@ -41,10 +38,97 @@ class NewContact extends StatefulWidget {
   _NewContactState createState() => _NewContactState();
 }
 
-class _NewContactState extends State<NewContact> {
-  ValueNotifier<bool> nameOpen = new ValueNotifier<bool>(false);
+class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
+  //---Image
+  ValueNotifier<String> imageLocation = new ValueNotifier<String>("");
 
-  //---Focus Nodes
+  //---Names
+  TextEditingController nameCtrl = new TextEditingController(); //givenName
+
+  TextEditingController prefixCtrl = new TextEditingController(); //prefix
+  TextEditingController firstCtrl = new TextEditingController(); //displayName
+  TextEditingController middleCtrl = new TextEditingController(); //middleName
+  TextEditingController lastCtrl = new TextEditingController(); //familyName
+  TextEditingController suffixCtrl = new TextEditingController(); //suffix
+
+  //---Work
+  TextEditingController companyCtrl = new TextEditingController(); //company
+  TextEditingController jobTitleCtrl = new TextEditingController(); //jobTitle
+
+  //---Lists
+  List<Item> phones = new List<Item>(); //phones
+  List<Item> emails = new List<Item>(); //emails
+  List<PostalAddress> addresses = new List<PostalAddress>(); //addresses
+
+  //---Note
+  TextEditingController noteCtrl = new TextEditingController(); //note
+
+  //---Contact Save Functionality
+  saveContact() async{
+    //create empty contact
+    Contact newContact = new Contact();
+
+    //save the image
+    if(imageLocation.value != ""){
+      List<int> avatarList = await File(imageLocation.value).readAsBytes();
+      newContact.avatar = Uint8List.fromList(avatarList);
+    }
+
+    //save the name(s)
+    newContact.givenName = nameCtrl.text;
+    newContact.prefix = nameCtrl.text;
+    newContact.displayName = firstCtrl.text;
+    newContact.middleName = middleCtrl.text;
+    newContact.familyName = lastCtrl.text;
+    newContact.suffix = suffixCtrl.text;
+
+    //save the work stuff
+    newContact.company = companyCtrl.text;
+    newContact.jobTitle = jobTitleCtrl.text;
+
+    //save the lists
+    newContact.phones = phones;
+    newContact.emails = emails;
+    newContact.postalAddresses = addresses;
+
+    //save the note
+    newContact.note = noteCtrl.text;
+
+    //TODO... remove this test code
+    // The contact must have a firstName / lastName to be successfully added
+    if(newContact.givenName == "") newContact.givenName = "given";
+    if(newContact.displayName == "") newContact.displayName = "display";
+    if(newContact.familyName == "") newContact.familyName = "family";
+
+    //handle permissions
+    if(await SimplePermissions.checkPermission(Permission.WriteContacts)){
+      //with permission we can both
+      //1. add the contact
+      await ContactsService.addContact(newContact);  
+      //2. and update the contact
+      widget.onSelect(context, newContact);
+    }
+    else{
+      //we know that we don't have permission so we know either the modal or page will pop up
+      backFromPermissionPage.value = true;
+
+      //without permission we give the user the option to ONLY
+      //1. update the contact
+      permissionRequired(
+        context, 
+        false, 
+        false, //we are creating a contact
+        (){
+          widget.onSelect(context, newContact);
+        }
+      );
+    }
+  }
+
+  //---Name section open and closing
+  ValueNotifier<bool> namesSpread = new ValueNotifier<bool>(false);
+
+  //---Name Focus Nodes
   FocusNode nameFocusNode = new FocusNode();
 
   FocusNode prefixFC = new FocusNode();
@@ -53,116 +137,67 @@ class _NewContactState extends State<NewContact> {
   FocusNode lastFC = new FocusNode();
   FocusNode suffixFC = new FocusNode();
 
-  //---Text Editing Controllers
-  TextEditingController nameCtrl = new TextEditingController();
-
-  TextEditingController prefixCtrl = new TextEditingController();
-  TextEditingController firstCtrl = new TextEditingController();
-  TextEditingController middleCtrl = new TextEditingController();
-  TextEditingController lastCtrl = new TextEditingController();
-  TextEditingController suffixCtrl = new TextEditingController();
-
-  //---Contact Save Functionality
-  saveContact() async{
-    //TODO... stop using dummy contact
-    Contact newContact = getDummyContact();
-
-    //Create the contact from all the data
-    //TODO... actually use all the data
-
-    //save the avatar
-    if(imageFile != null){
-      List<int> avatarList = await imageFile.readAsBytes();
-      newContact.avatar = Uint8List.fromList(avatarList);
-    }
-
-    //save the name(s)
-    newContact.givenName = nameCtrl.text;
-
-    print("-----------------------------------");
-
-    //make sure we have the proper permissions
-    permissionRequired(
-      context, 
-      false,
-      false,
-      (){
-        widget.onSelect(context, newContact);
-      }
-    );
-
-    //save the contact
-    await ContactsService.addContact(newContact);  
-  }
-
-  //---Image Picker Functionality
-  File imageFile;
-
-  void showImagePicker() {
-    // flutter defined function
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // return object of type Dialog
-        return Dialog(
-          child: Row(
-            children: <Widget>[
-              bigIcon(false, FontAwesomeIcons.images),
-              bigIcon(true, Icons.camera),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget bigIcon(bool fromCamera, dynamic icon){
-    return Expanded(
-      child: FittedBox(
-        fit: BoxFit.fill,
-        child: Container(
-          padding: EdgeInsets.only(left: 4, right: 8, top: 4, bottom: 4),
-          child: IconButton(
-            onPressed: () => changeImage(fromCamera),
-            icon: Icon(icon),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future changeImage(bool fromCamera) async {
-    File tempImage = await ImagePicker.pickImage(
-      source: (fromCamera) ? ImageSource.camera : ImageSource.gallery,
-    );
-
-    if(tempImage != null){
-      Navigator.of(context).pop();
-
-      imageFile = tempImage;
-
-      setState(() {
-        
-      });
-    }
-    //ELSE... we keep whatever image we had here or
-  }
-
   @override
   void initState() {
-    nameOpen.addListener((){
+    //observer for onResume
+    WidgetsBinding.instance.addObserver(this); 
+
+    //if we spread or unspread the name
+    namesSpread.addListener((){
+      //actually open the names
       setState(() {});
+      //focus on the proper name
       WidgetsBinding.instance.addPostFrameCallback((_){
-        if(nameOpen.value){
+        //Feature copied for samsung contacts
+        if(namesSpread.value){
+          //if all the names have been spread
+          //TODO... break apart all the names
+          //focus on the first name
           FocusScope.of(context).requestFocus(firstFC);
         }
         else{
+          //If all the names have been close
+          //TODO... combine all the names into a single name in nameFocusNode
+          //then focus on the combined names
           FocusScope.of(context).requestFocus(nameFocusNode);
         }
       });
     });
     super.initState();
   }
+
+  //dispose
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  //keep track of whether or not we returned from the permissions page
+  ValueNotifier<bool> backFromPermissionPage = new ValueNotifier<bool>(false);
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    /*
+    IF we have access now we save the contact and run onselect
+    ELSE we wait for the user to decide what to do
+    */
+    if(state == AppLifecycleState.resumed) onResume();
+  }
+
+  //this run even if the image picker modal is above it
+  //which is why we need the 2 variables
+  onResume() async{
+      if(backFromPermissionPage.value){
+        backFromPermissionPage.value = false;
+        if(await SimplePermissions.checkPermission(Permission.WriteContacts)){
+          saveContact();
+        }
+      }
+      //ELSE we are back from either picking an image or deciding not to pick an image, both of which do nothing
+  }
+
+  //-------------------------Everything Above Is OK-------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -184,7 +219,6 @@ class _NewContactState extends State<NewContact> {
         return Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: false,
-            title: Text("New Contact"),
             actions: <Widget>[
               //Cancel Buton
               isPortrait == false ? 
@@ -239,10 +273,10 @@ class _NewContactState extends State<NewContact> {
                                     //First name (givenName), Middle name (middleName), Last name (familyName)
                                     //display name = prefix, first name, middle name, last name, ',' suffix
                                     Visibility(
-                                      visible: (nameOpen.value == false),
+                                      visible: (namesSpread.value == false),
                                       child: new NameRow(
                                         bottomBarHeight: bottomBarHeight,
-                                        nameOpen: nameOpen,
+                                        nameOpen: namesSpread,
                                         icon: Icons.keyboard_arrow_down,
                                         label: "Name",
                                         focusNode: nameFocusNode,
@@ -250,12 +284,12 @@ class _NewContactState extends State<NewContact> {
                                       ),
                                     ),
                                     Visibility(
-                                      visible: nameOpen.value,
+                                      visible: namesSpread.value,
                                       child: Column(
                                         children: <Widget>[
                                           new NameRow(
                                             bottomBarHeight: bottomBarHeight,
-                                            nameOpen: nameOpen,
+                                            nameOpen: namesSpread,
                                             icon: Icons.keyboard_arrow_up,
                                             label: "Name prefix",
                                             focusNode: prefixFC,
@@ -263,28 +297,28 @@ class _NewContactState extends State<NewContact> {
                                           ), 
                                           new NameRow(
                                             bottomBarHeight: bottomBarHeight,
-                                            nameOpen: nameOpen,
+                                            nameOpen: namesSpread,
                                             label: "First name",
                                             focusNode: firstFC,
                                             controller: firstCtrl,
                                           ),
                                           new NameRow(
                                             bottomBarHeight: bottomBarHeight,
-                                            nameOpen: nameOpen,
+                                            nameOpen: namesSpread,
                                             label: "Middle name",
                                             focusNode: middleFC,
                                             controller: middleCtrl,
                                           ),
                                           new NameRow(
                                             bottomBarHeight: bottomBarHeight,
-                                            nameOpen: nameOpen,
+                                            nameOpen: namesSpread,
                                             label: "Last name",
                                             focusNode: lastFC,
                                             controller: lastCtrl,
                                           ),
                                           new NameRow(
                                             bottomBarHeight: bottomBarHeight,
-                                            nameOpen: nameOpen,
+                                            nameOpen: namesSpread,
                                             label: "Name suffix",
                                             focusNode: suffixFC,
                                             controller: suffixCtrl,
@@ -337,7 +371,17 @@ class _NewContactState extends State<NewContact> {
                         width: MediaQuery.of(context).size.width,
                         alignment: Alignment.center,
                         child: GestureDetector(
-                          onTap: () => showImagePicker(),
+                          onTap: (){
+                            showImagePicker(
+                              context,
+                              imageLocation,
+                              (){
+                                setState(() {
+                                  
+                                });
+                              }
+                            );
+                          },
                           child: Stack(
                             children: <Widget>[
                               new Container(
@@ -347,7 +391,7 @@ class _NewContactState extends State<NewContact> {
                                   color: Theme.of(context).indicatorColor,
                                   shape: BoxShape.circle,
                                 ),
-                                child: (imageFile == null) ? Icon(
+                                child: (imageLocation.value == "") ? Icon(
                                   Icons.camera_alt,
                                   size: imageDiameter / 2,
                                   color: Theme.of(context).primaryColor,
@@ -356,7 +400,7 @@ class _NewContactState extends State<NewContact> {
                                   child: FittedBox(
                                     fit: BoxFit.cover,
                                       child: Image.file(
-                                      imageFile,
+                                      File(imageLocation.value),
                                     ),
                                   )
                                 )
