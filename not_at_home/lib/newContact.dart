@@ -4,11 +4,10 @@ import 'dart:typed_data';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:not_at_home/permission.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:permission/permission.dart';
 
 import 'helper.dart';
 import 'imagePicker.dart';
-import 'main.dart';
 
 /*
 We only confirm and request access to contacts before we save and pass it
@@ -103,8 +102,8 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     if(newContact.familyName == "") newContact.familyName = "family";
 
     //handle permissions
-    PermissionStatus permissionStatus = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
-    if(permissionStatus == PermissionStatus.granted){
+    PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
+    if(isAuthorized(permissionStatus)){
       //with permission we can both
       //1. add the contact
       await ContactsService.addContact(newContact);  
@@ -191,10 +190,10 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   //this run even if the image picker modal is above it
   //which is why we need the 2 variables
   onResume() async{
-      PermissionStatus permissionStatus = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
       if(backFromPermissionPage.value){
         backFromPermissionPage.value = false;
-        if(permissionStatus == PermissionStatus.granted){
+        PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
+        if(isAuthorized(permissionStatus)){
           saveContact();
         }
       }

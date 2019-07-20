@@ -4,7 +4,7 @@ import 'package:not_at_home/helper.dart';
 import 'package:not_at_home/permission.dart';
 import 'package:not_at_home/request.dart';
 import 'package:not_at_home/selectContactUX.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:permission/permission.dart';
 
 import 'contactTile.dart';
 import 'main.dart';
@@ -91,7 +91,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //async init
   confirmPermission() async{
     PermissionStatus permissionStatus = await getContacts();
-    if(permissionStatus != PermissionStatus.granted){
+    if(isAuthorized(permissionStatus) == false){
       permissionRequired(
         context, 
         widget.forceSelection, 
@@ -135,7 +135,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     if(backFromPermissionPage){
       print("back from permission page");
       PermissionStatus permissionStatus = await getContacts();
-      if(permissionStatus != PermissionStatus.granted){
+      if(isAuthorized(permissionStatus) == false){
         //Even after making it clear that the user needs to accept permission in order to use this feature
         //they didn't select manual input
         //and they didn't give us permssion so simply go back to the previous page
@@ -159,8 +159,8 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //NOTE: If rebuild fails then we are no longer mounted
   //hence all the if(rebuild(bool)) snippets
   Future<PermissionStatus> getContacts() async{
-    PermissionStatus permissionStatus = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
-    if(permissionStatus == PermissionStatus.granted){
+    PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
+    if(isAuthorized(permissionStatus)){
       contacts.clear();
 
       //inform the user we are getting the contacts

@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:not_at_home/helper.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:permission/permission.dart';
 
 permissionRequired(BuildContext context, bool force, bool selectingContact, Function onSecondaryOption) async{
-  PermissionStatus startStatus = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
-  if(startStatus != PermissionStatus.granted){
-    bool popUpNotBlocked = await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.contacts);
-    if(popUpNotBlocked){
-      Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([PermissionGroup.contacts]);
-      PermissionStatus status = permissions[PermissionGroup.contacts];
-      if(status != PermissionStatus.granted){
+  PermissionStatus startStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
+  if(isAuthorized(startStatus) == false){
+    if(startStatus == PermissionStatus.notAgain){
+      PermissionStatus status = (await Permission.requestPermissions([PermissionName.Contacts]))[0].permissionStatus;
+      if(isAuthorized(status) == false){
         permissionRequired(context, force, selectingContact, onSecondaryOption);
       }
     }
@@ -71,8 +70,8 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
   //If the user came back having given us permission then we automatically pop
   //ELSE we let the read the message so we can evetually pop or allow then the other navigation options
   void checkIfCanPop() async{
-    PermissionStatus status = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
-    if(status == PermissionStatus.granted){
+    PermissionStatus status = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
+    if(isAuthorized(status)){
       Navigator.of(context).pop();
     }
   }
@@ -176,7 +175,7 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
                   BottomButton(
                     label: "App Settings",
                     func: (){
-                      PermissionHandler().openAppSettings();
+                      Permission.openSettings();
                     },
                     icon: Icons.keyboard_arrow_right,
                   ),

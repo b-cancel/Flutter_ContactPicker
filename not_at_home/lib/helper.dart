@@ -1,6 +1,14 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'package:permission/permission.dart';
+
+bool isAuthorized(PermissionStatus status){
+  if(status == PermissionStatus.allow) return true;
+  else if(status == PermissionStatus.always) return true;
+  else if(status == PermissionStatus.whenInUse) return true;
+  else return false;
+}
 
 //-----Prefixes
 Set<String> prefixes = new Set<String>();
