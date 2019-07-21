@@ -6,8 +6,9 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <!--For Contacts PlugIn-->
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
-    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
 
     <!--Other Permission we might need
     <uses-permission android:name="android.permission.READ_CALENDAR" />

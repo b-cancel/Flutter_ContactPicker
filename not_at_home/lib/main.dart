@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:not_at_home/request.dart';
@@ -35,67 +37,12 @@ class StatelessLink extends StatelessWidget {
       },   
       title: 'Contact Picker',
       theme: theme.getTheme(),
-      home: Container(
-        child: FlatButton(
-          onPressed: (){
-            askPermission();
-          },
-          child: Text("test"),
-        ),
-      )
+      home: SelectContact(
+        forceSelection: true,
+      ),
     );
   }
 
-  static const MethodChannel channel = const MethodChannel('plugins.ly.com/permission');
-  static const MethodChannel methodChannel = MethodChannel('flutter.baseflow.com/permissions/methods');
-
-  askPermission()async{
-    print("asking for permission");
-    PermissionStatus startStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
-    print("start status: " + startStatus.toString());
-    if(startStatus != PermissionStatus.allow || startStatus != PermissionStatus.always || startStatus != PermissionStatus.whenInUse){
-      print("not granted");
-      //-----
-      DateTime start = DateTime.now();
-      print("before request");
-      List<Permissions> permissions = await Permission.requestPermissions([PermissionName.Contacts]);
-      print("after request");
-      DateTime end = DateTime.now();
-      Duration timeforPopUpClose = end.difference(start);
-
-      print("between: " + timeforPopUpClose.toString());
-
-      //open app setting from other plugin      
-      //methodChannel.invokeMethod('openAppSettings');
-      Permission.openSettings(); 
-
-      //open app settings froms this plugin
-
-
-      /*
-      bool showOtherUI = await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.contacts);
-      print("show other UI: " + showOtherUI.toString());
-      if(showOtherUI == false){
-        PermissionStatus status = permissions[PermissionGroup.contacts];
-        print("status: " + status.toString());
-        if(status != PermissionStatus.granted){
-          //---top
-          print("------------------------ask for permission again");
-          askPermission();
-        }
-      }
-      else{
-        print("--------------------will have to force permission");
-      }
-      */
-      //-----
-    }
-    else print("----------------------already has permission");
-  }
+  //PermissionStatus startStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
+  //List<Permissions> permissions = await Permission.requestPermissions([PermissionName.Contacts]);
 }
-
-/*
-SelectContact(
-        forceSelection: true,
-      ),
-*/

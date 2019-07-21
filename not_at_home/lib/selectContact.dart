@@ -4,10 +4,9 @@ import 'package:not_at_home/helper.dart';
 import 'package:not_at_home/permission.dart';
 import 'package:not_at_home/request.dart';
 import 'package:not_at_home/selectContactUX.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:permission/permission.dart';
 
 import 'contactTile.dart';
-import 'main.dart';
 
 /*
 the onSelect function is set depending on whether or not we are on the first page
@@ -159,7 +158,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //NOTE: If rebuild fails then we are no longer mounted
   //hence all the if(rebuild(bool)) snippets
   Future<PermissionStatus> getContacts() async{
-    PermissionStatus permissionStatus = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
+    PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
     if(isAuthorized(permissionStatus)){
       contacts.clear();
 

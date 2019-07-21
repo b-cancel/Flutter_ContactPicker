@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:not_at_home/permission.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:permission/permission.dart';
 
 import 'helper.dart';
 import 'imagePicker.dart';
@@ -102,7 +102,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     if(newContact.familyName == "") newContact.familyName = "family";
 
     //handle permissions
-    PermissionStatus permissionStatus = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
+    PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
     if(isAuthorized(permissionStatus)){
       //with permission we can both
       //1. add the contact
@@ -192,7 +192,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   onResume() async{
       if(backFromPermissionPage.value){
         backFromPermissionPage.value = false;
-        PermissionStatus permissionStatus = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
+        PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
         if(isAuthorized(permissionStatus)){
           saveContact();
         }

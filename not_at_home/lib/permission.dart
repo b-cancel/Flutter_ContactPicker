@@ -2,22 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:not_at_home/helper.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:permission/permission.dart';
+
+final ValueNotifier<bool> firstTime = new ValueNotifier<bool>(true);
 
 permissionRequired(BuildContext context, bool force, bool selectingContact, Function onSecondaryOption) async{
   //---bottom
-  PermissionStatus startStatus = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
-  if(startStatus != PermissionStatus.granted){
-    bool popUpNotBlocked = await PermissionHandler().shouldShowRequestPermissionRationale(PermissionGroup.contacts);
-    if(popUpNotBlocked){
-      Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([PermissionGroup.contacts]);
-      PermissionStatus status = permissions[PermissionGroup.contacts];
-      if(status != PermissionStatus.granted){
-        //---top
-        permissionRequired(context, force, selectingContact, onSecondaryOption);
-      }
-    }
-    else{
+  PermissionStatus startStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
+  print("-------------------------before start " + startStatus.toString() + " " + firstTime.value.toString());
+  if(isAuthorized(startStatus) == false){
+    if(startStatus == PermissionStatus.notAgain && !firstTime.value){
+      print("-------------------------pushing new screen");
       Navigator.push(
         context, PageTransition(
           type: PageTransitionType.leftToRight,
@@ -29,7 +24,22 @@ permissionRequired(BuildContext context, bool force, bool selectingContact, Func
         ),
       );
     }
+    else{
+      print("-------------------------permission request " + DateTime.now().toIso8601String());
+
+      //covers edge case where the first time we request a permission its status is not at home
+      firstTime.value = false;
+
+      //ask for permission
+      PermissionStatus status = (await Permission.requestPermissions([PermissionName.Contacts]))[0].permissionStatus;
+      print("-------------------------result " + status.toString() + " " + DateTime.now().toIso8601String());
+      if(isAuthorized(status) == false){
+        //---top
+        permissionRequired(context, force, selectingContact, onSecondaryOption);
+      }
+    }
   }
+  //ELSE... permission already given
 }
 
 class Manual extends StatefulWidget {
@@ -74,8 +84,8 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
   //If the user came back having given us permission then we automatically pop
   //ELSE we let the read the message so we can evetually pop or allow then the other navigation options
   void checkIfCanPop() async{
-    PermissionStatus status = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
-    if(isAuthorized(status)){
+    PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
+    if(isAuthorized(permissionStatus)){
       Navigator.of(context).pop();
     }
   }
@@ -179,7 +189,7 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
                   BottomButton(
                     label: "App Settings",
                     func: (){
-                      PermissionHandler().openAppSettings();
+                      Permission.openSettings();
                     },
                     icon: Icons.keyboard_arrow_right,
                   ),
