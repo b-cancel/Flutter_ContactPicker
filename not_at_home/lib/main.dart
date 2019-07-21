@@ -1,11 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:not_at_home/request.dart';
 import 'package:not_at_home/selectContact.dart';
 import 'package:not_at_home/theme.dart';
-import 'package:permission/permission.dart';
 import 'package:provider/provider.dart';
 
 import 'helper.dart';
@@ -42,7 +38,4 @@ class StatelessLink extends StatelessWidget {
       ),
     );
   }
-
-  //PermissionStatus startStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
-  //List<Permissions> permissions = await Permission.requestPermissions([PermissionName.Contacts]);
 }
