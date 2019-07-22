@@ -26,12 +26,12 @@ dependencies:
 
   provider: ^2.0.1
   page_transition: ^1.1.4
-  image_picker: ^0.6.0+16
+  image_picker: ^0.6.0+16 #
   contacts_service: ^0.2.8
   font_awesome_flutter: ^8.4.0
-  image: ^2.1.4
+  image: ^2.1.4 #
   #---permission plugins
-  #permission_handler: ^3.2.0 #don't upgrade beyond this (works but not fully, request permission never returns)
+  #permission_handler: ^3.2.0 #don't upgrade beyond this (works but not fully)
   permission: ^0.1.2 #works not tested
   #simple_permissions: ^0.1.9 #still doesn't work
   

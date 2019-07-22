@@ -11,6 +11,10 @@ permissionRequired(BuildContext context, bool force, bool selectingContact, Func
   PermissionStatus startStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
   print("-------------------------before start " + startStatus.toString() + " " + firstTime.value.toString());
   if(isAuthorized(startStatus) == false){
+    print("-------------------------Before (NOT AUTH) " + DateTime.now().toString());
+    PermissionStatus status = (await Permission.requestPermissions([PermissionName.Contacts]))[0].permissionStatus;
+    print("-------------------------After " + status.toString() + " " + DateTime.now().toString());
+    /*
     if(startStatus == PermissionStatus.notAgain && !firstTime.value){
       print("-------------------------pushing new screen");
       Navigator.push(
@@ -38,6 +42,7 @@ permissionRequired(BuildContext context, bool force, bool selectingContact, Func
         permissionRequired(context, force, selectingContact, onSecondaryOption);
       }
     }
+    */
   }
   //ELSE... permission already given
 }

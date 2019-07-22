@@ -1,15 +1,12 @@
-import 'package:flutter/material.dart';
-
 import 'package:contacts_service/contacts_service.dart';
-import 'package:permission/permission.dart';
-
+import 'package:flutter/material.dart';
+import 'package:not_at_home/helper.dart';
 import 'package:not_at_home/permission.dart';
-import 'package:not_at_home/helper.dart'; //isAuthorized & theColors
-
-//commented out for testing things
 import 'package:not_at_home/request.dart';
 import 'package:not_at_home/selectContactUX.dart';
-import 'package:not_at_home/contactTile.dart';
+import 'package:permission/permission.dart';
+
+import 'contactTile.dart';
 
 /*
 the onSelect function is set depending on whether or not we are on the first page
@@ -59,10 +56,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     //if no contact is passed then we know this is the first page
     firstPage = (widget.contactToUpdate == null);
     //create the onSelect Function
-    onSelect = (){
-      print("commented out");
-    };
-    /*
     if(firstPage){
       onSelect = (BuildContext context, Contact contact){
         //1. push our new page with our new contact
@@ -90,12 +83,8 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         //https://flutter.dev/docs/cookbook/navigation/navigate-with-arguments
       };
     }
-    */
-
-    /*
     //try to get contacts
     confirmPermission();
-    */
   }
 
   //async init
@@ -224,7 +213,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //build
   @override
   Widget build(BuildContext context) {
-    /*
     //convert the retreived contacts into widgets
     List<Widget> contactWidgets = new List<Widget>();
 
@@ -238,40 +226,18 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         ),
       );
     }
-    */
 
     //pass the widgets
     return WillPopScope(
       //IF first page I should be able to close the app
       //ELSE -> I block the user from going back IF forceSelection is enabled
       onWillPop: () async => !(widget.forceSelection && !firstPage),
-      child: Scaffold(
-        body: FlatButton(
-          onPressed: (){
-            confirmPermission();
-          },
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            alignment: Alignment.center,
-            child: Text(
-              "test",
-              style: TextStyle(
-                color: Colors.white,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-      
-      /*SelectContactUX(
+      child: SelectContactUX(
         retreivingContacts: (contacts == null),
         contactWidgets: contactWidgets,
         backFromNewContact: backFromNewContactPage,
         onSelect: onSelect,
       ),
-      */
     );
   }
 }
