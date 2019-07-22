@@ -107,17 +107,15 @@ class StatelessLink extends StatelessWidget {
       },   
       title: 'Contact Picker',
       theme: theme.getTheme(),
-      home: Test(),
-      
-      /*
+      home: 
       SelectContact(
         forceSelection: true,
       ),
-      */
     );
   }
 }
 
+/*
 class Test extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -147,3 +145,4 @@ class Test extends StatelessWidget {
     );
   }
 }
+*/
