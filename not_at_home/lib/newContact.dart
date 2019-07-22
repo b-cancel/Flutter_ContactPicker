@@ -131,7 +131,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   ValueNotifier<bool> namesSpread = new ValueNotifier<bool>(false);
 
   //---Name Focus Nodes
-  FocusNode nameFocusNode = new FocusNode();
+  FocusNode nameFC = new FocusNode();
 
   FocusNode prefixFC = new FocusNode();
   FocusNode firstFC = new FocusNode();
@@ -161,7 +161,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
           //If all the names have been close
           //TODO... combine all the names into a single name in nameFocusNode
           //then focus on the combined names
-          FocusScope.of(context).requestFocus(nameFocusNode);
+          FocusScope.of(context).requestFocus(nameFC);
         }
       });
     });
@@ -210,265 +210,352 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
       builder: (context, orientation) {
         bool isPortrait = (orientation == Orientation.portrait);
 
-        //react
+        //cal bottom bar height
         if(isPortrait == false) bottomBarHeight = 0;
+        else bottomBarHeight = 32;
 
+        //calc imageDiameter
         double imageDiameter = MediaQuery.of(context).size.width / 2;
         if(isPortrait == false){
           imageDiameter = MediaQuery.of(context).size.height / 2;
         }
 
-        //build
-        return Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            actions: <Widget>[
-              //Cancel Buton
-              isPortrait == false ? 
-              new Action(
-                func: (){
-                  Navigator.maybePop(context);
-                }, 
-                str: "Cancel",
-              )
-              : Container(),
-              //Save Button
-              isPortrait == false ? 
-              new Action(
-                func: () => saveContact(), 
-                str: "Save",
-              )
-              : Container()
-            ],
-          ),
-          body: Stack(
-            children: <Widget>[
-              ListView(
-                children: <Widget>[
-                  Stack(
+        //make new contact UX
+        Widget bodyWidget = NewContactUX(
+          imageDiameter: imageDiameter,
+          bottomBarHeight: bottomBarHeight,
+          imageLocation: imageLocation,
+          isPortrait: isPortrait,
+          contactSaved: () => saveContact(),
+          imagePicked: (){
+            setState(() {
+              
+            });
+          },
+          namesSpread: namesSpread,
+
+          nameFC: nameFC,
+          prefixFC: prefixFC,
+          firstFC: firstFC,
+          middleFC: middleFC,
+          lastFC: lastFC,
+          suffixFC: suffixFC,
+
+          nameCtrl: nameCtrl,
+          prefixCtrl: prefixCtrl,
+          firstCtrl: firstCtrl,
+          middleCtrl: middleCtrl,
+          lastCtrl: lastCtrl,
+          suffixCtrl: suffixCtrl,
+        );
+
+        //react to isPortrait
+        if(isPortrait){
+          return Scaffold(
+            body: bodyWidget,
+          );
+        }
+        else{
+          return Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              actions: <Widget>[
+                //Cancel Buton
+                isPortrait == false ? 
+                new Action(
+                  func: (){
+                    Navigator.maybePop(context);
+                  }, 
+                  str: "Cancel",
+                )
+                : Container(),
+                //Save Button
+                isPortrait == false ? 
+                new Action(
+                  func: () => saveContact(), 
+                  str: "Save",
+                )
+                : Container()
+              ],
+            ),
+            body: bodyWidget,
+          );
+        }
+      }
+    );
+  }
+}
+
+class NewContactUX extends StatelessWidget {
+  NewContactUX({
+    this.imageDiameter,
+    this.bottomBarHeight,
+    this.imageLocation,
+    this.isPortrait,
+    this.contactSaved,
+    this.imagePicked,
+    this.namesSpread,
+
+    this.nameFC,
+    this.prefixFC,
+    this.firstFC,
+    this.middleFC,
+    this.lastFC,
+    this.suffixFC,
+
+    this.nameCtrl,
+    this.prefixCtrl,
+    this.firstCtrl,
+    this.middleCtrl,
+    this.lastCtrl,
+    this.suffixCtrl,
+  });
+
+  final double imageDiameter;
+  final double bottomBarHeight;
+  final ValueNotifier<String> imageLocation;
+  final bool isPortrait;
+  final Function contactSaved;
+  final Function imagePicked;
+  final ValueNotifier<bool> namesSpread;
+
+  final FocusNode nameFC;
+  final FocusNode prefixFC;
+  final FocusNode firstFC;
+  final FocusNode middleFC;
+  final FocusNode lastFC;
+  final FocusNode suffixFC;
+
+  final TextEditingController nameCtrl;
+  final TextEditingController prefixCtrl;
+  final TextEditingController firstCtrl;
+  final TextEditingController middleCtrl;
+  final TextEditingController lastCtrl;
+  final TextEditingController suffixCtrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        ListView(
+          children: <Widget>[
+            Stack(
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.fromLTRB(
+                    8,
+                    imageDiameter * (5/7),
+                    8,
+                    16,
+                  ),
+                  width: MediaQuery.of(context).size.width,
+                  child: Column(
                     children: <Widget>[
-                      Container(
-                        padding: EdgeInsets.fromLTRB(
-                          8,
-                          imageDiameter * (5/7),
-                          8,
-                          16,
-                        ),
-                        width: MediaQuery.of(context).size.width,
-                        child: Column(
-                          children: <Widget>[
-                            Card(
-                              child: Container(
-                                padding: EdgeInsets.fromLTRB(
-                                  0, 
-                                  imageDiameter * (2/7) + 16 * 2, 
-                                  16, 
-                                  0,
+                      Card(
+                        child: Container(
+                          padding: EdgeInsets.fromLTRB(
+                            0, 
+                            imageDiameter * (2/7) + 16 * 2, 
+                            16, 
+                            0,
+                          ),
+                          child: Column(
+                            children: <Widget>[
+                              new Title(
+                                icon: Icons.person,
+                                name: "Name",
+                              ),
+                              //displayName, givenName, middleName, prefix, suffix, familyName;
+                              //Name prefix(prefix), Name suffix(suffix)
+                              //First name (givenName), Middle name (middleName), Last name (familyName)
+                              //display name = prefix, first name, middle name, last name, ',' suffix
+                              Visibility(
+                                visible: (namesSpread.value == false),
+                                child: new NameRow(
+                                  bottomBarHeight: bottomBarHeight,
+                                  nameOpen: namesSpread,
+                                  icon: Icons.keyboard_arrow_down,
+                                  label: "Name",
+                                  focusNode: nameFC,
+                                  controller: nameCtrl,
                                 ),
+                              ),
+                              Visibility(
+                                visible: namesSpread.value,
                                 child: Column(
                                   children: <Widget>[
-                                    new Title(
-                                      icon: Icons.person,
-                                      name: "Name",
+                                    new NameRow(
+                                      bottomBarHeight: bottomBarHeight,
+                                      nameOpen: namesSpread,
+                                      icon: Icons.keyboard_arrow_up,
+                                      label: "Name prefix",
+                                      focusNode: prefixFC,
+                                      controller: prefixCtrl,
+                                    ), 
+                                    new NameRow(
+                                      bottomBarHeight: bottomBarHeight,
+                                      nameOpen: namesSpread,
+                                      label: "First name",
+                                      focusNode: firstFC,
+                                      controller: firstCtrl,
                                     ),
-                                    //displayName, givenName, middleName, prefix, suffix, familyName;
-                                    //Name prefix(prefix), Name suffix(suffix)
-                                    //First name (givenName), Middle name (middleName), Last name (familyName)
-                                    //display name = prefix, first name, middle name, last name, ',' suffix
-                                    Visibility(
-                                      visible: (namesSpread.value == false),
-                                      child: new NameRow(
-                                        bottomBarHeight: bottomBarHeight,
-                                        nameOpen: namesSpread,
-                                        icon: Icons.keyboard_arrow_down,
-                                        label: "Name",
-                                        focusNode: nameFocusNode,
-                                        controller: nameCtrl,
-                                      ),
+                                    new NameRow(
+                                      bottomBarHeight: bottomBarHeight,
+                                      nameOpen: namesSpread,
+                                      label: "Middle name",
+                                      focusNode: middleFC,
+                                      controller: middleCtrl,
                                     ),
-                                    Visibility(
-                                      visible: namesSpread.value,
-                                      child: Column(
-                                        children: <Widget>[
-                                          new NameRow(
-                                            bottomBarHeight: bottomBarHeight,
-                                            nameOpen: namesSpread,
-                                            icon: Icons.keyboard_arrow_up,
-                                            label: "Name prefix",
-                                            focusNode: prefixFC,
-                                            controller: prefixCtrl,
-                                          ), 
-                                          new NameRow(
-                                            bottomBarHeight: bottomBarHeight,
-                                            nameOpen: namesSpread,
-                                            label: "First name",
-                                            focusNode: firstFC,
-                                            controller: firstCtrl,
-                                          ),
-                                          new NameRow(
-                                            bottomBarHeight: bottomBarHeight,
-                                            nameOpen: namesSpread,
-                                            label: "Middle name",
-                                            focusNode: middleFC,
-                                            controller: middleCtrl,
-                                          ),
-                                          new NameRow(
-                                            bottomBarHeight: bottomBarHeight,
-                                            nameOpen: namesSpread,
-                                            label: "Last name",
-                                            focusNode: lastFC,
-                                            controller: lastCtrl,
-                                          ),
-                                          new NameRow(
-                                            bottomBarHeight: bottomBarHeight,
-                                            nameOpen: namesSpread,
-                                            label: "Name suffix",
-                                            focusNode: suffixFC,
-                                            controller: suffixCtrl,
-                                          ),  
-                                        ],
-                                      ),
+                                    new NameRow(
+                                      bottomBarHeight: bottomBarHeight,
+                                      nameOpen: namesSpread,
+                                      label: "Last name",
+                                      focusNode: lastFC,
+                                      controller: lastCtrl,
                                     ),
-                                    new Title( 
-                                      icon: Icons.work,
-                                      name: "Work",
-                                      onPressed: (){
-                                        print("tapped");
-                                      }
-                                    ),
-                                    new Title( 
-                                      icon: Icons.phone,
-                                      name: "Phone",
-                                      onPressed: (){
-                                        print("tapped");
-                                      }
-                                    ),
-                                    new Title( 
-                                      icon: Icons.email,
-                                      name: "Email",
-                                      onPressed: (){
-                                        print("tapped");
-                                      }
-                                    ),
-                                    new Title( 
-                                      icon: Icons.location_on,
-                                      name: "Address",
-                                      onPressed: (){
-                                        print("tapped");
-                                      }
-                                    ),
+                                    new NameRow(
+                                      bottomBarHeight: bottomBarHeight,
+                                      nameOpen: namesSpread,
+                                      label: "Name suffix",
+                                      focusNode: suffixFC,
+                                      controller: suffixCtrl,
+                                    ),  
                                   ],
-                                )
-                              ),
-                            ),
-                            //makes sure that we can always see all of our items
-                            //with a little extra padding for looks
-                            Container(
-                              height: bottomBarHeight + 16,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(16),
-                        width: MediaQuery.of(context).size.width,
-                        alignment: Alignment.center,
-                        child: GestureDetector(
-                          onTap: (){
-                            showImagePicker(
-                              context,
-                              imageLocation,
-                              (){
-                                setState(() {
-                                  
-                                });
-                              }
-                            );
-                          },
-                          child: Stack(
-                            children: <Widget>[
-                              new Container(
-                                width: imageDiameter,
-                                height: imageDiameter,
-                                decoration: new BoxDecoration(
-                                  color: Theme.of(context).indicatorColor,
-                                  shape: BoxShape.circle,
                                 ),
-                                child: (imageLocation.value == "") ? Icon(
-                                  Icons.camera_alt,
-                                  size: imageDiameter / 2,
-                                  color: Theme.of(context).primaryColor,
-                                )
-                                : ClipOval(
-                                  child: FittedBox(
-                                    fit: BoxFit.cover,
-                                      child: Image.file(
-                                      File(imageLocation.value),
-                                    ),
-                                  )
-                                )
                               ),
-                              Positioned(
-                                right: 0,
-                                bottom: 0,
-                                child: new Container(
-                                  padding: EdgeInsets.all(8),
-                                  decoration: new BoxDecoration(
-                                    color: Theme.of(context).primaryColor,
-                                    border: Border.all(
-                                      width: 3,
-                                    ),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.edit,
-                                    color: Theme.of(context).primaryColorLight,
-                                  ),
-                                ),
+                              new Title( 
+                                icon: Icons.work,
+                                name: "Work",
+                                onPressed: (){
+                                  print("tapped");
+                                }
+                              ),
+                              new Title( 
+                                icon: Icons.phone,
+                                name: "Phone",
+                                onPressed: (){
+                                  print("tapped");
+                                }
+                              ),
+                              new Title( 
+                                icon: Icons.email,
+                                name: "Email",
+                                onPressed: (){
+                                  print("tapped");
+                                }
+                              ),
+                              new Title( 
+                                icon: Icons.location_on,
+                                name: "Address",
+                                onPressed: (){
+                                  print("tapped");
+                                }
                               ),
                             ],
-                          ),
+                          )
                         ),
+                      ),
+                      //makes sure that we can always see all of our items
+                      //with a little extra padding for looks
+                      Container(
+                        height: bottomBarHeight + 16,
                       ),
                     ],
                   ),
-                  
-                ],
-              ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Visibility(
-                  visible: isPortrait,
-                  child: Container(
-                    color: Theme.of(context).primaryColorDark,
-                    width: MediaQuery.of(context).size.width,
-                    padding: EdgeInsets.only(left:16, right:16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                ),
+                Container(
+                  padding: EdgeInsets.all(16),
+                  width: MediaQuery.of(context).size.width,
+                  alignment: Alignment.center,
+                  child: GestureDetector(
+                    onTap: (){
+                      showImagePicker(
+                        context,
+                        imageLocation,
+                        imagePicked,
+                      );
+                    },
+                    child: Stack(
                       children: <Widget>[
-                        new BottomButton(
-                          width: MediaQuery.of(context).size.width / 2 - 16,
-                          name: "Cancel",
-                          onPressed: (){
-                            Navigator.maybePop(context);
-                          },
+                        new Container(
+                          width: imageDiameter,
+                          height: imageDiameter,
+                          decoration: new BoxDecoration(
+                            color: Theme.of(context).indicatorColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: (imageLocation.value == "") ? Icon(
+                            Icons.camera_alt,
+                            size: imageDiameter / 2,
+                            color: Theme.of(context).primaryColor,
+                          )
+                          : ClipOval(
+                            child: FittedBox(
+                              fit: BoxFit.cover,
+                                child: Image.file(
+                                File(imageLocation.value),
+                              ),
+                            )
+                          )
                         ),
-                        new BottomButton(
-                          width: MediaQuery.of(context).size.width / 2 - 16,
-                          name: "Save",
-                          onPressed: () => saveContact(),
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: new Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: new BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              border: Border.all(
+                                width: 3,
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.edit,
+                              color: Theme.of(context).primaryColorLight,
+                            ),
+                          ),
                         ),
                       ],
-                    )
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
+            
+          ],
+        ),
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: Visibility(
+            visible: isPortrait,
+            child: Container(
+              color: Theme.of(context).primaryColorDark,
+              width: MediaQuery.of(context).size.width,
+              padding: EdgeInsets.only(left:16, right:16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  new BottomButton(
+                    width: MediaQuery.of(context).size.width / 2 - 16,
+                    name: "Cancel",
+                    onPressed: (){
+                      Navigator.maybePop(context);
+                    },
+                  ),
+                  new BottomButton(
+                    width: MediaQuery.of(context).size.width / 2 - 16,
+                    name: "Save",
+                    onPressed: () => contactSaved(),
+                  ),
+                ],
+              )
+            ),
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 }

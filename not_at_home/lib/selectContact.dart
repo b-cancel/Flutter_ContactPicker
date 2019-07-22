@@ -49,6 +49,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //init
   @override
   void initState(){ 
+    print("init");
     //super init
     super.initState(); 
     //observer for onResume
@@ -155,6 +156,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     }
   }
 
+  //TODO... getContacts should not care so much about our permssion status but instead care about whether or not our contact size is 0
   //NOTE: If rebuild fails then we are no longer mounted
   //hence all the if(rebuild(bool)) snippets
   Future<PermissionStatus> getContacts() async{
@@ -191,6 +193,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
             //get the contacts (WITH HIGH RESOLUTION THUMBNAILS)
             temp = await ContactsService.getContacts(); 
             contacts = temp.toList();
+
             //inform the user we have the contacts
             rebuild(false);
           }
@@ -233,7 +236,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       //ELSE -> I block the user from going back IF forceSelection is enabled
       onWillPop: () async => !(widget.forceSelection && !firstPage),
       child: SelectContactUX(
-        retreivingContacts: (contacts == null),
+        retreivingContacts: retreivingContacts,
         contactWidgets: contactWidgets,
         backFromNewContact: backFromNewContactPage,
         onSelect: onSelect,
