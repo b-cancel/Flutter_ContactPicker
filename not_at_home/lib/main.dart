@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:not_at_home/permission.dart';
 import 'package:not_at_home/request.dart';
 import 'package:not_at_home/selectContact.dart';
 import 'package:not_at_home/theme.dart';
-import 'package:permission/permission.dart';
 import 'package:provider/provider.dart';
 
 import 'helper.dart';
@@ -35,42 +33,7 @@ class StatelessLink extends StatelessWidget {
       },   
       title: 'Contact Picker',
       theme: theme.getTheme(),
-      home: 
-      SelectContact(
-        forceSelection: true,
-      ),
+      home: SelectContact(),
     );
   }
 }
-
-/*
-class Test extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return FlatButton(
-      onPressed: (){
-        permissionRequired(
-            context, 
-            true, 
-            true,
-            (){
-              print("selected");
-            }
-          );
-      },
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        alignment: Alignment.center,
-        child: Text(
-          "test",
-          style: TextStyle(
-            color: Colors.white,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-}
-*/

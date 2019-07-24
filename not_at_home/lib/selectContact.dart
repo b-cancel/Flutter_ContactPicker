@@ -9,6 +9,15 @@ import 'package:permission/permission.dart';
 import 'contactTile.dart';
 
 /*
+HOW TO USE
+- if you are not not in the first page make sure to change the value of contactInput to either
+  - ContactInput.force: to force the user to select a contact
+  - or ContactInput.suggest: to let the user pick a contact if they want
+  - but not ContactInput.no: since this value tells whatever widget is using select contact that
+    - we already selected our contact and therefore don't need to bring up our manual pop up box
+*/
+
+/*
 the onSelect function is set depending on whether or not we are on the first page
 we know its the first page because we aren't passed a contact to update
 IF first page -> we are passed a contact we want to update it (we can do so with a value notifier)
@@ -24,12 +33,12 @@ ELSE -> user should be able to back away at any step
 
 class SelectContact extends StatefulWidget {
   SelectContact({
-    this.forceSelection: false,
-    //if this is set then we know we are not in the first page
+    //if these are set -> then we know we are not in the first page
+    this.contactInput, 
     this.contactToUpdate,
   });
 
-  final bool forceSelection;
+  final ValueNotifier<ContactInput> contactInput;
   final ValueNotifier<Contact> contactToUpdate;
 
   @override
@@ -48,31 +57,60 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
 
   //init
   @override
-  void initState(){ 
-    print("init");
+  void initState(){
     //super init
     super.initState(); 
     //observer for onResume
     WidgetsBinding.instance.addObserver(this); 
     //if no contact is passed then we know this is the first page
     firstPage = (widget.contactToUpdate == null);
+
+    //NOTE... the onSelect function below is called when...
+    //1. when the user decides they want to instead manually input the name
+    //  - from the select contact page [no contact passed]***
+    //  - from the add contact page we can still pass in a contact the user is just choosing not to save it
+    //2. when we select a contact from the contact list
+    //3. when we add a contact
+
     //create the onSelect Function
-    if(firstPage){
-      onSelect = (BuildContext context, Contact contact){
+    if(firstPage){ //we are selecting one for the first time
+
+      //we may or may not be passed a contact
+      onSelect = (BuildContext context, {Contact contact}){
+
         //1. push our new page with our new contact
         //2. remove all other pages from the stack in the background
         Navigator.pushNamedAndRemoveUntil(
           context, 
           ContactDisplayHelper.routeName,
           (r) => false,
-          arguments: ContactDisplayArgs(contact),
+          arguments: ContactDisplayArgs(
+            //If we aren't passed a contact then force the user to pass one
+            contact ?? new Contact(), 
+            (contact == null) ? ContactInput.force : ContactInput.no,
+          ),
         );
       };
     }
-    else{
-      onSelect = (BuildContext context, Contact contact){
-        //1. update our passed contact
-        widget.contactToUpdate.value = contact;
+    else{ //we may or may not be updating or selecting it for the first time
+
+      //we may or may not be passed a contact
+      onSelect = (BuildContext context, {Contact contact}){
+        //1. update our passed info from the page requesting this
+
+        //if we were passed a contact
+        if(contact != null){ //then we cant update things
+          widget.contactToUpdate.value = contact;
+          //a new value was passed in, so whether or not the use was forced to do so
+          //they no longer need to do so
+          widget.contactInput.value =  ContactInput.no;
+        }
+        else{
+          //the user must have opted to manualy input the values
+          //which means the if we return to the page the page will know whether or not to bring up the pop up
+          //and in what mode (forced or not forced(a.k.a. suggested))
+        }
+        
         //2. remove all other pages from the stack
         //   until we arrive at the page where we selected our contact from
         Navigator.popUntil(
@@ -94,10 +132,10 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     if(isAuthorized(permissionStatus) == false){
       permissionRequired(
         context, 
-        widget.forceSelection, 
+        firstPage ? ContactInput.force : widget.contactInput.value == ContactInput.force, 
         true,
         (){
-          onSelect(context, new Contact());
+          onSelect(context);
         }
       );
     }
@@ -133,7 +171,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     //if we came back from the permissions page
     bool backFromPermissionPage = (backFromNewContactPage.value == false);
     if(backFromPermissionPage){
-      print("back from permission page");
       PermissionStatus permissionStatus = await getContacts();
       if(isAuthorized(permissionStatus) == false){
         //Even after making it clear that the user needs to accept permission in order to use this feature
@@ -147,7 +184,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       }
     }
     else{
-      print("back from new contact");
       //NOTE: we might come back from it because our user decided to manually input their data
       //but in that case the manual input modal will pop up in the page requesting the contact
       //and everything else relating to select contact will be poped
@@ -230,11 +266,15 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       );
     }
 
+    //determien if we are forcing out selection
+    bool forceSelection = (widget.contactInput.value == ContactInput.force);
+
     //pass the widgets
     return WillPopScope(
       //IF first page I should be able to close the app
       //ELSE -> I block the user from going back IF forceSelection is enabled
-      onWillPop: () async => !(widget.forceSelection && !firstPage),
+      
+      onWillPop: () async => !(forceSelection && !firstPage),
       child: SelectContactUX(
         retreivingContacts: retreivingContacts,
         contactWidgets: contactWidgets,

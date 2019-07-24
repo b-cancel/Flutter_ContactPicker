@@ -1,21 +1,12 @@
-import 'dart:io';
-
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
-import 'package:not_at_home/main.dart';
-
-import 'dart:io';
 
 class ContactListTile extends StatelessWidget {
   const ContactListTile({
     Key key,
     @required this.thisContact,
     @required this.thisColor,
-    //if the selectContact instance we are comming from is the firstPage
-    //then we will have this function
     this.onSelect,
-    //ELSE... TODO...
-    //we should instead update the passed value notifier and pop until the page before select contact
   }) : super(key: key);
 
   final Contact thisContact;
@@ -43,7 +34,7 @@ class ContactListTile extends StatelessWidget {
     //return widget
     return ListTile(
       onTap: (){
-        onSelect(context, thisContact);
+        onSelect(context, contact: thisContact);
       },
       leading: new Container(
         width: 50,

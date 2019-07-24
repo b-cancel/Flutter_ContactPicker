@@ -13,9 +13,12 @@ If arrive at this page and
     - and we update our contact wtih an empty contact -> pop up manual input (non-forced should return our previous contact)
 */
 
+enum ContactInput {no, suggest, force}
+
 class ContactDisplayArgs {
   final Contact contact;
-  ContactDisplayArgs(this.contact);
+  final ContactInput contactInput;
+  ContactDisplayArgs(this.contact, this.contactInput);
 }
 
 class ContactDisplayHelper extends StatelessWidget {
@@ -26,6 +29,7 @@ class ContactDisplayHelper extends StatelessWidget {
     final ContactDisplayArgs args = ModalRoute.of(context).settings.arguments;
     return ContactDisplay(
       contact: args.contact,
+      contactInput: args.contactInput,
     );
   }
 }
@@ -33,28 +37,41 @@ class ContactDisplayHelper extends StatelessWidget {
 class ContactDisplay extends StatefulWidget {
   ContactDisplay({
     this.contact,
+    this.contactInput,
   });
 
   final Contact contact;
+  final ContactInput contactInput;
 
   @override
   _ContactDisplayState createState() => _ContactDisplayState();
 }
 
 class _ContactDisplayState extends State<ContactDisplay> with WidgetsBindingObserver {
-  bool isSwitched = true;
-  bool forceContactChange = true;
+  //these are actually defaults
+  bool darkMode = true;
+  bool forceContactUpdate = false;
 
+  //NOTE: whatever is in here are ONLY placeholders
+  ValueNotifier<ContactInput> contactInput = new ValueNotifier<ContactInput>(ContactInput.no);
   ValueNotifier<Contact> contact = new ValueNotifier<Contact>(new Contact());
 
-  ValueNotifier<bool> manualInput = new ValueNotifier<bool>(false);
-
+  //init state
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
+    //grab our initial contact
+    contactInput.value = widget.contactInput;
     contact.value = widget.contact;
+
+    //pop up the manual input IF no new contact
+    //pop it up with the force passed to this
+
+    //TODO...
+
+    //whenever you change the contact also updates the UI
     contact.addListener((){
       print("--------------------------------------NAME CHAGNED");
       setState(() {
@@ -72,14 +89,12 @@ class _ContactDisplayState extends State<ContactDisplay> with WidgetsBindingObse
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if(state == AppLifecycleState.resumed){
-      if(forceContactChange && manualInput.value){
-        //we forced the user to get a contact
-        //but they are back
-        //which can only happen IF then were allowed back
-        //but IF they were allowed back we still don't have our contact
-        //so we can confidently imply that they chosse the manualy input option
-        //TODO.a.sd.fkajsd.fjalsj
-      }
+      //we forced the user to get a contact
+      //but they are back
+      //which can only happen IF then were allowed back
+      //but IF they were allowed back we still don't have our contact
+      //so we can confidently imply that they chosse the manualy input option
+      //TODO.a.sd.fkajsd.fjalsj
     }
   }
 
@@ -121,12 +136,11 @@ class _ContactDisplayState extends State<ContactDisplay> with WidgetsBindingObse
                 child: FlatButton(
                   color: Theme.of(context).highlightColor,
                   onPressed: (){
-                    //set so that if we come back here without new name and value we are forced
-                    manualInput.value = true;
                     Navigator.push(
                       context, PageTransition(
                         type: PageTransitionType.rightToLeft,
                         child: SelectContact(
+                          contactInput: contactInput,
                           contactToUpdate: contact,
                         ),
                       ),
@@ -143,7 +157,7 @@ class _ContactDisplayState extends State<ContactDisplay> with WidgetsBindingObse
               Row(
                 children: <Widget>[
                   Switch(
-                    value: isSwitched,
+                    value: darkMode,
                     onChanged: (value) {
                       setState(() {
                         if(value){
@@ -152,13 +166,13 @@ class _ContactDisplayState extends State<ContactDisplay> with WidgetsBindingObse
                           else{
                             _themeChanger.setTheme(ThemeData.light());
                           }
-                          isSwitched = value;
+                          darkMode = value;
                       });
                     },
                   ),
                   Expanded(
                     child: Text(
-                      (isSwitched) ?
+                      (darkMode) ?
                       "Dark Mode"
                       : "Light Mode",
                     ),
@@ -168,16 +182,16 @@ class _ContactDisplayState extends State<ContactDisplay> with WidgetsBindingObse
               Row(
                 children: <Widget>[
                   Switch(
-                    value: forceContactChange,
+                    value: forceContactUpdate,
                     onChanged: (value) {
                       setState(() {
-                        forceContactChange = value;
+                        forceContactUpdate = value;
                       });
                     },
                   ),
                   Expanded(
                     child: Text(
-                      (forceContactChange) ?
+                      (forceContactUpdate) ?
                       "Force Change"
                       : "Don't Force Chance",
                     ),
