@@ -1,10 +1,16 @@
+import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:not_at_home/request.dart';
 import 'package:not_at_home/selectContact.dart';
 import 'package:not_at_home/theme.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 
 import 'helper.dart';
+
+//IF true -> first forces you to select a contact and then lets you change it
+//ELSE -> takes you directly into testing the toolkit in all other cases
+bool testFirstPage = false;
 
 //-----Start App
 void main() => runApp(MyApp());
@@ -22,7 +28,7 @@ class MyApp extends StatelessWidget {
 }
 
 //-----Statless Link Required Between Entry Point And App
-class StatelessLink extends StatelessWidget {
+class StatelessLink extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     final theme = Provider.of<ThemeChanger>(context);
@@ -33,7 +39,52 @@ class StatelessLink extends StatelessWidget {
       },   
       title: 'Contact Picker',
       theme: theme.getTheme(),
-      home: SelectContact(),
+      home: InitRouter(),
     );
+  }
+}
+
+class InitRouter extends StatefulWidget {
+  InitRouter({Key key}) : super(key: key);
+
+  _InitRouterState createState() => _InitRouterState();
+}
+
+//-----Router to select contact or the page that will select them for testing purposes
+class _InitRouterState extends State<InitRouter> {
+  @override
+  void initState() {
+    //after build completes
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      if(testFirstPage){
+        Navigator.pushReplacement(
+          context, 
+          PageTransition(
+            type: PageTransitionType.fade,
+            duration: Duration(seconds: 0),
+            child: SelectContact(),
+          ),
+        );
+      }
+      else{
+        Navigator.pushNamedAndRemoveUntil(
+          context, 
+          ContactDisplayHelper.routeName,
+          (r) => false,
+          arguments: ContactDisplayArgs(
+            new Contact(), 
+            ContactInput.no,
+          ),
+        );
+      }
+    });
+    
+    //super init state
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
   }
 }

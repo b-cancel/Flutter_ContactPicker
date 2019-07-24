@@ -104,7 +104,7 @@ class _ContactDisplayState extends State<ContactDisplay> with WidgetsBindingObse
     ThemeChanger _themeChanger = Provider.of<ThemeChanger>(context);
     
     //button text
-    String buttonText = contact.value.givenName;
+    String buttonText = contact.value?.givenName ?? "Select Contact";
     if(buttonText == " | ") buttonText = "Select Contact";
 
     //build
@@ -193,7 +193,7 @@ class _ContactDisplayState extends State<ContactDisplay> with WidgetsBindingObse
                     child: Text(
                       (forceContactUpdate) ?
                       "Force Change"
-                      : "Don't Force Chance",
+                      : "Don't Force Change",
                     ),
                   ),
                 ],

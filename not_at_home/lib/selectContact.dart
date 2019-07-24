@@ -132,7 +132,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     if(isAuthorized(permissionStatus) == false){
       permissionRequired(
         context, 
-        firstPage ? ContactInput.force : widget.contactInput.value == ContactInput.force, 
+        firstPage ? true : (widget.contactInput.value == ContactInput.force), 
         true,
         (){
           onSelect(context);
@@ -266,8 +266,8 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       );
     }
 
-    //determien if we are forcing out selection
-    bool forceSelection = (widget.contactInput.value == ContactInput.force);
+    //determine if we are forcing our selection
+    bool forceSelection = firstPage ? false : (widget.contactInput.value == ContactInput.force);
 
     //pass the widgets
     return WillPopScope(
