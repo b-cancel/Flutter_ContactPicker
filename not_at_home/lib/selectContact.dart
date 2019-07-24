@@ -9,19 +9,21 @@ import 'package:permission/permission.dart';
 import 'contactTile.dart';
 
 /*
-HOW TO USE
+*************************HOW TO USE*************************
 - if you are not not in the first page make sure to change the value of contactInput to either
   - ContactInput.force: to force the user to select a contact
   - or ContactInput.suggest: to let the user pick a contact if they want
   - but not ContactInput.no: since this value tells whatever widget is using select contact that
     - we already selected our contact and therefore don't need to bring up our manual pop up box
+      even if its requested
 */
 
 /*
 the onSelect function is set depending on whether or not we are on the first page
 we know its the first page because we aren't passed a contact to update
-IF first page -> we are passed a contact we want to update it (we can do so with a value notifier)
-ELSE -> we want to open a new page
+
+IF NOT first page -> we are passed a contact we want to update it (we can do so with a value notifier)
+ELSE -> we want to open a new page and pass it our initial contact value (which might be empty therefore forcing manual input on that page)
 */
 
 /*
@@ -99,14 +101,14 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         //1. update our passed info from the page requesting this
 
         //if we were passed a contact
-        if(contact != null){ //then we cant update things
+        if(contact != null){ 
           widget.contactToUpdate.value = contact;
           //a new value was passed in, so whether or not the use was forced to do so
-          //they no longer need to do so
+          //they no longer need to do so in the page requesting this contact
           widget.contactInput.value =  ContactInput.no;
         }
         else{
-          //the user must have opted to manualy input the values
+          //the user MUST HAVE opted to manualy input the values (because of possible commands listed above)
           //which means the if we return to the page the page will know whether or not to bring up the pop up
           //and in what mode (forced or not forced(a.k.a. suggested))
         }
@@ -132,9 +134,12 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     if(isAuthorized(permissionStatus) == false){
       permissionRequired(
         context, 
+        //if its the first page we force users to select a contact
         firstPage ? true : (widget.contactInput.value == ContactInput.force), 
         true,
         (){
+          //pop everything and go to the page requesting the contact 
+          //and let it force or suggest the user to manually input
           onSelect(context);
         }
       );
@@ -173,26 +178,37 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     if(backFromPermissionPage){
       PermissionStatus permissionStatus = await getContacts();
       if(isAuthorized(permissionStatus) == false){
+        //the permission page did not get the users permission
+        //the user either backed up from the page OR selected manual input
+        //we already handle the manual input case with the onSelect we pass the permssions page
+        //so the only case we could be handling here is the use backing up case
+        //since backing up is not allowed if the contact is required
+        //we know the contact isnt required
+
         //Even after making it clear that the user needs to accept permission in order to use this feature
-        //they didn't select manual input
-        //and they didn't give us permssion so simply go back to the previous page
-        //If this contact was REQUIRED then we would be here
+        //they didn't select manual input and they didn't give us permssion 
+        //so simply go back to the previous page
+
+        //If this contact was REQUIRED then we would NOT be here
         //so we know we can back up
         if(firstPage == false){
           Navigator.pop(context);
         }
       }
+      //ELSE... the permssions page got the users permission
     }
     else{
       //NOTE: we might come back from it because our user decided to manually input their data
       //but in that case the manual input modal will pop up in the page requesting the contact
       //and everything else relating to select contact will be poped
       //so this being set to false isn't going to break anything either
+
+      //if we are instead comming back from it because we no longer want to select a user by adding them
+      //then this is the appropiate action
       backFromNewContactPage.value = false;
     }
   }
 
-  //TODO... getContacts should not care so much about our permssion status but instead care about whether or not our contact size is 0
   //NOTE: If rebuild fails then we are no longer mounted
   //hence all the if(rebuild(bool)) snippets
   Future<PermissionStatus> getContacts() async{
@@ -273,7 +289,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     return WillPopScope(
       //IF first page I should be able to close the app
       //ELSE -> I block the user from going back IF forceSelection is enabled
-      
       onWillPop: () async => !(forceSelection && !firstPage),
       child: SelectContactUX(
         retreivingContacts: retreivingContacts,

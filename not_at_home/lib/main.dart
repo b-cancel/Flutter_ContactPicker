@@ -44,13 +44,17 @@ class StatelessLink extends StatelessWidget{
   }
 }
 
+//-----Router to select contact or the page that will select them for testing purposes
+//NOTE: if anyone reading this can find a cleaner way to do this that would be great
+//I did it this way because I need to be able to push the ContactDisplay page with its name
+//otherwise when I select a contact ill pop everything since the onSelect function in SelectContact
+//is also expecting the route name of the page requesting the contact
 class InitRouter extends StatefulWidget {
   InitRouter({Key key}) : super(key: key);
 
   _InitRouterState createState() => _InitRouterState();
 }
 
-//-----Router to select contact or the page that will select them for testing purposes
 class _InitRouterState extends State<InitRouter> {
   @override
   void initState() {

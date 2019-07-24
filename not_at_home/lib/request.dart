@@ -6,11 +6,8 @@ import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 
 /*
-If arrive at this page and
-  - its the first time we arrive at it
-    - and we do so with an empty contact -> pop up manual input (forced)
-  - its not the first time we arrive at it
-    - and we update our contact wtih an empty contact -> pop up manual input (non-forced should return our previous contact)
+If arrive at this page or resume into it
+  - and our contactInput == force OR suggest -> pop up with respective setting
 */
 
 enum ContactInput {no, suggest, force}
@@ -55,6 +52,31 @@ class _ContactDisplayState extends State<ContactDisplay> with WidgetsBindingObse
   //NOTE: whatever is in here are ONLY placeholders
   ValueNotifier<ContactInput> contactInput = new ValueNotifier<ContactInput>(ContactInput.no);
   ValueNotifier<Contact> contact = new ValueNotifier<Contact>(new Contact());
+
+  //Manual Input Dialog Box
+  void showManualInputDialog(bool forceContactUpdate) {
+    // flutter defined function
+    showDialog(
+      context: context,
+      barrierDismissible: (forceContactUpdate == false),
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text("New Contact Required"),
+          content: new Text("Alert Dialog body"),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new FlatButton(
+              child: new Text("Close"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   //init state
   @override

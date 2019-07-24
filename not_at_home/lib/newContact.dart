@@ -117,10 +117,13 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
       //without permission we give the user the option to ONLY
       //1. update the contact
       permissionRequired(
-        context, 
+        context,
+        //the user is never forced to create a contact, only to select one
         false, 
         false, //we are creating a contact
         (){
+          //on Select only updates the contact
+          //or the user can give us permission and come back and add it as well
           widget.onSelect(context, contact: newContact);
         }
       );
@@ -193,6 +196,10 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
       if(backFromPermissionPage.value){
         backFromPermissionPage.value = false;
         PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
+
+        //since the permissions page was brought up because the user wanted to save the contact
+        //we can imply the user wants to save the contact immediately after ther permissions page
+        //WITHOUT making any changes
         if(isAuthorized(permissionStatus)){
           saveContact();
         }
