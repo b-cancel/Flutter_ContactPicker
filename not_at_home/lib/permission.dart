@@ -16,18 +16,6 @@ permissionRequired(BuildContext context, bool force, bool selectingContact, Func
     print("-------------------------Before (NOT AUTH) " + DateTime.now().toString());
     if(startStatus == PermissionStatus.notAgain && !firstTime.value){
       print("-------------------------pushing new screen");
-      /*
-      Navigator.push(
-        context, PageTransition(
-          type: PageTransitionType.downToUp,
-          child: Manual(
-            forcePermission: force,
-            selectingContact: selectingContact,
-            onSecondaryOption: onSecondaryOption,
-          ),
-        ),
-      );
-      */
       showDialog(
         context: context,
         barrierDismissible: (force == false),
