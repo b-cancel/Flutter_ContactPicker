@@ -10,7 +10,7 @@ import 'helper.dart';
 
 //IF true -> first forces you to select a contact and then lets you change it
 //ELSE -> takes you directly into testing the toolkit in all other cases
-bool testFirstPage = false;
+bool testFirstPage = true;
 
 //-----Start App
 void main() => runApp(MyApp());

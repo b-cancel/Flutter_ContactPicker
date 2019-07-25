@@ -4,8 +4,10 @@ import 'package:not_at_home/helper.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:permission/permission.dart';
 
+//required because of how the permission plugin operates
 final ValueNotifier<bool> firstTime = new ValueNotifier<bool>(true);
 
+//request contact permission from the user
 permissionRequired(BuildContext context, bool force, bool selectingContact, Function onSecondaryOption) async{
   //---bottom
   PermissionStatus startStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
@@ -14,15 +16,28 @@ permissionRequired(BuildContext context, bool force, bool selectingContact, Func
     print("-------------------------Before (NOT AUTH) " + DateTime.now().toString());
     if(startStatus == PermissionStatus.notAgain && !firstTime.value){
       print("-------------------------pushing new screen");
+      /*
       Navigator.push(
         context, PageTransition(
-          type: PageTransitionType.leftToRight,
+          type: PageTransitionType.downToUp,
           child: Manual(
             forcePermission: force,
             selectingContact: selectingContact,
             onSecondaryOption: onSecondaryOption,
           ),
         ),
+      );
+      */
+      showDialog(
+        context: context,
+        barrierDismissible: (force == false),
+        builder: (BuildContext context) {
+          return Manual(
+            forcePermission: force,
+            selectingContact: selectingContact,
+            onSecondaryOption: onSecondaryOption,
+          );
+        },
       );
     }
     else{
@@ -91,111 +106,45 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
     }
   }
 
+  //build
   @override
   Widget build(BuildContext context) {
     bool isSelecting = widget.selectingContact;
 
     return WillPopScope(
       onWillPop:  () async => !widget.forcePermission,
-      child: Scaffold(
-        body: Column(
-          children: <Widget>[
-            Expanded(
-              child: Center(
-                child: DefaultTextStyle(
-                  style: TextStyle(
-                    fontSize: 18,
-                  ),
-                  child: Container(
-                    padding: EdgeInsets.all(32),
-                    child: Container(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Container(
-                            padding: EdgeInsets.only(bottom: 4),
-                            child: Text(
-                              "Grant Us Access",
-                              style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.only(bottom: 16),
-                            child: Text(
-                              "In order to " + ((isSelecting) ? "\"Select\"" : "\"Save\"") + " a Contact",
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.only(bottom: 16),
-                            child: Column(
-                              children: <Widget>[
-                                Text(
-                                  "Enable \"Contacts\" in the \"Permissions\" section of \"App Settings\" below",
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.only(bottom: 16),
-                            child: Column(
-                              children: <Widget>[
-                                Text(
-                                  (isSelecting) ?
-                                  "Or Manually Input the Contact below"
-                                  : "Use the Contact without saving it below",
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            width: MediaQuery.of(context).size.width,
-                            padding: EdgeInsets.all(32),
-                            child: FittedBox(
-                              fit: BoxFit.fill,
-                              child: Icon(
-                                Icons.contacts,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+      child: Theme(
+        data: ThemeData.light(),
+        child: AlertDialog(
+          title: Row(
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.only(right: 16),
+                child: Icon(
+                  Icons.contacts,
+                  color: Theme.of(context).buttonColor,
                 ),
               ),
+              new Text("Grant Us Access"),
+            ],
+          ),
+          content: new Text(
+            "In order to " + ((isSelecting) ? "\"Select\"" : "\"Save\"") + " a Contact. "
+            + "\n\n" + "Enable \"Contacts\" in the \"Permissions\" section of \"App Settings\""
+            + "\n" + ((isSelecting) ? "Or Manually Input the Contact below" : "Use the Contact without saving it below"),
+          ),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text((isSelecting) ? "Manual Input" : "Use Don't Save"),
+              onPressed: () {
+                widget.onSecondaryOption();
+              },
             ),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(
-                    color: Theme.of(context).accentColor,
-                  )
-                )
-              ),
-              child: Row(
-                children: <Widget>[
-                  BottomButton(
-                    label: (isSelecting) ? "Manual Input" : "Use Don't Save",
-                    func: (){
-                      widget.onSecondaryOption();
-                    },
-                  ),
-                  BottomButton(
-                    label: "App Settings",
-                    func: (){
-                      Permission.openSettings();
-                    },
-                    icon: Icons.keyboard_arrow_right,
-                  ),
-                ],
-              )
+            new FlatButton(
+              child: new Text("Settings"),
+              onPressed: () {
+                Permission.openSettings();
+              },
             ),
           ],
         ),
@@ -204,6 +153,120 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
   }
 }
 
+/*
+//---How we used to call the permissions page instead of the pop up
+*/
+
+/*
+//---Permission Page no longer used since we have the pop up
+
+Scaffold(
+  body: Column(
+    children: <Widget>[
+      Expanded(
+        child: Center(
+          child: DefaultTextStyle(
+            style: TextStyle(
+              fontSize: 18,
+            ),
+            child: Container(
+              padding: EdgeInsets.all(32),
+              child: Container(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      padding: EdgeInsets.only(bottom: 4),
+                      child: Text(
+                        "Grant Us Access",
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(bottom: 16),
+                      child: Text(
+                        "In order to " + ((isSelecting) ? "\"Select\"" : "\"Save\"") + " a Contact",
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(bottom: 16),
+                      child: Column(
+                        children: <Widget>[
+                          Text(
+                            "Enable \"Contacts\" in the \"Permissions\" section of \"App Settings\" below",
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(bottom: 16),
+                      child: Column(
+                        children: <Widget>[
+                          Text(
+                            (isSelecting) ?
+                            "Or Manually Input the Contact below"
+                            : "Use the Contact without saving it below",
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      padding: EdgeInsets.all(32),
+                      child: FittedBox(
+                        fit: BoxFit.fill,
+                        child: Icon(
+                          Icons.contacts,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      Container(
+        width: MediaQuery.of(context).size.width,
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: Theme.of(context).accentColor,
+            )
+          )
+        ),
+        child: Row(
+          children: <Widget>[
+            BottomButton(
+              label: (isSelecting) ? "Manual Input" : "Use Don't Save",
+              func: (){
+                widget.onSecondaryOption();
+              },
+            ),
+            BottomButton(
+              label: "App Settings",
+              func: (){
+                Permission.openSettings();
+              },
+              icon: Icons.keyboard_arrow_right,
+            ),
+          ],
+        )
+      ),
+    ],
+  ),
+),
+*/
+
+/*
+//---Class used by the permssion page
 class BottomButton extends StatelessWidget {
   const BottomButton({
     this.label,
@@ -255,3 +318,4 @@ class BottomButton extends StatelessWidget {
     );
   }
 }
+*/
