@@ -34,7 +34,7 @@ class ContactListTile extends StatelessWidget {
     //return widget
     return ListTile(
       onTap: (){
-        onSelect(context, contact: thisContact);
+        onSelect(context, thisContact);
       },
       leading: new Container(
         width: 50,

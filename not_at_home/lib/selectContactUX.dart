@@ -67,9 +67,7 @@ class SelectContactUX extends StatelessWidget {
                   double absoluteChange = math.sqrt(math.pow(change.dy, 2));
                   if(absoluteChange > 2.5){
                     //show one thing or the other given our scroll direction
-                    bool prev = showNewContact.value;
                     showNewContact.value = (change.dy > 0);
-                    print(showNewContact.value.toString());
                   }
                 }
               }

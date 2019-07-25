@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:not_at_home/helper.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:permission/permission.dart';
 
 //required because of how the permission plugin operates
@@ -133,6 +132,49 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
               child: new Text((isSelecting) ? "Manual Input" : "Use Don't Save"),
               onPressed: () {
                 widget.onSecondaryOption();
+
+                /*
+                showDialog(
+        context: context,
+        barrierDismissible: dismissible,
+        builder: (BuildContext context) {
+          // return object of type Dialog
+          return WillPopScope(
+            onWillPop:  () async => dismissible,
+            child: Theme(
+              data: ThemeData.light(),
+              child: AlertDialog(
+                title: new Text("Manually Add Contact"),
+                content: new Text(
+                  "form field here",
+                ),
+                actions: <Widget>[
+                  new FlatButton(
+                    child: new Text("Grant Permission"),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      selectAContact();
+                    },
+                  ),
+                  new RaisedButton(
+                    textColor: Colors.white,
+                    child: new Text(
+                      "Add Contact",
+                    ),
+                    //TODO... make this null until we can confirm
+                    //1. we have some form of name
+                    //2. we have atleast 7 numbers in the field (any more might be country codes)
+                    onPressed: null, /*() {
+                      
+                    },*/
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+                */
               },
             ),
             new RaisedButton(

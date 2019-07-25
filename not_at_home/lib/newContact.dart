@@ -108,7 +108,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
       //1. add the contact
       await ContactsService.addContact(newContact);  
       //2. and update the contact
-      widget.onSelect(context, contact: newContact);
+      widget.onSelect(context, newContact);
     }
     else{
       //we know that we don't have permission so we know either the modal or page will pop up
@@ -124,7 +124,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
         (){
           //on Select only updates the contact
           //or the user can give us permission and come back and add it as well
-          widget.onSelect(context, contact: newContact);
+          widget.onSelect(context, newContact);
         }
       );
     }
@@ -187,7 +187,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     IF we have access now we save the contact and run onselect
     ELSE we wait for the user to decide what to do
     */
-    if(state == AppLifecycleState.resumed && state != AppLifecycleState.paused) onResume();
+    if(state == AppLifecycleState.resumed) onResume();
   }
 
   //this run even if the image picker modal is above it
@@ -204,6 +204,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
       if(isAuthorized(permissionStatus)){
         saveContact();
       }
+      //ELSE... we might let them just go back, edit the contact, or etc
     }
     //ELSE we are back from either picking an image or deciding not to pick an image, both of which do nothing
   }
