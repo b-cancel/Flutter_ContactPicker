@@ -1,5 +1,6 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:not_at_home/helper.dart';
 import 'package:not_at_home/permission.dart';
 import 'package:not_at_home/request.dart';
@@ -60,6 +61,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //init
   @override
   void initState(){
+    print("select contact init");
     //super init
     super.initState(); 
     //observer for onResume
@@ -124,6 +126,8 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         //https://flutter.dev/docs/cookbook/navigation/navigate-with-arguments
       };
     }
+
+    print("asking for permission");
     //try to get contacts
     confirmPermission();
   }
@@ -155,7 +159,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if(state == AppLifecycleState.resumed) reactToResume();
+    if(state == AppLifecycleState.resumed && state != AppLifecycleState.paused) reactToResume();
   }
 
   //this is set TRUE right before we open up "NewContact"
@@ -165,6 +169,8 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   ValueNotifier<bool> backFromNewContactPage = new ValueNotifier<bool>(false);
 
   reactToResume() async{
+    print("*************************SELECT CONTACT RESUME");
+
     //IF -> we came back from the permissions page
     //  IF we now have permission -> refill the contacts list with our contacts
     //  ELSE -> EITHER manual input OR (back because not forced) [CAN ASSUME back because not forced]
@@ -299,3 +305,46 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     );
   }
 }
+
+/*
+showDialog(
+        context: context,
+        barrierDismissible: dismissible,
+        builder: (BuildContext context) {
+          // return object of type Dialog
+          return WillPopScope(
+            onWillPop:  () async => dismissible,
+            child: Theme(
+              data: ThemeData.light(),
+              child: AlertDialog(
+                title: new Text("Manually Add Contact"),
+                content: new Text(
+                  "form field here",
+                ),
+                actions: <Widget>[
+                  new FlatButton(
+                    child: new Text("Grant Permission"),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      selectAContact();
+                    },
+                  ),
+                  new RaisedButton(
+                    textColor: Colors.white,
+                    child: new Text(
+                      "Add Contact",
+                    ),
+                    //TODO... make this null until we can confirm
+                    //1. we have some form of name
+                    //2. we have atleast 7 numbers in the field (any more might be country codes)
+                    onPressed: null, /*() {
+                      
+                    },*/
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+*/

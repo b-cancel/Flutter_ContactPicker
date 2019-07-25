@@ -5,17 +5,10 @@ import 'package:not_at_home/theme.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 
-/*
-If arrive at this page or resume into it
-  - and our contactInput == force OR suggest -> pop up with respective setting
-*/
-
-enum ContactInput {no, suggest, force}
-
+//this Class is required in order to be able to pass parameters to named routes
 class ContactDisplayArgs {
   final Contact contact;
-  final ContactInput contactInput;
-  ContactDisplayArgs(this.contact, this.contactInput);
+  ContactDisplayArgs(this.contact);
 }
 
 class ContactDisplayHelper extends StatelessWidget {
@@ -26,98 +19,44 @@ class ContactDisplayHelper extends StatelessWidget {
     final ContactDisplayArgs args = ModalRoute.of(context).settings.arguments;
     return ContactDisplay(
       contact: args.contact,
-      contactInput: args.contactInput,
     );
   }
 }
 
+//this class actually displays the contact
 class ContactDisplay extends StatefulWidget {
   ContactDisplay({
     this.contact,
-    this.contactInput,
   });
 
   final Contact contact;
-  final ContactInput contactInput;
 
   @override
   _ContactDisplayState createState() => _ContactDisplayState();
 }
 
-class _ContactDisplayState extends State<ContactDisplay> with WidgetsBindingObserver {
+class _ContactDisplayState extends State<ContactDisplay> {
   //these are actually defaults
   bool darkMode = true;
   bool forceContactUpdate = false;
 
   //NOTE: whatever is in here are ONLY placeholders
-  ValueNotifier<ContactInput> contactInput = new ValueNotifier<ContactInput>(ContactInput.no);
   ValueNotifier<Contact> contact = new ValueNotifier<Contact>(new Contact());
-
-  //Manual Input Dialog Box
-  void showManualInputDialog(bool forceContactUpdate) {
-    // flutter defined function
-    showDialog(
-      context: context,
-      barrierDismissible: (forceContactUpdate == false),
-      builder: (BuildContext context) {
-        // return object of type Dialog
-        return AlertDialog(
-          title: new Text("New Contact Required"),
-          content: new Text("Alert Dialog body"),
-          actions: <Widget>[
-            // usually buttons at the bottom of the dialog
-            new FlatButton(
-              child: new Text("Close"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   //init state
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-
     //grab our initial contact
-    contactInput.value = widget.contactInput;
     contact.value = widget.contact;
-
-    //pop up the manual input IF no new contact
-    //pop it up with the force passed to this
-
-    //TODO...
 
     //whenever you change the contact also updates the UI
     contact.addListener((){
-      print("--------------------------------------NAME CHAGNED");
+      print("--------------------------------------NAME CHANGED");
       setState(() {
         
       });
     });
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if(state == AppLifecycleState.resumed){
-      //we forced the user to get a contact
-      //but they are back
-      //which can only happen IF then were allowed back
-      //but IF they were allowed back we still don't have our contact
-      //so we can confidently imply that they chosse the manualy input option
-      //TODO.a.sd.fkajsd.fjalsj
-    }
   }
 
   @override
@@ -162,7 +101,6 @@ class _ContactDisplayState extends State<ContactDisplay> with WidgetsBindingObse
                       context, PageTransition(
                         type: PageTransitionType.rightToLeft,
                         child: SelectContact(
-                          contactInput: contactInput,
                           contactToUpdate: contact,
                         ),
                       ),

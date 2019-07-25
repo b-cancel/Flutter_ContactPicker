@@ -8,20 +8,26 @@ import 'package:permission/permission.dart';
 final ValueNotifier<bool> firstTime = new ValueNotifier<bool>(true);
 
 //request contact permission from the user
-permissionRequired(BuildContext context, bool force, bool selectingContact, Function onSecondaryOption) async{
+permissionRequired(BuildContext context, bool forcePermission, bool selectingContact, Function onSecondaryOption) async{
   //---bottom
   PermissionStatus startStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
   print("-------------------------before start " + startStatus.toString() + " " + firstTime.value.toString());
   if(isAuthorized(startStatus) == false){
     print("-------------------------Before (NOT AUTH) " + DateTime.now().toString());
+    //NOTE: if notAgain && not firstTime -> guaranted notAgain
+    //else if notAgain && firstTime -> maybe not valid notAgain 
+    //  IF valid should show manual ELSE should ASK FOR PERMISSION
+    //else we can ASK FOR PERMISSION -> if fail ask again
+
+
     if(startStatus == PermissionStatus.notAgain && !firstTime.value){
       print("-------------------------pushing new screen");
       showDialog(
         context: context,
-        barrierDismissible: (force == false),
+        barrierDismissible: (forcePermission == false),
         builder: (BuildContext context) {
           return Manual(
-            forcePermission: force,
+            forcePermission: forcePermission,
             selectingContact: selectingContact,
             onSecondaryOption: onSecondaryOption,
           );
@@ -39,7 +45,7 @@ permissionRequired(BuildContext context, bool force, bool selectingContact, Func
       print("-------------------------result " + status.toString() + " " + DateTime.now().toIso8601String());
       if(isAuthorized(status) == false){
         //---top
-        permissionRequired(context, force, selectingContact, onSecondaryOption);
+        permissionRequired(context, forcePermission, selectingContact, onSecondaryOption);
       }
     }
   }
@@ -80,7 +86,8 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
   //that would have traveled away from it permanently and this wouldn't run
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if(state == AppLifecycleState.resumed){
+    if(state == AppLifecycleState.resumed && state != AppLifecycleState.paused){
+      print("*************************PERMISSION RESUME");
       checkIfCanPop();
     }
   }
@@ -100,7 +107,7 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
     bool isSelecting = widget.selectingContact;
 
     return WillPopScope(
-      onWillPop:  () async => !widget.forcePermission,
+      onWillPop:  () async => (widget.forcePermission == false),
       child: Theme(
         data: ThemeData.light(),
         child: AlertDialog(
@@ -128,9 +135,12 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
                 widget.onSecondaryOption();
               },
             ),
-            new FlatButton(
-              child: new Text("Settings"),
-              onPressed: () {
+            new RaisedButton(
+              textColor: Colors.white,
+              child: new Text(
+                "Settings",
+              ),
+              onPressed: (){
                 Permission.openSettings();
               },
             ),

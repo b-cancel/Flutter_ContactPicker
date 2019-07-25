@@ -187,24 +187,25 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     IF we have access now we save the contact and run onselect
     ELSE we wait for the user to decide what to do
     */
-    if(state == AppLifecycleState.resumed) onResume();
+    if(state == AppLifecycleState.resumed && state != AppLifecycleState.paused) onResume();
   }
 
   //this run even if the image picker modal is above it
   //which is why we need the 2 variables
   onResume() async{
-      if(backFromPermissionPage.value){
-        backFromPermissionPage.value = false;
-        PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
+    print("*************************NEW CONTACT RESUME");
+    if(backFromPermissionPage.value){
+      backFromPermissionPage.value = false;
+      PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
 
-        //since the permissions page was brought up because the user wanted to save the contact
-        //we can imply the user wants to save the contact immediately after ther permissions page
-        //WITHOUT making any changes
-        if(isAuthorized(permissionStatus)){
-          saveContact();
-        }
+      //since the permissions page was brought up because the user wanted to save the contact
+      //we can imply the user wants to save the contact immediately after ther permissions page
+      //WITHOUT making any changes
+      if(isAuthorized(permissionStatus)){
+        saveContact();
       }
-      //ELSE we are back from either picking an image or deciding not to pick an image, both of which do nothing
+    }
+    //ELSE we are back from either picking an image or deciding not to pick an image, both of which do nothing
   }
 
   //-------------------------Everything Above Is OK-------------------------
