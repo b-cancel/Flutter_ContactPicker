@@ -10,7 +10,7 @@ import 'helper.dart';
 
 //IF true -> first forces you to select a contact and then lets you change it
 //ELSE -> takes you directly into testing the toolkit in all other cases
-bool testFirstPage = false;
+bool testFirstPage = true;
 
 //-----Start App
 void main() => runApp(MyApp());
@@ -61,12 +61,16 @@ class _InitRouterState extends State<InitRouter> {
     //after build completes
     WidgetsBinding.instance.addPostFrameCallback((_){
       if(testFirstPage){
+        //we start the app by making the user select a contact
         Navigator.pushReplacement(
           context, 
           PageTransition(
             type: PageTransitionType.fade,
             duration: Duration(seconds: 0),
-            child: SelectContact(),
+            //since this is how the app starts the user MUST select a contact
+            child: SelectContact(
+              forceSelection: true,
+            ),
           ),
         );
       }
@@ -76,8 +80,7 @@ class _InitRouterState extends State<InitRouter> {
           ContactDisplayHelper.routeName,
           (r) => false,
           arguments: ContactDisplayArgs(
-            new Contact(), 
-            ContactInput.no,
+            new Contact(),
           ),
         );
       }

@@ -66,7 +66,6 @@ class _ContactDisplayState extends State<ContactDisplay> {
     
     //button text
     String buttonText = contact.value?.givenName ?? "Select Contact";
-    if(buttonText == " | ") buttonText = "Select Contact";
 
     //build
     return Scaffold(
@@ -101,6 +100,7 @@ class _ContactDisplayState extends State<ContactDisplay> {
                       context, PageTransition(
                         type: PageTransitionType.rightToLeft,
                         child: SelectContact(
+                          forceSelection: forceContactUpdate,
                           contactToUpdate: contact,
                         ),
                       ),
