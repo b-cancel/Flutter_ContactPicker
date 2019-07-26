@@ -1,6 +1,7 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:not_at_home/helper.dart';
 import 'package:permission/permission.dart';
 
@@ -185,7 +186,8 @@ class ManualInput extends StatefulWidget {
 
 class _ManualInputState extends State<ManualInput> {
   //keep track of whether or not the form is valid
-  bool infoValid = false;
+  ValueNotifier<bool> nameValid = new ValueNotifier<bool>(false);
+  ValueNotifier<bool> phoneValid = new ValueNotifier<bool>(false);
 
   //Focus Nodes for our form fields
   FocusNode nameFN = new FocusNode();
@@ -195,17 +197,33 @@ class _ManualInputState extends State<ManualInput> {
   TextEditingController nameCtrl = new TextEditingController();
   TextEditingController phoneCtrl = new TextEditingController();
 
-  //the function that runs after finishing editing the name or number field
-  submitForm(){
-    if(infoValid){
-      widget.onSubmit(context, new Contact(
-        givenName: nameCtrl.text,
-        phones: [Item(value: phoneCtrl.text, label: "manual")]
-      ));
-    }
-    else{
+  isNameValid(){
+    nameValid.value = (nameCtrl.text != "");
+  }
+  
+  isPhoneValid(){
+    phoneValid.value = (onlyNumbers(phoneCtrl.text).length >= 10);
+  }
 
+  //determine what to do after a user finishes filling a field
+  submitOrRefocus({bool onName: true}){
+    if(nameValid.value && phoneValid.value) submitForm();
+    else{
+      //if we are on phone field and it isn't valid then stay
+      if(onName != null && onName == false && phoneValid.value == false) return; //stay in phone
+      else{ //focus on the first field that isnt valid
+        if(nameValid.value == false) FocusScope.of(context).requestFocus(nameFN);
+        else FocusScope.of(context).requestFocus(phoneFN);
+      }
     }
+  }
+
+  //create the valid contact and submit it
+  submitForm(){
+    widget.onSubmit(context, new Contact(
+      givenName: nameCtrl.text,
+      phones: [Item(value: onlyNumbers(phoneCtrl.text), label: "manual")]
+    ));
   }
 
   //init
@@ -214,6 +232,15 @@ class _ManualInputState extends State<ManualInput> {
     //focus our name at the start
     WidgetsBinding.instance.addPostFrameCallback((_){
       FocusScope.of(context).requestFocus(nameFN);
+    });
+
+    //set state on both things changing to update keyboard buttons
+    nameValid.addListener((){
+      setState(() {});
+    });
+
+    phoneValid.addListener((){
+      setState(() {});
     });
 
     //super init
@@ -246,24 +273,53 @@ class _ManualInputState extends State<ManualInput> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              TextFormField(
+              TextField(
+                //basics
+                maxLines: 1,
                 focusNode: nameFN,
                 controller: nameCtrl,
-                maxLines: 1,
-                //next and send
-                textInputAction: TextInputAction.next,
+                //if the other field is valid show submit
+                textInputAction: (phoneValid.value)
+                ? TextInputAction.done
+                : TextInputAction.next,
+                //decoration to indicate field type
                 decoration: InputDecoration(
                   labelText: "Name",
+                  helperText: "must not be empty"
                 ),
+                //on button action
+                onEditingComplete: (){
+                  submitOrRefocus(onName: true);
+                },
+                //update valid status
+                onChanged: (str){
+                  isNameValid();
+                },
               ),
-              TextFormField(
+              TextField(
+                maxLines: 1,
                 focusNode: phoneFN,
                 controller: phoneCtrl,
+                //if the other field is valid show submit
+                textInputAction: (nameValid.value) 
+                ? TextInputAction.done
+                : TextInputAction.next,
+                //change keyboard for phone number
                 keyboardType: TextInputType.number,
-                maxLines: 1,
+                //decoration to indicate field type
                 decoration: InputDecoration(
                   labelText: "Phone",
+                  helperText: "must be a valid number"
                 ),
+                //on button action
+                onEditingComplete: (){
+                  submitOrRefocus(onName: false);
+                },
+                //update valid status
+                onChanged: (str){
+                  print("change phone");
+                  isPhoneValid();
+                },
               ),
             ],
           ),
@@ -273,6 +329,7 @@ class _ManualInputState extends State<ManualInput> {
             child: new Text("Grant Permission"),
             onPressed: () {
               Navigator.pop(context);
+              //this is implicit we can save the user an extra click
               Permission.openSettings();
             },
           ),
@@ -281,10 +338,11 @@ class _ManualInputState extends State<ManualInput> {
             child: new Text(
               "Add Contact",
             ),
-            //TODO... make this null until we can confirm
-            //1. we have some form of name
-            //2. we have atleast 7 numbers in the field (any more might be country codes)
-            onPressed: null,
+            //disable the button until conditions are met
+            //NOTE: we ONLY wait for one condition because otherwise we would have to check if conditions are met while we are typing
+            onPressed: (nameValid.value && phoneValid.value)
+            ? submitForm
+            : null,
           ),
         ],
       ),

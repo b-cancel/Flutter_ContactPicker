@@ -41,15 +41,23 @@ getPrefixes(){
   prefixes.add("professor");
 }
 
-String onlyCharacters(String string){
+String onlyCharactersS2E(String string, int startInc, int endInc){
   String output = "";
   for(int i = 0; i < string.length; i++){
     int code = string[i].codeUnitAt(0);
-    if(97 <= code && code <= 122){
+    if(startInc <= code && code <= endInc){
       output += string[i];
     }
   }
   return output;
+}
+
+String onlyNumbers(String string){
+  return onlyCharactersS2E(string, 48, 57);
+}
+
+String onlyCharacters(String string){
+  return onlyCharactersS2E(string, 97, 122);
 }
 
 bool firstWordIsPrefix(String string){
