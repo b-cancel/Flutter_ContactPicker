@@ -240,7 +240,6 @@ class NewContactUX extends StatelessWidget {
                 ),
               ],
             ),
-            
           ],
         ),
         Positioned(

@@ -67,7 +67,26 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   //---Contact Save Functionality
   saveContact() async{
     //create empty contact
-    Contact newContact = new Contact();
+    Contact newContact = new Contact(
+      familyName: "fam",
+      givenName: "giv",
+      middleName: "mid",
+      prefix: "pre",
+      suffix: "suf",
+      company: "comp",
+      jobTitle: "jt",
+      note: "no",
+      phones: [Item(value: "9567772692", label: "mobile")],
+      postalAddresses: [PostalAddress(
+        label: "add",
+        street: "stre",
+        city: "cit",
+        postcode: "pc",
+        region: "reg",
+        country: "count",
+      )],
+      emails: [Item(value: "b@gmail.com", label: "email")]
+    );
 
     //save the image
     if(imageLocation.value != ""){
@@ -75,6 +94,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
       newContact.avatar = Uint8List.fromList(avatarList);
     }
 
+    /*
     //save the name(s)
     newContact.givenName = nameCtrl.text;
     newContact.prefix = nameCtrl.text;
@@ -100,12 +120,19 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     if(newContact.givenName == "") newContact.givenName = "given";
     if(newContact.displayName == "") newContact.displayName = "display";
     if(newContact.familyName == "") newContact.familyName = "family";
+    if(newContact.middleName == "") newContact.middleName = "middle";
+    //if(newContact.identifier == "") newContact.identifier = "identifier";
+    newContact.phones = [Item(value: "9567772692", label: "mobile")];
+    */
 
     //handle permissions
     PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
     if(isAuthorized(permissionStatus)){
+      print("AUTHORIZED-------------------------");
+
       //with permission we can both
       //1. add the contact
+      //NOTE: The contact must have a firstName / lastName to be successfully added  
       await ContactsService.addContact(newContact);  
       //2. and update the contact
       widget.onSelect(context, newContact);
