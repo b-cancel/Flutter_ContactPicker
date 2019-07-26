@@ -1,3 +1,4 @@
+import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:not_at_home/helper.dart';
@@ -51,6 +52,7 @@ permissionRequired(BuildContext context, bool forcePermission, bool selectingCon
   //ELSE... permission already given
 }
 
+//display the WE NEED PERMISSION pop up
 class Manual extends StatefulWidget {
   final bool forcePermission;
   final bool selectingContact;
@@ -86,7 +88,6 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if(state == AppLifecycleState.resumed && state != AppLifecycleState.paused){
-      print("*************************PERMISSION RESUME");
       checkIfCanPop();
     }
   }
@@ -131,77 +132,21 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
             new FlatButton(
               child: new Text((isSelecting) ? "Manual Input" : "Use Don't Save"),
               onPressed: () {
-                if(isSelecting){
+                if(isSelecting){ //manual input
                   showDialog(
                     context: context,
-                    //NOTE: the barrier should be dismissible
+                    //NOTE: the barrier should be dismissible ALWAYS
+                    barrierDismissible: true,
                     builder: (BuildContext context) {
-                      return Theme(
-                        data: ThemeData.light(),
-                        child: AlertDialog(
-                          title: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: <Widget>[
-                              Container(
-                                padding: EdgeInsets.only(right: 16),
-                                child: Icon(
-                                  Icons.contacts,
-                                  color: Theme.of(context).buttonColor,
-                                ),
-                              ),
-                              Expanded(
-                                child: new Text("Manually Add Contact"),
-                              ),
-                            ],
-                          ),
-                          content: Container(
-                            width: MediaQuery.of(context).size.width,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                TextFormField(
-                                  autofocus: true,
-                                  maxLines: 1,
-                                  decoration: InputDecoration(
-                                    labelText: "Name",
-                                  ),
-                                ),
-                                TextFormField(
-                                  keyboardType: TextInputType.number,
-                                  maxLines: 1,
-                                  decoration: InputDecoration(
-                                    labelText: "Phone",
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          actions: <Widget>[
-                            new FlatButton(
-                              child: new Text("Grant Permission"),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                            new RaisedButton(
-                              textColor: Colors.white,
-                              child: new Text(
-                                "Add Contact",
-                              ),
-                              //TODO... make this null until we can confirm
-                              //1. we have some form of name
-                              //2. we have atleast 7 numbers in the field (any more might be country codes)
-                              onPressed: null, /*() {
-                                
-                              },*/
-                            ),
-                          ],
-                        ),
+                      return ManualInput(
+                        //this is simply passing a reference to a dynamic function 
+                        //that can take 2 params 1. context 2. contact
+                        onSubmit: widget.onSecondaryOption,
                       );
                     },
                   );
                 }
-                else{
+                else{ //use don't save
                   widget.onSecondaryOption();
                 }
               },
@@ -217,6 +162,131 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+//display the we ATLEAST NEED MANUAL CONTACT box if you won't give us permission
+//NOTE: here we know for a fact that we come from SELECTING A CONTACT
+//AND: since the user could decide inputting the contact is too much work
+//  we also don't force the user to stay here, they can back out if desired
+class ManualInput extends StatefulWidget {
+  const ManualInput({
+    Key key,
+    @required this.onSubmit,
+  }) : super(key: key);
+
+  final onSubmit;
+
+  @override
+  _ManualInputState createState() => _ManualInputState();
+}
+
+class _ManualInputState extends State<ManualInput> {
+  //keep track of whether or not the form is valid
+  bool infoValid = false;
+
+  //Focus Nodes for our form fields
+  FocusNode nameFN = new FocusNode();
+  FocusNode phoneFN = new FocusNode();
+
+  //the text editing controllers for our form fields
+  TextEditingController nameCtrl = new TextEditingController();
+  TextEditingController phoneCtrl = new TextEditingController();
+
+  //the function that runs after finishing editing the name or number field
+  submitForm(){
+    if(infoValid){
+      widget.onSubmit(context, new Contact(
+        givenName: nameCtrl.text,
+        phones: [Item(value: phoneCtrl.text, label: "manual")]
+      ));
+    }
+    else{
+
+    }
+  }
+
+  //init
+  @override
+  void initState() {
+    //focus our name at the start
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      FocusScope.of(context).requestFocus(nameFN);
+    });
+
+    //super init
+    super.initState();
+  }
+
+  //build
+  @override
+  Widget build(BuildContext context) {
+    return Theme(
+      data: ThemeData.light(),
+      child: AlertDialog(
+        title: Row(
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.only(right: 16),
+              child: Icon(
+                Icons.contacts,
+                color: Theme.of(context).buttonColor,
+              ),
+            ),
+            Expanded(
+              child: new Text("Manually Add Contact"),
+            ),
+          ],
+        ),
+        content: Container(
+          width: MediaQuery.of(context).size.width,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextFormField(
+                focusNode: nameFN,
+                controller: nameCtrl,
+                maxLines: 1,
+                //next and send
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  labelText: "Name",
+                ),
+              ),
+              TextFormField(
+                focusNode: phoneFN,
+                controller: phoneCtrl,
+                keyboardType: TextInputType.number,
+                maxLines: 1,
+                decoration: InputDecoration(
+                  labelText: "Phone",
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          new FlatButton(
+            child: new Text("Grant Permission"),
+            onPressed: () {
+              Navigator.pop(context);
+              Permission.openSettings();
+            },
+          ),
+          new RaisedButton(
+            textColor: Colors.white,
+            child: new Text(
+              "Add Contact",
+            ),
+            //TODO... make this null until we can confirm
+            //1. we have some form of name
+            //2. we have atleast 7 numbers in the field (any more might be country codes)
+            onPressed: null,
+          ),
+        ],
       ),
     );
   }
