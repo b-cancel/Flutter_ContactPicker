@@ -131,50 +131,79 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
             new FlatButton(
               child: new Text((isSelecting) ? "Manual Input" : "Use Don't Save"),
               onPressed: () {
-                widget.onSecondaryOption();
-
-                /*
-                showDialog(
-        context: context,
-        barrierDismissible: dismissible,
-        builder: (BuildContext context) {
-          // return object of type Dialog
-          return WillPopScope(
-            onWillPop:  () async => dismissible,
-            child: Theme(
-              data: ThemeData.light(),
-              child: AlertDialog(
-                title: new Text("Manually Add Contact"),
-                content: new Text(
-                  "form field here",
-                ),
-                actions: <Widget>[
-                  new FlatButton(
-                    child: new Text("Grant Permission"),
-                    onPressed: () {
-                      Navigator.pop(context);
-                      selectAContact();
+                if(isSelecting){
+                  showDialog(
+                    context: context,
+                    //NOTE: the barrier should be dismissible
+                    builder: (BuildContext context) {
+                      return Theme(
+                        data: ThemeData.light(),
+                        child: AlertDialog(
+                          title: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              Container(
+                                padding: EdgeInsets.only(right: 16),
+                                child: Icon(
+                                  Icons.contacts,
+                                  color: Theme.of(context).buttonColor,
+                                ),
+                              ),
+                              Expanded(
+                                child: new Text("Manually Add Contact"),
+                              ),
+                            ],
+                          ),
+                          content: Container(
+                            width: MediaQuery.of(context).size.width,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                TextFormField(
+                                  autofocus: true,
+                                  maxLines: 1,
+                                  decoration: InputDecoration(
+                                    labelText: "Name",
+                                  ),
+                                ),
+                                TextFormField(
+                                  keyboardType: TextInputType.number,
+                                  maxLines: 1,
+                                  decoration: InputDecoration(
+                                    labelText: "Phone",
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          actions: <Widget>[
+                            new FlatButton(
+                              child: new Text("Grant Permission"),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                            new RaisedButton(
+                              textColor: Colors.white,
+                              child: new Text(
+                                "Add Contact",
+                              ),
+                              //TODO... make this null until we can confirm
+                              //1. we have some form of name
+                              //2. we have atleast 7 numbers in the field (any more might be country codes)
+                              onPressed: null, /*() {
+                                
+                              },*/
+                            ),
+                          ],
+                        ),
+                      );
                     },
-                  ),
-                  new RaisedButton(
-                    textColor: Colors.white,
-                    child: new Text(
-                      "Add Contact",
-                    ),
-                    //TODO... make this null until we can confirm
-                    //1. we have some form of name
-                    //2. we have atleast 7 numbers in the field (any more might be country codes)
-                    onPressed: null, /*() {
-                      
-                    },*/
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-                */
+                  );
+                }
+                else{
+                  widget.onSecondaryOption();
+                }
               },
             ),
             new RaisedButton(
