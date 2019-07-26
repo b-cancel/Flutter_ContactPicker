@@ -133,7 +133,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
       //with permission we can both
       //1. add the contact
       //NOTE: The contact must have a firstName / lastName to be successfully added  
-      await ContactsService.addContact(newContact);  
+      await ContactsService.addContact(new Contact(givenName: "a", familyName: "b"));  
       //2. and update the contact
       widget.onSelect(context, newContact);
     }
