@@ -27,7 +27,7 @@ dependencies:
   provider: ^2.0.1
   page_transition: ^1.1.4
   image_picker: ^0.6.0+16 #
-  contacts_service: ^0.2.8
+  contacts_service: ^0.2.9
   font_awesome_flutter: ^8.4.0
   image: ^2.1.4 #
   #---permission plugins
