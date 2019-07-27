@@ -53,9 +53,7 @@ class NewContactUX extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        ListView(
+    return ListView(
           children: <Widget>[
             Stack(
               children: <Widget>[
@@ -241,60 +239,7 @@ class NewContactUX extends StatelessWidget {
               ],
             ),
           ],
-        ),
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: Visibility(
-            visible: isPortrait,
-            child: Container(
-              color: Theme.of(context).primaryColorDark,
-              width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.only(left:16, right:16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  new BottomButton(
-                    width: MediaQuery.of(context).size.width / 2 - 16,
-                    name: "Cancel",
-                    onPressed: (){
-                      Navigator.maybePop(context);
-                    },
-                  ),
-                  new BottomButton(
-                    width: MediaQuery.of(context).size.width / 2 - 16,
-                    name: "Save",
-                    onPressed: () => contactSaved(),
-                  ),
-                ],
-              )
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class ActionButton extends StatelessWidget {
-  const ActionButton({
-    Key key,
-    @required this.func,
-    @required this.str,
-  }) : super(key: key);
-
-  final Function func;
-  final String str;
-
-  @override
-  Widget build(BuildContext context) {
-    return FlatButton(
-      onPressed: (){
-        func();
-      },
-      child: Text(str),
-    );
+        );
   }
 }
 
@@ -360,41 +305,6 @@ class NameRow extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class BottomButton extends StatelessWidget {
-  final String name;
-  final Function onPressed;
-  final double width;
-
-  const BottomButton({
-    this.name,
-    this.onPressed,
-    this.width,
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      child: new OutlineButton(
-        child: new Text(
-          name,
-          style: TextStyle(
-            fontSize: 18,
-          ),
-        ),
-        onPressed: onPressed,
-        highlightedBorderColor: Colors.transparent,
-        disabledBorderColor: Colors.transparent,
-        borderSide: BorderSide(style: BorderStyle.none),
-        shape: new RoundedRectangleBorder(
-          borderRadius: new BorderRadius.circular(30.0),
-        ),
       ),
     );
   }

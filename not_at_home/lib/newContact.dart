@@ -65,28 +65,13 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   TextEditingController noteCtrl = new TextEditingController(); //note
 
   //---Contact Save Functionality
-  saveContact() async{
+  cancelContact(){
+    Navigator.of(context).pop();
+  }
+
+  createContact() async{
     //create empty contact
-    Contact newContact = new Contact(
-      familyName: "fam",
-      givenName: "giv",
-      middleName: "mid",
-      prefix: "pre",
-      suffix: "suf",
-      company: "comp",
-      jobTitle: "jt",
-      note: "no",
-      phones: [Item(value: "9567772692", label: "mobile")],
-      postalAddresses: [PostalAddress(
-        label: "add",
-        street: "stre",
-        city: "cit",
-        postcode: "pc",
-        region: "reg",
-        country: "count",
-      )],
-      emails: [Item(value: "b@gmail.com", label: "email")]
-    );
+    Contact newContact = new Contact();
 
     //save the image
     if(imageLocation.value != ""){
@@ -94,7 +79,6 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
       newContact.avatar = Uint8List.fromList(avatarList);
     }
 
-    /*
     //save the name(s)
     newContact.givenName = nameCtrl.text;
     newContact.prefix = nameCtrl.text;
@@ -121,9 +105,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     if(newContact.displayName == "") newContact.displayName = "display";
     if(newContact.familyName == "") newContact.familyName = "family";
     if(newContact.middleName == "") newContact.middleName = "middle";
-    //if(newContact.identifier == "") newContact.identifier = "identifier";
     newContact.phones = [Item(value: "9567772692", label: "mobile")];
-    */
 
     //handle permissions
     PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
@@ -229,7 +211,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
       //we can imply the user wants to save the contact immediately after ther permissions page
       //WITHOUT making any changes
       if(isAuthorized(permissionStatus)){
-        saveContact();
+        createContact();
       }
       //ELSE... we might let them just go back, edit the contact, or etc
     }
@@ -262,7 +244,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
           bottomBarHeight: bottomBarHeight,
           imageLocation: imageLocation,
           isPortrait: isPortrait,
-          contactSaved: () => saveContact(),
+          contactSaved: () => createContact(),
           imagePicked: (){
             setState(() {
               
@@ -288,7 +270,39 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
         //react to isPortrait
         if(isPortrait){
           return Scaffold(
-            body: bodyWidget,
+            body: Stack(
+              children: <Widget>[
+                bodyWidget,
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Visibility(
+                    visible: isPortrait,
+                    child: Container(
+                      color: Theme.of(context).primaryColorDark,
+                      width: MediaQuery.of(context).size.width,
+                      padding: EdgeInsets.only(left:16, right:16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          new PortraitButton(
+                            width: MediaQuery.of(context).size.width / 2 - 16,
+                            name: "Cancel",
+                            onPressed: () => cancelContact(),
+                          ),
+                          new PortraitButton(
+                            width: MediaQuery.of(context).size.width / 2 - 16,
+                            name: "Save",
+                            onPressed: () => createContact(),
+                          ),
+                        ],
+                      )
+                    ),
+                  ),
+                ),
+              ],
+            ),
           );
         }
         else{
@@ -296,28 +310,78 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
             appBar: AppBar(
               automaticallyImplyLeading: false,
               actions: <Widget>[
-                //Cancel Buton
-                isPortrait == false ? 
-                new ActionButton(
-                  func: (){
-                    Navigator.maybePop(context);
-                  }, 
+                new LandscapeButton(
+                  func: () => cancelContact(),
                   str: "Cancel",
-                )
-                : Container(),
-                //Save Button
-                isPortrait == false ? 
-                new ActionButton(
-                  func: () => saveContact(), 
+                ),
+                new LandscapeButton(
+                  func: () => createContact(), 
                   str: "Save",
                 )
-                : Container()
               ],
             ),
             body: bodyWidget,
           );
         }
       }
+    );
+  }
+}
+
+//the buttons used when the app is in landscape mode
+class LandscapeButton extends StatelessWidget {
+  const LandscapeButton({
+    Key key,
+    @required this.func,
+    @required this.str,
+  }) : super(key: key);
+
+  final Function func;
+  final String str;
+
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      onPressed: (){
+        func();
+      },
+      child: Text(str),
+    );
+  }
+}
+
+//the buttons used when the app is in portrait mode
+class PortraitButton extends StatelessWidget {
+  final String name;
+  final Function onPressed;
+  final double width;
+
+  const PortraitButton({
+    this.name,
+    this.onPressed,
+    this.width,
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      child: new OutlineButton(
+        child: new Text(
+          name,
+          style: TextStyle(
+            fontSize: 18,
+          ),
+        ),
+        onPressed: onPressed,
+        highlightedBorderColor: Colors.transparent,
+        disabledBorderColor: Colors.transparent,
+        borderSide: BorderSide(style: BorderStyle.none),
+        shape: new RoundedRectangleBorder(
+          borderRadius: new BorderRadius.circular(30.0),
+        ),
+      ),
     );
   }
 }
