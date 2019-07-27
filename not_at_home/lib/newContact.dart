@@ -9,6 +9,22 @@ import 'package:permission/permission.dart';
 import 'helper.dart';
 import 'newContactUX.dart';
 
+class FieldData{
+  int index;
+  TextEditingController controller;
+  FocusNode focusNode;
+  Function nextFunction;
+
+  FieldData(){
+    index = 0;
+    controller = new TextEditingController();
+    focusNode = new FocusNode();
+    nextFunction = (){
+      print("next field");
+    };
+  }
+}
+
 /*
 We only confirm and request access to contacts before we save and pass it
 If we already have access we save the contact and run onselect
@@ -40,117 +56,58 @@ class NewContact extends StatefulWidget {
 }
 
 class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
-  //---Image
-  ValueNotifier<String> imageLocation = new ValueNotifier<String>("");
-
-  //---Names
-  TextEditingController nameCtrl = new TextEditingController(); //givenName
-
-  TextEditingController prefixCtrl = new TextEditingController(); //prefix
-  TextEditingController firstCtrl = new TextEditingController(); //displayName
-  TextEditingController middleCtrl = new TextEditingController(); //middleName
-  TextEditingController lastCtrl = new TextEditingController(); //familyName
-  TextEditingController suffixCtrl = new TextEditingController(); //suffix
-
-  //---Work
-  TextEditingController companyCtrl = new TextEditingController(); //company
-  TextEditingController jobTitleCtrl = new TextEditingController(); //jobTitle
-
-  //---Lists
-  List<Item> phones = new List<Item>(); //phones
-  List<Item> emails = new List<Item>(); //emails
-  List<PostalAddress> addresses = new List<PostalAddress>(); //addresses
-
-  //---Note
-  TextEditingController noteCtrl = new TextEditingController(); //note
-
-  //---Contact Save Functionality
-  cancelContact(){
-    Navigator.of(context).pop();
-  }
-
-  createContact() async{
-    //create empty contact
-    Contact newContact = new Contact();
-
-    //save the image
-    if(imageLocation.value != ""){
-      List<int> avatarList = await File(imageLocation.value).readAsBytes();
-      newContact.avatar = Uint8List.fromList(avatarList);
-    }
-
-    //save the name(s)
-    newContact.givenName = nameCtrl.text;
-    newContact.prefix = nameCtrl.text;
-    newContact.displayName = firstCtrl.text;
-    newContact.middleName = middleCtrl.text;
-    newContact.familyName = lastCtrl.text;
-    newContact.suffix = suffixCtrl.text;
-
-    //save the work stuff
-    newContact.company = companyCtrl.text;
-    newContact.jobTitle = jobTitleCtrl.text;
-
-    //save the lists
-    newContact.phones = phones;
-    newContact.emails = emails;
-    newContact.postalAddresses = addresses;
-
-    //save the note
-    newContact.note = noteCtrl.text;
-
-    //TODO... remove this test code
-    // The contact must have a firstName / lastName to be successfully added
-    if(newContact.givenName == "") newContact.givenName = "given";
-    if(newContact.displayName == "") newContact.displayName = "display";
-    if(newContact.familyName == "") newContact.familyName = "family";
-    if(newContact.middleName == "") newContact.middleName = "middle";
-    newContact.phones = [Item(value: "9567772692", label: "mobile")];
-
-    //handle permissions
-    PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
-    if(isAuthorized(permissionStatus)){
-      print("AUTHORIZED-------------------------");
-
-      //with permission we can both
-      //1. add the contact
-      //NOTE: The contact must have a firstName / lastName to be successfully added  
-      await ContactsService.addContact(new Contact(givenName: "a", familyName: "b"));  
-      //2. and update the contact
-      widget.onSelect(context, newContact);
-    }
-    else{
-      //we know that we don't have permission so we know either the modal or page will pop up
-      backFromPermissionPage.value = true;
-
-      //without permission we give the user the option to ONLY
-      //1. update the contact
-      permissionRequired(
-        context,
-        //the user is never forced to create a contact, only to select one
-        false, 
-        false, //we are creating a contact
-        (){
-          //on Select only updates the contact
-          //or the user can give us permission and come back and add it as well
-          widget.onSelect(context, newContact);
-        }
-      );
-    }
-  }
-
-  //---Name section open and closing
+  //-------------------------Logic Code-------------------------
   ValueNotifier<bool> namesSpread = new ValueNotifier<bool>(false);
 
-  //---Name Focus Nodes
-  FocusNode nameFC = new FocusNode();
+  ValueNotifier<String> imageLocation = new ValueNotifier<String>("");
 
-  FocusNode prefixFC = new FocusNode();
-  FocusNode firstFC = new FocusNode();
-  FocusNode middleFC = new FocusNode();
-  FocusNode lastFC = new FocusNode();
-  FocusNode suffixFC = new FocusNode();
+  //keep track of whether or not we returned from the permissions page
+  ValueNotifier<bool> backFromPermissionPage = new ValueNotifier<bool>(false);
 
+  //-------------------------Fields Options-------------------------
+
+  //NOTE: these are designed to be set ONCE and DONE
+  //NOTE: we NEED a name so it autofocuses and therefore auto opens
+
+  //-------------------------Fields Code-------------------------
+
+  //-------------------------Name (put together)
+  FieldData nameField = FieldData();
+
+  //-------------------------Names (split up)
+  //prefix, first, middle, last, suffix
+  List<FieldData> nameFields = List<FieldData>();
+  List<String> nameLabels = List<String>();
+
+  //-------------------------Phones
+  bool autoAddPhone;
+  List<FieldData> phoneValueFields = List<FieldData>();
+  List<FieldData> phoneLabelFields = List<FieldData>();
+
+  //-------------------------Emails
+  bool autoAddEmail;
+  List<FieldData> emailValueFields = List<FieldData>();
+  List<FieldData> emailLabelFields = List<FieldData>();
+
+  //-------------------------Work
+  bool autoOpenWork;
+  FieldData jobTitle = FieldData(); //jobTitle
+  FieldData companyName = FieldData(); //company
+
+  //-------------------------Addresses
+  bool autoAddFirstAddress; //add
+  List<FieldData> addressStreetFields = new List<FieldData>();
+  List<FieldData> addressCityFields = new List<FieldData>();
+  List<FieldData> addressPostcodeFields = new List<FieldData>();
+  List<FieldData> addressRegionFields = new List<FieldData>();
+  List<FieldData> addressCountryFields = new List<FieldData>();
+  List<FieldData> addressLabelFields = new List<FieldData>();
+
+  //-------------------------Note
+  bool autoOpenNote;
+  TextEditingController noteCtrl = TextEditingController(); //note
+
+  //-------------------------Init-------------------------
   @override
   void initState() {
     //observer for onResume
@@ -167,13 +124,13 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
           //if all the names have been spread
           //TODO... break apart all the names
           //focus on the first name
-          FocusScope.of(context).requestFocus(firstFC);
+          FocusScope.of(context).requestFocus(nameFields[1].focusNode);
         }
         else{
           //If all the names have been close
           //TODO... combine all the names into a single name in nameFocusNode
           //then focus on the combined names
-          FocusScope.of(context).requestFocus(nameFC);
+          FocusScope.of(context).requestFocus(nameField.focusNode);
         }
       });
     });
@@ -186,9 +143,6 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
-
-  //keep track of whether or not we returned from the permissions page
-  ValueNotifier<bool> backFromPermissionPage = new ValueNotifier<bool>(false);
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -239,6 +193,8 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
         }
 
         //make new contact UX
+        Widget bodyWidget = Container();
+        /*
         Widget bodyWidget = NewContactUX(
           imageDiameter: imageDiameter,
           bottomBarHeight: bottomBarHeight,
@@ -252,7 +208,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
           },
           namesSpread: namesSpread,
 
-          nameFC: nameFC,
+          nameFC: nameFN,
           prefixFC: prefixFC,
           firstFC: firstFC,
           middleFC: middleFC,
@@ -265,7 +221,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
           middleCtrl: middleCtrl,
           lastCtrl: lastCtrl,
           suffixCtrl: suffixCtrl,
-        );
+        );*/
 
         //react to isPortrait
         if(isPortrait){
@@ -326,7 +282,121 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
       }
     );
   }
+
+  //-------------------------Save Contact Helper-------------------------
+  List<Item> itemFieldData2ItemList(List<FieldData> values, List<FieldData> labels){
+    List<Item> itemList = new List<Item>();
+    for(int i = 0; i < values.length; i++){
+      itemList.add(Item(
+        value: values[i].controller.text,
+        label: labels[i].controller.text,
+      ));
+    }
+    return itemList;
+  }
+
+  List<PostalAddress> fieldsToAddresses(){
+    List<PostalAddress> addresses = new List<PostalAddress>();
+    for(int i = 0; i < addressStreetFields.length; i++){
+      addresses.add(PostalAddress(
+        street: addressStreetFields[i].controller.text,
+        city: addressCityFields[i].controller.text,
+        postcode: addressPostcodeFields[i].controller.text,
+        region: addressRegionFields[i].controller.text,
+        country: addressCountryFields[i].controller.text,
+        label: addressLabelFields[i].controller.text,
+      ));
+    }
+    return addresses;
+  }
+
+  //-------------------------Submit Action Functionality-------------------------
+  cancelContact(){
+    Navigator.of(context).pop();
+  }
+
+  createContact() async{
+    //create empty contact
+    Contact newContact = new Contact();
+
+    //save the image
+    if(imageLocation.value != ""){
+      List<int> avatarList = await File(imageLocation.value).readAsBytes();
+      newContact.avatar = Uint8List.fromList(avatarList);
+    }
+
+    //save the name(s)
+    newContact.givenName = nameField.controller.text;
+
+    newContact.prefix = nameFields[0].controller.text;
+    newContact.displayName = nameFields[1].controller.text;
+    newContact.middleName = nameFields[2].controller.text;
+    newContact.familyName = nameFields[3].controller.text;
+    newContact.suffix = nameFields[4].controller.text;
+
+    //save the phones
+    newContact.phones = itemFieldData2ItemList(
+      phoneValueFields, 
+      phoneLabelFields,
+    );
+
+    //save the emails
+    newContact.emails= itemFieldData2ItemList(
+      emailValueFields, 
+      emailLabelFields,
+    );
+
+    //save the work stuff
+    newContact.jobTitle = jobTitle.controller.text;
+    newContact.company = companyName.controller.text;
+
+    //save the addresses
+
+    //save the note
+    newContact.note = noteCtrl.text;
+
+    //TODO... remove this test code
+    // The contact must have a firstName / lastName to be successfully added
+    if(newContact.givenName == "") newContact.givenName = "given";
+    if(newContact.displayName == "") newContact.displayName = "display";
+    if(newContact.familyName == "") newContact.familyName = "family";
+    if(newContact.middleName == "") newContact.middleName = "middle";
+    newContact.phones = [Item(value: "9567772692", label: "mobile")];
+
+    //handle permissions
+    PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
+    if(isAuthorized(permissionStatus)){
+      print("AUTHORIZED-------------------------");
+
+      //with permission we can both
+      //1. add the contact
+      //NOTE: The contact must have a firstName / lastName to be successfully added  
+      await ContactsService.addContact(new Contact(givenName: "a", familyName: "b"));  
+      //2. and update the contact
+      widget.onSelect(context, newContact);
+    }
+    else{
+      //we know that we don't have permission so we know either the modal or page will pop up
+      backFromPermissionPage.value = true;
+
+      //without permission we give the user the option to ONLY
+      //1. update the contact
+      permissionRequired(
+        context,
+        //the user is never forced to create a contact, only to select one
+        false, 
+        false, //we are creating a contact
+        (){
+          //on Select only updates the contact
+          //or the user can give us permission and come back and add it as well
+          widget.onSelect(context, newContact);
+        }
+      );
+    }
+  }
 }
+
+//-------------------------Helper Widgets-------------------------
 
 //the buttons used when the app is in landscape mode
 class LandscapeButton extends StatelessWidget {
