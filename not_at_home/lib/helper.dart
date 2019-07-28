@@ -4,6 +4,23 @@ import 'package:permission/permission.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+class FieldData{
+  int index;
+  TextEditingController controller;
+  FocusNode focusNode;
+  Function nextFunction;
+
+  FieldData(){
+    index = 0;
+    controller = new TextEditingController();
+    focusNode = new FocusNode();
+    nextFunction = (){
+      print("next field");
+    };
+  }
+}
+
+//---permssion helper function
 bool isAuthorized(PermissionStatus status){
   if(status == PermissionStatus.allow) return true;
   else if(status == PermissionStatus.always) return true;

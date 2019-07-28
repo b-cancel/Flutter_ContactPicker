@@ -10,22 +10,6 @@ import 'helper.dart';
 import 'imagePicker.dart';
 import 'newContactUX.dart';
 
-class FieldData{
-  int index;
-  TextEditingController controller;
-  FocusNode focusNode;
-  Function nextFunction;
-
-  FieldData(){
-    index = 0;
-    controller = new TextEditingController();
-    focusNode = new FocusNode();
-    nextFunction = (){
-      print("next field");
-    };
-  }
-}
-
 /*
 We only confirm and request access to contacts before we save and pass it
 If we already have access we save the contact and run onselect
@@ -110,31 +94,158 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   FieldData noteField = FieldData(); //note
   bool noteOpen = false;
 
-  //-------------------------Add To Lists-------------------------
-  //NOTE: MUST SET STATE
-  //NOTE: we always add at the end
+  //-------------------------Next Function Helpers-------------------------
+  //NOTE: these WILL only be called IF indeed things are empty
 
-  addPhone(){
-    int newIndex = phoneValueFields.length;
+  //start with value
+  addFirstPhone(){
+    if(phoneValueFields.isEmpty){
+      addPhone();   
+    }
+  }
 
-    //add both values
-    phoneValueFields.add(FieldData());
-    phoneLabelFields.add(FieldData());
+  //start with value
+  addFirstEmail(){
+    if(emailValueFields.isEmpty){
+      addEmail();
+    }
+  }
 
-    //set the indices
-    phoneValueFields[newIndex].index = newIndex;
-    phoneLabelFields[newIndex].index = newIndex;
+  //starting with job title
+  openWork(){
+    if(workOpen == false){
+      //open the work section
+      workOpen = true;
+
+      //set state to reflect that change
+      setState(() {});
+
+      //focus on the section AFTER build completes
+      WidgetsBinding.instance.addPostFrameCallback((_){
+        FocusScope.of(context).requestFocus(jobTitleField.focusNode);
+      });
+    }
+  }
+
+  //starting with street
+  addFirstPostalAddress(){
+    if(addressStreetFields.isEmpty){
+      addPostalAddress();   
+    }
+  }
+
+  //start with note (only way to start :p)
+  openNote(){
+    if(noteOpen == false){
+      //open the note section
+      noteOpen = true;
+
+      //set state to reflect that change
+      setState(() {});
+
+      //focus on the section AFTER build completes
+      WidgetsBinding.instance.addPostFrameCallback((_){
+        FocusScope.of(context).requestFocus(noteField.focusNode);
+      });
+    }
+  }
+
+  //-------------------------Next Function Helper's Helpers-------------------------
+
+  toFirstItem(
+    List<FieldData> fields, 
+    bool autoAddFirstField, 
+    Function addFirst, 
+    Function alternative,
+    ){
+    bool fieldsPresent = (fields.length > 0);
+    bool canAddFirstField = fieldsPresent == false && autoAddFirstField;
+    if(fieldsPresent || canAddFirstField){
+      if(canAddFirstField) addFirst(); //will focus after build
+      else FocusScope.of(context).requestFocus(fields[0].focusNode);
+    }
+    else alternative();
+  }
+
+  //-------------------------Next Function Helpers-------------------------
+
+  toFirstPhone(){
+    toFirstItem(phoneValueFields, autoAddFirstPhone, addPhone, toFirstEmail);
+  }
+
+  toFirstEmail(){
+    toFirstItem(emailValueFields, autoAddFirstEmail, addEmail, toWork);
+  }
+
+  toWork(){
+    if(workOpen) FocusScope.of(context).requestFocus(jobTitleField.focusNode);
+    else{
+      if(autoOpenWork) openWork();
+      else toFirstAddress();
+    }
+  }
+
+  toFirstAddress(){
+    toFirstItem(addressStreetFields, autoAddFirstAddress, addPostalAddress, toNote);
+  }
+
+  toNote(){
+    if(noteOpen) FocusScope.of(context).requestFocus(noteField.focusNode);
+    else{
+      if(autoOpenNote) openNote();
+      //ELSE... there is nothing else to do
+    }
+  }
+
+  //-------------------------Add To List Helper-------------------------
+
+  addItem(List<List<FieldData>> allFields){
+    int newIndex = allFields[0].length;
+
+    //init all fields
+    for(int i = 0; i < allFields.length; i++){
+      allFields[i].add(FieldData()); //add both values
+      allFields[i][newIndex].index = newIndex; //set the indices
+    }
 
     //set the state so the UI rebuilds with the new number
     setState(() {});
+
+    //focus on the first field AFTER build completes (above)
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      FocusScope.of(context).requestFocus(allFields[0][newIndex].focusNode);
+    });
+  }
+
+  //-------------------------Add To Lists-------------------------
+  //NOTES: 
+  //1. we always add at the end of the list
+  //2. we must set state afterwards
+  //3. whenever we add, we also have to focus on what we add
+
+  addPhone(){
+    addItem([
+      phoneValueFields,
+      phoneLabelFields,
+    ]);
   }
 
   addEmail(){
-
+    addItem([
+      emailValueFields,
+      emailLabelFields,
+    ]);
   }
 
   addPostalAddress(){
-
+    addItem([
+      addressStreetFields,
+      addressCityFields,
+      addressPostcodeFields,
+      addressRegionFields,
+      addressCountryFields,
+      addressLabelFields,
+    ]);
   }
 
   //-------------------------Remove From Lists-------------------------
@@ -152,127 +263,12 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
   }
 
-  //-------------------------Next Function Helpers-------------------------
-
-  //start with value
-  addFirstPhone(){
-    if(phoneValueFields.isEmpty){
-      //add the phone
-      addPhone();
-
-      //focus on the first field AFTER build completes (above)
-      WidgetsBinding.instance.addPostFrameCallback((_){
-        FocusScope.of(context).requestFocus(phoneValueFields[0].focusNode);
-      });
-    }
-  }
-
-  //start with value
-  addFirstEmail(){
-    if(emailValueFields.isEmpty){
-      //add the email
-      addEmail();
-
-      //focus on the first field AFTER build completes (above)
-      WidgetsBinding.instance.addPostFrameCallback((_){
-        FocusScope.of(context).requestFocus(emailValueFields[0].focusNode);
-      });
-    }
-  }
-
-  //starting with job title
-  openWork(){
-    if(workOpen == false){
-      //open the work section
-      workOpen = true;
-      setState(() {});
-
-      //focus on the section AFTER build completes
-      WidgetsBinding.instance.addPostFrameCallback((_){
-        FocusScope.of(context).requestFocus(jobTitleField.focusNode);
-      });
-    }
-  }
-
-  //starting with street
-  addFirstPostalAddress(){
-    if(addressStreetFields.isEmpty){
-      //add the postal address
-      addPostalAddress();
-
-      //focus on the section AFTER build completes
-      WidgetsBinding.instance.addPostFrameCallback((_){
-        FocusScope.of(context).requestFocus(addressStreetFields[0].focusNode);
-      });      
-    }
-  }
-
-  //start with note (only way to start :p)
-  openNote(){
-    if(noteOpen == false){
-      //open the note section
-      noteOpen = true;
-      setState(() {});
-
-      //focus on the section AFTER build completes
-      WidgetsBinding.instance.addPostFrameCallback((_){
-        FocusScope.of(context).requestFocus(noteField.focusNode);
-      });
-    }
-  }
-
-  //-------------------------Next Function Helpers-------------------------
-
-  toFirstPhone() async{
-    bool phonesPresent = (phoneValueFields.length > 0);
-    bool canAddPhone = phonesPresent == false && autoAddFirstPhone;
-    if(phonesPresent || canAddPhone){
-      if(canAddPhone) addFirstPhone();
-      else FocusScope.of(context).requestFocus(phoneValueFields[0].focusNode);
-    }
-    else toFirstEmail();
-  }
-
-  toFirstEmail() async{
-    bool emailsPresent = (emailValueFields.length > 0);
-    bool canAddEmail = emailsPresent == false && autoAddFirstEmail;
-    if(emailsPresent || canAddEmail){
-      if(canAddEmail) addFirstPhone();
-      else FocusScope.of(context).requestFocus(emailValueFields[0].focusNode);
-    }
-    else toWork();
-  }
-
-  toWork() async{
-    if(workOpen) FocusScope.of(context).requestFocus(jobTitleField.focusNode);
-    else{
-      if(autoOpenWork) openWork();
-      else toFirstAddress();
-    }
-  }
-
-  toFirstAddress() async{
-    bool addressesPresent = (addressStreetFields.length > 0);
-    bool canAddAddress = addressesPresent == false && autoAddFirstAddress;
-    if(addressesPresent || canAddAddress){
-      if(canAddAddress) addFirstPhone();
-      else FocusScope.of(context).requestFocus(addressStreetFields[0].focusNode);
-    }
-    else toNote();
-  }
-
-  toNote() async{
-    if(noteOpen) FocusScope.of(context).requestFocus(noteField.focusNode);
-    else{
-      if(autoOpenNote) openNote();
-      //ELSE... there is nothing else to do
-    }
-  }
-
   //-------------------------Init-------------------------
   @override
   void initState() {
     //-------------------------Variable Prep-------------------------
+
+    //TODO... all starter stuff
 
     //-------------------------Name
     nameField.nextFunction = toFirstPhone();
@@ -359,6 +355,9 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   //-------------------------build-------------------------
   @override
   Widget build(BuildContext context) {
+
+    //TODO... fill all the function arguments depending on current vars
+
     return OrientationBuilder(
       builder: (context, orientation) {
         bool isPortrait = (orientation == Orientation.portrait);
@@ -607,7 +606,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     //save the addresses
 
     //save the note
-    newContact.note = noteField.text;
+    newContact.note = noteField.controller.text;
 
     //TODO... remove this test code
     // The contact must have a firstName / lastName to be successfully added
