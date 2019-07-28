@@ -81,19 +81,20 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   List<String> nameLabels = List<String>();
 
   //-------------------------Phones
-  bool autoAddPhone = true;
+  bool autoAddFirstPhone = true;
   List<FieldData> phoneValueFields = List<FieldData>();
   List<FieldData> phoneLabelFields = List<FieldData>();
 
   //-------------------------Emails
-  bool autoAddEmail = true;
+  bool autoAddFirstEmail = true;
   List<FieldData> emailValueFields = List<FieldData>();
   List<FieldData> emailLabelFields = List<FieldData>();
 
   //-------------------------Work
   bool autoOpenWork = true;
-  FieldData jobTitle = FieldData(); //jobTitle
+  FieldData jobTitleField = FieldData(); //jobTitle
   FieldData companyName = FieldData(); //company
+  bool workOpen = false;
 
   //-------------------------Addresses
   bool autoAddFirstAddress = false; //add
@@ -106,20 +107,116 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
   //-------------------------Note
   bool autoOpenNote = true;
-  TextEditingController noteCtrl = TextEditingController(); //note
+  FieldData noteField = FieldData(); //note
+  bool noteOpen = false;
+
+  //-------------------------Next Function Helpers-------------------------
+
+  //TODO... cover edge case for running this twice?
+  addFirstPhone(){
+    //add both values
+    phoneValueFields.add(FieldData());
+    phoneLabelFields.add(FieldData());
+
+    //NOTE: the indices of both of these are 0 and they are auto set
+
+    //add respective functions 
+    //1. probably reference to first email if label
+    //2. and ref to label if value)
+    //TODO... set the next functions
+
+    //set the state so the UI rebuilds with the new number
+    setState(() {});
+
+    //focus on the first field AFTER build completes
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      FocusScope.of(context).requestFocus(phoneValueFields[0].focusNode);
+    });
+  }
+
+  //TODO... cover edge case for running this twice?
+  addFirstEmail(){
+
+  }
+
+  //TODO... cover edge case for running this twice?
+  openWork(){
+
+  }
+
+  //TODO... cover edge case for running this twice?
+  addFirstAddress(){
+
+  }
+
+  //TODO... cover edge case for running this twice?
+  openNote(){
+
+  }
+
+  //-------------------------Next Function Helpers-------------------------
+
+  toFirstPhone() async{
+    bool phonesPresent = (phoneValueFields.length > 0);
+    bool canAddPhone = phonesPresent == false && autoAddFirstPhone;
+    if(phonesPresent || canAddPhone){
+      if(canAddPhone) addFirstPhone();
+      else FocusScope.of(context).requestFocus(phoneValueFields[0].focusNode);
+    }
+    else toFirstEmail();
+  }
+
+  toFirstEmail() async{
+    bool emailsPresent = (emailValueFields.length > 0);
+    bool canAddEmail = emailsPresent == false && autoAddFirstEmail;
+    if(emailsPresent || canAddEmail){
+      if(canAddEmail) addFirstPhone();
+      else FocusScope.of(context).requestFocus(emailValueFields[0].focusNode);
+    }
+    else toWork();
+  }
+
+  toWork() async{
+    if(workOpen) FocusScope.of(context).requestFocus(jobTitleField.focusNode);
+    else{
+      if(autoOpenWork) openWork();
+      else toFirstAddress();
+    }
+  }
+
+  toFirstAddress() async{
+    bool addressesPresent = (addressStreetFields.length > 0);
+    bool canAddAddress = addressesPresent == false && autoAddFirstAddress;
+    if(addressesPresent || canAddAddress){
+      if(canAddAddress) addFirstPhone();
+      else FocusScope.of(context).requestFocus(addressStreetFields[0].focusNode);
+    }
+    else toNote();
+  }
+
+  toNote() async{
+    if(noteOpen) FocusScope.of(context).requestFocus(noteField.focusNode);
+    else{
+      if(autoOpenNote) openNote();
+      //ELSE... there is nothing else to do
+    }
+  }
 
   //-------------------------Init-------------------------
   @override
   void initState() {
     //-------------------------Variable Prep-------------------------
 
-    //TODO...complete this
+    //-------------------------Name
+    nameField.nextFunction = toFirstPhone();
 
     //-------------------------Names
     //prefix, first, middle, last, suffix
-    int fieldCount = 5; //6,5,4,3,2,1
-    while(fieldCount > 0){
+    int fieldCount = 0; //0,1,2,3,4
+    while(fieldCount < 5){
       nameFields.add(FieldData());
+      nameFields[fieldCount].index = fieldCount;
+      fieldCount++;
     }
     nameLabels.add("Name prefix");
     nameLabels.add("First name");
@@ -437,13 +534,13 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     );
 
     //save the work stuff
-    newContact.jobTitle = jobTitle.controller.text;
+    newContact.jobTitle = jobTitleField.controller.text;
     newContact.company = companyName.controller.text;
 
     //save the addresses
 
     //save the note
-    newContact.note = noteCtrl.text;
+    newContact.note = noteField.text;
 
     //TODO... remove this test code
     // The contact must have a firstName / lastName to be successfully added
