@@ -53,193 +53,100 @@ class NewContactUX extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-          children: <Widget>[
-            Stack(
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.fromLTRB(
-                    8,
-                    imageDiameter * (5/7),
-                    8,
-                    16,
-                  ),
-                  width: MediaQuery.of(context).size.width,
-                  child: Column(
-                    children: <Widget>[
-                      Card(
-                        child: Container(
-                          padding: EdgeInsets.fromLTRB(
-                            0, 
-                            imageDiameter * (2/7) + 16 * 2, 
-                            16, 
-                            0,
-                          ),
-                          child: Column(
-                            children: <Widget>[
-                              new Title(
-                                icon: Icons.person,
-                                name: "Name",
-                              ),
-                              //displayName, givenName, middleName, prefix, suffix, familyName;
-                              //Name prefix(prefix), Name suffix(suffix)
-                              //First name (givenName), Middle name (middleName), Last name (familyName)
-                              //display name = prefix, first name, middle name, last name, ',' suffix
-                              Visibility(
-                                visible: (namesSpread.value == false),
-                                child: new NameRow(
-                                  bottomBarHeight: bottomBarHeight,
-                                  nameOpen: namesSpread,
-                                  icon: Icons.keyboard_arrow_down,
-                                  label: "Name",
-                                  focusNode: nameFC,
-                                  controller: nameCtrl,
-                                ),
-                              ),
-                              Visibility(
-                                visible: namesSpread.value,
-                                child: Column(
-                                  children: <Widget>[
-                                    new NameRow(
-                                      bottomBarHeight: bottomBarHeight,
-                                      nameOpen: namesSpread,
-                                      icon: Icons.keyboard_arrow_up,
-                                      label: "Name prefix",
-                                      focusNode: prefixFC,
-                                      controller: prefixCtrl,
-                                    ), 
-                                    new NameRow(
-                                      bottomBarHeight: bottomBarHeight,
-                                      nameOpen: namesSpread,
-                                      label: "First name",
-                                      focusNode: firstFC,
-                                      controller: firstCtrl,
-                                    ),
-                                    new NameRow(
-                                      bottomBarHeight: bottomBarHeight,
-                                      nameOpen: namesSpread,
-                                      label: "Middle name",
-                                      focusNode: middleFC,
-                                      controller: middleCtrl,
-                                    ),
-                                    new NameRow(
-                                      bottomBarHeight: bottomBarHeight,
-                                      nameOpen: namesSpread,
-                                      label: "Last name",
-                                      focusNode: lastFC,
-                                      controller: lastCtrl,
-                                    ),
-                                    new NameRow(
-                                      bottomBarHeight: bottomBarHeight,
-                                      nameOpen: namesSpread,
-                                      label: "Name suffix",
-                                      focusNode: suffixFC,
-                                      controller: suffixCtrl,
-                                    ),  
-                                  ],
-                                ),
-                              ),
-                              new Title( 
-                                icon: Icons.work,
-                                name: "Work",
-                                onPressed: (){
-                                  print("tapped");
-                                }
-                              ),
-                              new Title( 
-                                icon: Icons.phone,
-                                name: "Phone",
-                                onPressed: (){
-                                  print("tapped");
-                                }
-                              ),
-                              new Title( 
-                                icon: Icons.email,
-                                name: "Email",
-                                onPressed: (){
-                                  print("tapped");
-                                }
-                              ),
-                              new Title( 
-                                icon: Icons.location_on,
-                                name: "Address",
-                                onPressed: (){
-                                  print("tapped");
-                                }
-                              ),
-                            ],
-                          )
-                        ),
-                      ),
-                      //makes sure that we can always see all of our items
-                      //with a little extra padding for looks
-                      Container(
-                        height: bottomBarHeight + 16,
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.all(16),
-                  width: MediaQuery.of(context).size.width,
-                  alignment: Alignment.center,
-                  child: GestureDetector(
-                    onTap: (){
-                      showImagePicker(
-                        context,
-                        imageLocation,
-                        imagePicked,
-                      );
-                    },
-                    child: Stack(
-                      children: <Widget>[
-                        new Container(
-                          width: imageDiameter,
-                          height: imageDiameter,
-                          decoration: new BoxDecoration(
-                            color: Theme.of(context).indicatorColor,
-                            shape: BoxShape.circle,
-                          ),
-                          child: (imageLocation.value == "") ? Icon(
-                            Icons.camera_alt,
-                            size: imageDiameter / 2,
-                            color: Theme.of(context).primaryColor,
-                          )
-                          : ClipOval(
-                            child: FittedBox(
-                              fit: BoxFit.cover,
-                                child: Image.file(
-                                File(imageLocation.value),
-                              ),
-                            )
-                          )
-                        ),
-                        Positioned(
-                          right: 0,
-                          bottom: 0,
-                          child: new Container(
-                            padding: EdgeInsets.all(8),
-                            decoration: new BoxDecoration(
-                              color: Theme.of(context).primaryColor,
-                              border: Border.all(
-                                width: 3,
-                              ),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.edit,
-                              color: Theme.of(context).primaryColorLight,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
+    return Column(
+      children: <Widget>[
+        new Title(
+          icon: Icons.person,
+          name: "Name",
+        ),
+        //displayName, givenName, middleName, prefix, suffix, familyName;
+        //Name prefix(prefix), Name suffix(suffix)
+        //First name (givenName), Middle name (middleName), Last name (familyName)
+        //display name = prefix, first name, middle name, last name, ',' suffix
+        Visibility(
+          visible: (namesSpread.value == false),
+          child: new NameRow(
+            bottomBarHeight: bottomBarHeight,
+            nameOpen: namesSpread,
+            icon: Icons.keyboard_arrow_down,
+            label: "Name",
+            focusNode: nameFC,
+            controller: nameCtrl,
+          ),
+        ),
+        Visibility(
+          visible: namesSpread.value,
+          child: Column(
+            children: <Widget>[
+              new NameRow(
+                bottomBarHeight: bottomBarHeight,
+                nameOpen: namesSpread,
+                icon: Icons.keyboard_arrow_up,
+                label: "Name prefix",
+                focusNode: prefixFC,
+                controller: prefixCtrl,
+              ), 
+              new NameRow(
+                bottomBarHeight: bottomBarHeight,
+                nameOpen: namesSpread,
+                label: "First name",
+                focusNode: firstFC,
+                controller: firstCtrl,
+              ),
+              new NameRow(
+                bottomBarHeight: bottomBarHeight,
+                nameOpen: namesSpread,
+                label: "Middle name",
+                focusNode: middleFC,
+                controller: middleCtrl,
+              ),
+              new NameRow(
+                bottomBarHeight: bottomBarHeight,
+                nameOpen: namesSpread,
+                label: "Last name",
+                focusNode: lastFC,
+                controller: lastCtrl,
+              ),
+              new NameRow(
+                bottomBarHeight: bottomBarHeight,
+                nameOpen: namesSpread,
+                label: "Name suffix",
+                focusNode: suffixFC,
+                controller: suffixCtrl,
+              ),  
+            ],
+          ),
+        ),
+        new Title( 
+          icon: Icons.work,
+          name: "Work",
+          onPressed: (){
+            print("tapped");
+          }
+        ),
+        new Title( 
+          icon: Icons.phone,
+          name: "Phone",
+          onPressed: (){
+            print("tapped");
+          }
+        ),
+        new Title( 
+          icon: Icons.email,
+          name: "Email",
+          onPressed: (){
+            print("tapped");
+          }
+        ),
+        new Title( 
+          icon: Icons.location_on,
+          name: "Address",
+          onPressed: (){
+            print("tapped");
+          }
+        ),
+      ],
+    );
   }
 }
 

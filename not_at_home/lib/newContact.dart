@@ -7,6 +7,7 @@ import 'package:not_at_home/permission.dart';
 import 'package:permission/permission.dart';
 
 import 'helper.dart';
+import 'imagePicker.dart';
 import 'newContactUX.dart';
 
 class FieldData{
@@ -137,13 +138,14 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     super.initState();
   }
 
-  //dispose
+  //-------------------------Dispose-------------------------
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
+  //-------------------------Change-------------------------
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     /*
@@ -172,19 +174,16 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     //ELSE we are back from either picking an image or deciding not to pick an image, both of which do nothing
   }
 
-  //-------------------------Everything Above Is OK-------------------------
-
+  //-------------------------build-------------------------
   @override
   Widget build(BuildContext context) {
-    double bottomBarHeight = 32;
-
     return OrientationBuilder(
       builder: (context, orientation) {
         bool isPortrait = (orientation == Orientation.portrait);
 
-        //cal bottom bar height
+        //calc bottom bar height
+        double bottomBarHeight = 32;
         if(isPortrait == false) bottomBarHeight = 0;
-        else bottomBarHeight = 32;
 
         //calc imageDiameter
         double imageDiameter = MediaQuery.of(context).size.width / 2;
@@ -193,38 +192,113 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
         }
 
         //make new contact UX
-        Widget bodyWidget = Container();
-        /*
-        Widget bodyWidget = NewContactUX(
-          imageDiameter: imageDiameter,
-          bottomBarHeight: bottomBarHeight,
-          imageLocation: imageLocation,
-          isPortrait: isPortrait,
-          contactSaved: () => createContact(),
-          imagePicked: (){
-            setState(() {
-              
-            });
-          },
-          namesSpread: namesSpread,
+        Widget bodyWidget = ListView(
+          children: <Widget>[
+            Stack(
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.fromLTRB(
+                    8,
+                    //push CARD down to the ABOUT middle of the picture
+                    imageDiameter * (5/7),
+                    8,
+                    16,
+                  ),
+                  width: MediaQuery.of(context).size.width,
+                  child: Column(
+                    children: <Widget>[
+                      Card(
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          padding: EdgeInsets.fromLTRB(
+                            0, 
+                            //push CARD CONTENT down to past the picture
+                            imageDiameter * (2/7) + 16 * 2, 
+                            16, 
+                            16,
+                          ),
+                          child: Column(
+                            children: <Widget>[
+                              Text("asdfadsfads") //TODO... field items here
+                            ],
+                          )
+                        ),
+                      ),
+                      //makes sure that we can always see all of our items
+                      //with a little extra padding for looks
+                      Container(
+                        height: bottomBarHeight + 16,
+                      ),
+                    ],
+                  ),
+                ),
+                //-------------------------Picture UX
+                Container(
+                  padding: EdgeInsets.all(16),
+                  width: MediaQuery.of(context).size.width,
+                  alignment: Alignment.center,
+                  child: GestureDetector(
+                    onTap: (){
+                      showImagePicker(
+                        context,
+                        imageLocation,
+                        //we set state so we update the picture
+                        () => setState(() {}),
+                      );
+                    },
+                    child: Stack(
+                      children: <Widget>[
+                        new Container(
+                          width: imageDiameter,
+                          height: imageDiameter,
+                          decoration: new BoxDecoration(
+                            color: Theme.of(context).indicatorColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: (imageLocation.value == "") ? Icon(
+                            Icons.camera_alt,
+                            size: imageDiameter / 2,
+                            color: Theme.of(context).primaryColor,
+                          )
+                          : ClipOval(
+                            child: FittedBox(
+                              fit: BoxFit.cover,
+                                child: Image.file(
+                                File(imageLocation.value),
+                              ),
+                            )
+                          )
+                        ),
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: new Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: new BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              border: Border.all(
+                                width: 3,
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.edit,
+                              color: Theme.of(context).primaryColorLight,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
 
-          nameFC: nameFN,
-          prefixFC: prefixFC,
-          firstFC: firstFC,
-          middleFC: middleFC,
-          lastFC: lastFC,
-          suffixFC: suffixFC,
-
-          nameCtrl: nameCtrl,
-          prefixCtrl: prefixCtrl,
-          firstCtrl: firstCtrl,
-          middleCtrl: middleCtrl,
-          lastCtrl: lastCtrl,
-          suffixCtrl: suffixCtrl,
-        );*/
-
-        //react to isPortrait
+        //-------------------------Submit Button Locations
         if(isPortrait){
+          //in portrait mode the buttons are large and at the bottom of the screen
           return Scaffold(
             body: Stack(
               children: <Widget>[
@@ -233,28 +307,25 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
                   bottom: 0,
                   left: 0,
                   right: 0,
-                  child: Visibility(
-                    visible: isPortrait,
-                    child: Container(
-                      color: Theme.of(context).primaryColorDark,
-                      width: MediaQuery.of(context).size.width,
-                      padding: EdgeInsets.only(left:16, right:16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          new PortraitButton(
-                            width: MediaQuery.of(context).size.width / 2 - 16,
-                            name: "Cancel",
-                            onPressed: () => cancelContact(),
-                          ),
-                          new PortraitButton(
-                            width: MediaQuery.of(context).size.width / 2 - 16,
-                            name: "Save",
-                            onPressed: () => createContact(),
-                          ),
-                        ],
-                      )
-                    ),
+                  child: Container(
+                    color: Theme.of(context).primaryColorDark,
+                    width: MediaQuery.of(context).size.width,
+                    padding: EdgeInsets.only(left:16, right:16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        new PortraitButton(
+                          width: MediaQuery.of(context).size.width / 2 - 16,
+                          name: "Cancel",
+                          onPressed: () => cancelContact(),
+                        ),
+                        new PortraitButton(
+                          width: MediaQuery.of(context).size.width / 2 - 16,
+                          name: "Save",
+                          onPressed: () => createContact(),
+                        ),
+                      ],
+                    )
                   ),
                 ),
               ],
@@ -262,6 +333,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
           );
         }
         else{
+          //In landscape mode the buttons are small and on the app bar
           return Scaffold(
             appBar: AppBar(
               automaticallyImplyLeading: false,
