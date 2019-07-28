@@ -81,22 +81,22 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   List<String> nameLabels = List<String>();
 
   //-------------------------Phones
-  bool autoAddPhone;
+  bool autoAddPhone = true;
   List<FieldData> phoneValueFields = List<FieldData>();
   List<FieldData> phoneLabelFields = List<FieldData>();
 
   //-------------------------Emails
-  bool autoAddEmail;
+  bool autoAddEmail = true;
   List<FieldData> emailValueFields = List<FieldData>();
   List<FieldData> emailLabelFields = List<FieldData>();
 
   //-------------------------Work
-  bool autoOpenWork;
+  bool autoOpenWork = true;
   FieldData jobTitle = FieldData(); //jobTitle
   FieldData companyName = FieldData(); //company
 
   //-------------------------Addresses
-  bool autoAddFirstAddress; //add
+  bool autoAddFirstAddress = false; //add
   List<FieldData> addressStreetFields = new List<FieldData>();
   List<FieldData> addressCityFields = new List<FieldData>();
   List<FieldData> addressPostcodeFields = new List<FieldData>();
@@ -105,12 +105,30 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   List<FieldData> addressLabelFields = new List<FieldData>();
 
   //-------------------------Note
-  bool autoOpenNote;
+  bool autoOpenNote = true;
   TextEditingController noteCtrl = TextEditingController(); //note
 
   //-------------------------Init-------------------------
   @override
   void initState() {
+    //-------------------------Variable Prep-------------------------
+
+    //TODO...complete this
+
+    //-------------------------Names
+    //prefix, first, middle, last, suffix
+    int fieldCount = 5; //6,5,4,3,2,1
+    while(fieldCount > 0){
+      nameFields.add(FieldData());
+    }
+    nameLabels.add("Name prefix");
+    nameLabels.add("First name");
+    nameLabels.add("Middle name");
+    nameLabels.add("Last name");
+    nameLabels.add("Name suffix");
+
+    //-------------------------Other-------------------------
+
     //observer for onResume
     WidgetsBinding.instance.addObserver(this); 
 

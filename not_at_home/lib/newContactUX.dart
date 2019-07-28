@@ -1,8 +1,4 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-
-import 'imagePicker.dart';
 
 class NewContactUX extends StatelessWidget {
   NewContactUX({
