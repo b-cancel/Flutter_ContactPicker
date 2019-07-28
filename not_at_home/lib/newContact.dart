@@ -248,19 +248,59 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     ]);
   }
 
+  //-------------------------Remove From Lists Helper-------------------------
+
+  removeItem(int index, List<List<FieldData>> allFields){
+    if(0 <= index && index < allFields[0].length){
+      //save next focus function
+      Function nextFocus = allFields.last[index].nextFunction;
+
+      //remove the item
+      for(int i = 0; i < allFields.length; i++){
+        allFields[i].removeAt(index);
+      }
+
+      //set the state so the UI rebuilds with the new number
+      setState(() {});
+
+      //focus on the NEXT field AFTER build completes (above)
+      WidgetsBinding.instance.addPostFrameCallback((_){
+        nextFocus();
+      });
+    }
+    //ELSE... we can't remove what doesn't exist
+  }
+
   //-------------------------Remove From Lists-------------------------
-  //NOTE: MUST SET STATE
+  //NOTE: 
+  //1. we can remove from any location in the list
+  //2. we must set state afterwards
+  //3. whenever we remove we also focus on whatever was going to be next
+  //  on the thing we removed
 
   removePhone(int index){
-    
+    removeItem(index, [
+      phoneValueFields,
+      phoneLabelFields,
+    ]);
   }
 
   removeEmail(int index){
-
+    removeItem(index, [
+      emailValueFields,
+      emailLabelFields,
+    ]);
   }
 
   removalPostalAddress(int index){
-
+    removeItem(index, [
+      addressStreetFields,
+      addressCityFields,
+      addressPostcodeFields,
+      addressRegionFields,
+      addressCountryFields,
+      addressLabelFields,
+    ]);
   }
 
   //-------------------------Init-------------------------
