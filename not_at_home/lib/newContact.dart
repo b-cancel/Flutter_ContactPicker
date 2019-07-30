@@ -66,23 +66,23 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   List<String> nameLabels = List<String>();
 
   //-------------------------Phones
-  bool autoAddFirstPhone = true;
+  bool autoAddFirstPhone = false; //TODO... the default of this is true
   List<FieldData> phoneValueFields = List<FieldData>();
   List<FieldData> phoneLabelFields = List<FieldData>();
 
   //-------------------------Emails
-  bool autoAddFirstEmail = true;
+  bool autoAddFirstEmail = false; //TODO... the default of this is true
   List<FieldData> emailValueFields = List<FieldData>();
   List<FieldData> emailLabelFields = List<FieldData>();
 
   //-------------------------Work
   bool autoOpenWork = true;
   FieldData jobTitleField = FieldData(); //jobTitle
-  FieldData companyName = FieldData(); //company
-  bool workOpen = false;
+  FieldData companyField = FieldData(); //company
+  ValueNotifier<bool> workOpen = new ValueNotifier<bool>(false);
 
   //-------------------------Addresses
-  bool autoAddFirstAddress = false; //add
+  bool autoAddFirstAddress = false; //TODO... the default of this is true
   List<FieldData> addressStreetFields = new List<FieldData>();
   List<FieldData> addressCityFields = new List<FieldData>();
   List<FieldData> addressPostcodeFields = new List<FieldData>();
@@ -93,7 +93,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   //-------------------------Note
   bool autoOpenNote = true;
   FieldData noteField = FieldData(); //note
-  bool noteOpen = false;
+  ValueNotifier<bool> noteOpen = new ValueNotifier<bool>(false);
 
   //-------------------------Next Function Helpers-------------------------
   //NOTE: these WILL only be called IF indeed things are empty
@@ -114,17 +114,11 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
   //starting with job title
   openWork(){
-    if(workOpen == false){
+    if(workOpen.value == false){
       //open the work section
-      workOpen = true;
-
-      //set state to reflect that change
-      setState(() {});
-
-      //focus on the section AFTER build completes
-      WidgetsBinding.instance.addPostFrameCallback((_){
-        FocusScope.of(context).requestFocus(jobTitleField.focusNode);
-      });
+      workOpen.value = true;
+      //the value changing to true will trigger a listener
+      //that will set state and focus on the right field
     }
   }
 
@@ -137,17 +131,11 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
   //start with note (only way to start :p)
   openNote(){
-    if(noteOpen == false){
+    if(noteOpen.value == false){
       //open the note section
-      noteOpen = true;
-
-      //set state to reflect that change
-      setState(() {});
-
-      //focus on the section AFTER build completes
-      WidgetsBinding.instance.addPostFrameCallback((_){
-        FocusScope.of(context).requestFocus(noteField.focusNode);
-      });
+      noteOpen.value = true;
+      //the value changing to true will trigger a listener
+      //that will set state and focus on the right field
     }
   }
 
@@ -179,7 +167,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   }
 
   toWork(){
-    if(workOpen) FocusScope.of(context).requestFocus(jobTitleField.focusNode);
+    if(workOpen.value) FocusScope.of(context).requestFocus(jobTitleField.focusNode);
     else{
       if(autoOpenWork) openWork();
       else toFirstAddress();
@@ -191,7 +179,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   }
 
   toNote(){
-    if(noteOpen) FocusScope.of(context).requestFocus(noteField.focusNode);
+    if(noteOpen.value) FocusScope.of(context).requestFocus(noteField.focusNode);
     else{
       if(autoOpenNote) openNote();
       //ELSE... there is nothing else to do
@@ -307,6 +295,26 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   //-------------------------Init-------------------------
   @override
   void initState() {
+    workOpen.addListener((){
+      //set state to reflect that change
+      setState(() {});
+
+      //focus on the section AFTER build completes
+      WidgetsBinding.instance.addPostFrameCallback((_){
+        FocusScope.of(context).requestFocus(jobTitleField.focusNode);
+      });
+    });
+
+    noteOpen.addListener((){
+      //set state to reflect that change
+      setState(() {});
+
+      //focus on the section AFTER build completes
+      WidgetsBinding.instance.addPostFrameCallback((_){
+        FocusScope.of(context).requestFocus(noteField.focusNode);
+      });
+    });
+
     //-------------------------Variable Prep-------------------------
 
     //prefix, first, middle, last, suffix
@@ -568,7 +576,19 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
       else thisField.nextFunction = toFirstPhone;
     }
     
-    //TODO... move onto doing phone section
+    //TODO... phones section
+    //TODO... emails section
+
+    //handle work section
+    jobTitleField.nextFunction = (){
+      FocusScope.of(context).requestFocus(companyField.focusNode);
+    };
+    companyField.nextFunction = toFirstAddress;
+
+    //TODO... addresses section
+
+    //handle note section
+    noteField.nextFunction = null;
 
     return OrientationBuilder(
       builder: (context, orientation) {
@@ -588,9 +608,22 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
           fields: NewContactUX(
             bottomBarHeight: bottomBarHeight,
             namesSpread: namesSpread,
+
             nameField: nameField,
             nameFields: nameFields,
             nameLabels: nameLabels,
+
+            //phones
+            //emails
+
+            jobTitleField: jobTitleField,
+            companyField: companyField,
+            workOpen: workOpen,
+
+            //address
+
+            noteField: noteField,
+            noteOpen: noteOpen,
           ),
         );
       }
@@ -662,7 +695,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
     //save the work stuff
     newContact.jobTitle = jobTitleField.controller.text;
-    newContact.company = companyName.controller.text;
+    newContact.company = companyField.controller.text;
 
     //save the addresses
 

@@ -1,22 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:not_at_home/newContactHelper.dart';
 
+//phones, emails, work (job title, company), addresses, note
+
 class NewContactUX extends StatelessWidget {
   NewContactUX({
-    this.bottomBarHeight,
-    this.namesSpread,
-
-    this.nameField,
-    this.nameFields,
-    this.nameLabels,
+    @required this.bottomBarHeight,
+    @required this.namesSpread,
+    //handle names
+    @required this.nameField,
+    @required this.nameFields,
+    @required this.nameLabels,
+    //TODO... add phones here
+    //TODO... add emails here
+    //handle work
+    @required this.jobTitleField,
+    @required this.companyField,
+    @required this.workOpen,
+    //TODO... add addresses here
+    @required this.noteField,
+    @required this.noteOpen,
   });
 
   final double bottomBarHeight;
   final ValueNotifier<bool> namesSpread;
-
+  //handle names
   final FieldData nameField;
   final List<FieldData> nameFields;
   final List<String> nameLabels;
+  //TODO... add phones here
+  //TODO... add emails here
+  //handle work
+  final FieldData jobTitleField;
+  final FieldData companyField;
+  final ValueNotifier<bool> workOpen;
+  //TODO... add addresses here
+  final FieldData noteField;
+  final ValueNotifier<bool> noteOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -68,36 +88,106 @@ class NewContactUX extends StatelessWidget {
             children: nameRows,
           ),
         ),
-        /*
-        new Title( 
-          icon: Icons.work,
-          name: "Work",
-          onPressed: (){
-            print("tapped");
-          }
-        ),
         new Title( 
           icon: Icons.phone,
           name: "Phone",
           onPressed: (){
-            print("tapped");
+            print("tapped phone");
           }
         ),
         new Title( 
           icon: Icons.email,
           name: "Email",
           onPressed: (){
-            print("tapped");
+            print("tapped email");
           }
+        ),
+        new Title( 
+          icon: Icons.work,
+          name: "Work",
+          onPressed: workOpen.value
+          ? null
+          : (){
+            workOpen.value = true;
+          }
+        ),
+        Visibility(
+          visible: workOpen.value,
+          child: Column(
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: <Widget>[
+                    IconWidget(),
+                    Flexible(
+                      child: TheField(
+                        focusNode: jobTitleField.focusNode, 
+                        controller: jobTitleField.controller, 
+                        bottomBarHeight: bottomBarHeight, 
+                        nextFunction: jobTitleField.nextFunction, 
+                        label: "Job title",
+                      ),
+                    ),
+                  ]
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: <Widget>[
+                    IconWidget(),
+                    Flexible(
+                      child: TheField(
+                        focusNode: companyField.focusNode, 
+                        controller: companyField.controller, 
+                        bottomBarHeight: bottomBarHeight, 
+                        nextFunction: companyField.nextFunction, 
+                        label: "Company",
+                      ),
+                    ),
+                  ]
+                ),
+              ),
+            ],
+          ),
         ),
         new Title( 
           icon: Icons.location_on,
           name: "Address",
           onPressed: (){
-            print("tapped");
+            print("tapped address");
           }
         ),
-        */
+        new Title( 
+          icon: Icons.note,
+          name: "Note",
+          onPressed: noteOpen.value
+          ? null
+          : (){
+            noteOpen.value = true;
+          }
+        ),
+        Visibility(
+          visible: noteOpen.value,
+          child: Container(
+            padding: EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: <Widget>[
+                IconWidget(),
+                Flexible(
+                  child: TheField(
+                    focusNode: noteField.focusNode, 
+                    controller: noteField.controller, 
+                    bottomBarHeight: bottomBarHeight, 
+                    nextFunction: noteField.nextFunction, 
+                    label: "Note",
+                  ),
+                ),
+              ]
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -134,25 +224,12 @@ class NameRow extends StatelessWidget {
         children: <Widget>[
           IconWidget(),
           Flexible(
-            child: TextFormField(
-              focusNode: focusNode,
-              controller: controller,
-              scrollPadding: EdgeInsets.only(bottom: bottomBarHeight * 2 + 8),
-              autofocus: true,
-              style: TextStyle(
-                fontSize: 18,
-              ),
-              onEditingComplete: (){
-                nextFunction();
-              },
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                contentPadding: EdgeInsets.only(bottom: 4),
-                hintText: label,
-                hintStyle: TextStyle(
-                  fontSize: 18,
-                ),
-              ),
+            child: new TheField(
+              focusNode: focusNode, 
+              controller: controller, 
+              bottomBarHeight: bottomBarHeight, 
+              nextFunction: nextFunction, 
+              label: label,
             ),
           ),
           GestureDetector(
@@ -171,6 +248,51 @@ class NameRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class TheField extends StatelessWidget {
+  const TheField({
+    Key key,
+    @required this.focusNode,
+    @required this.controller,
+    @required this.bottomBarHeight,
+    @required this.nextFunction,
+    @required this.label,
+  }) : super(key: key);
+
+  final FocusNode focusNode;
+  final TextEditingController controller;
+  final double bottomBarHeight;
+  final Function nextFunction;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      focusNode: focusNode,
+      controller: controller,
+      scrollPadding: EdgeInsets.only(bottom: bottomBarHeight * 2 + 8),
+      autofocus: true,
+      style: TextStyle(
+        fontSize: 18,
+      ),
+      onEditingComplete: (nextFunction == null)
+      ? null
+      : (){
+        nextFunction();
+      },
+      textInputAction: (nextFunction == null)
+      ? TextInputAction.done
+      : TextInputAction.next,
+      decoration: InputDecoration(
+        contentPadding: EdgeInsets.only(bottom: 4),
+        hintText: label,
+        hintStyle: TextStyle(
+          fontSize: 18,
+        ),
       ),
     );
   }
