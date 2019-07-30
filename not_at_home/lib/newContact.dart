@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:not_at_home/helper.dart';
 import 'package:not_at_home/newContactHelper.dart';
 import 'package:not_at_home/permission.dart';
 import 'package:permission/permission.dart';
@@ -365,6 +366,8 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
         //if we have to update the fields then we do so
         if(updateFields){
+          print("-------------------------UPDATING");
+
           //wipe all fields
           for(int i = 0; i < nameFields.length; i++){
             nameFields[i].controller.text = "";
@@ -377,11 +380,13 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
           if(names.length > 0){
             //check if the first name is a prefix
             String maybePrefix = onlyCharacters(names[0].toLowerCase());
-            bool isPrefix = prefixes.contains(maybePrefix); 
-            if(isPrefix){
+            bool isAPrefix = isPrefix(maybePrefix); 
+            if(isAPrefix){
               nameFields[0].controller.text = names[0];
               names.removeAt(0);
             }
+
+            print(maybePrefix + " is prefix " + isAPrefix.toString());
 
             //NOTE: now first name is at 0
 
@@ -404,7 +409,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
               //or after the name before
               int lastNameIndex = names.length - 1;
               String lastName = names[lastNameIndex];
-              bool commaBeforeLast = (lastName[0] == ",");
+              bool commaBeforeLast = (lastName.length > 0 && lastName[0] == ",");
               if(commaBeforeLast){
                 //remove the comma
                 names[lastNameIndex] = names[lastNameIndex].substring(1);
@@ -416,7 +421,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
               else{
                 if(names.length > 1){
                   String beforeLastName = names[lastNameIndex - 1];
-                  bool commaAfterBeforeLast = (beforeLastName[beforeLastName.length - 1] == ",");
+                  bool commaAfterBeforeLast = (beforeLastName.length > 0 && beforeLastName[beforeLastName.length - 1] == ",");
                   if(commaAfterBeforeLast){
                     //remove the comma
                     names[lastNameIndex - 1] = names[lastNameIndex - 1].substring(0, beforeLastName.length - 1);
@@ -439,7 +444,12 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
                 switch(names.length){
                   case 1:
-                    nameFields[1].controller.text = names[0];
+                    if(isAPrefix){ //consider last name
+                      nameFields[3].controller.text = names[0];
+                    }
+                    else{
+                      nameFields[1].controller.text = names[0];
+                    }
 
                     break;
                   case 2:
@@ -480,6 +490,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
             }
           }
         }
+        else print("-------------------------NOT UPDATING");
         //ELSE... fields don't have to be updated
         //they already contain everything they need
       }
@@ -489,13 +500,23 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
         String name = "";
         for(int i = 0; i < nameFields.length; i++){
           FieldData thisField = nameFields[i];
+          String text = thisField.controller.text.trim();
           if(i == (nameFields.length - 1)){
-            if(thisField.controller.text != " "){
-              name += "," + thisField.controller.text;
+            if(text != ""){
+              if(name == ""){
+                name += "," + text;
+              }
+              else{
+                name += " ," + text;
+              }
             }
           }
           else{
-            name += thisField.controller.text + " ";
+            if(i == 0) name = text;
+            else{ //there is some text already in the name
+              //so to do things properly we have to add a space behind us
+               name = name + " " + text;
+            }
           }
         }
 

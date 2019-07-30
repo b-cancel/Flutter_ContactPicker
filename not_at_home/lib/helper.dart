@@ -42,6 +42,14 @@ getPrefixes(){
   prefixes.add("professor");
 }
 
+bool isPrefix(String test){
+  if(prefixes.isEmpty){
+    getPrefixes();
+  }
+
+  return prefixes.contains(test);
+}
+
 String onlyCharactersS2E(String string, int startInc, int endInc){
   String output = "";
   for(int i = 0; i < string.length; i++){
