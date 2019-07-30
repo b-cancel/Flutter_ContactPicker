@@ -44,7 +44,6 @@ class NewContact extends StatefulWidget {
 class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   //-------------------------Logic Code-------------------------
   ValueNotifier<bool> namesSpread = new ValueNotifier<bool>(false);
-  ValueNotifier<bool> mergedNameChanged = new ValueNotifier<bool>(false);
 
   ValueNotifier<String> imageLocation = new ValueNotifier<String>("");
 
@@ -328,174 +327,138 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     //observer for onResume
     WidgetsBinding.instance.addObserver(this); 
 
-    //keep track of whether or not the mergedNameChanged
-    nameField.controller.addListener((){
-      if(namesSpread.value == false){
-        mergedNameChanged.value = true;
-      }
-      //ELSE... we are updating the merged field 
-      //with values retreived from the unmerged fields
-    });
+    //NOTE: we could keep everything in its position 
+    //IF after all the names are merged the merge name isn't updated
+    //But that's too much work
 
     //if we spread or unspread the name
     namesSpread.addListener((){
       //modify text editing controller value
       if(namesSpread.value){ //if all the names have been spread
-        bool updateFields = true;
-        
-        //if the merged name has not been changed
-        //we might not have to update the fields
-        if(mergedNameChanged.value == false){
-          //check if any single field has some value
-          bool aFieldNotEmpty = false;
-          for(int i = 0; i < nameFields.length; i++){
-            if(nameFields[i].controller.text != ""){
-              aFieldNotEmpty = true;
-              break;
-            }
-          }
-          
-          //if a field isnt empty then we can indeed NOT update
-          if(aFieldNotEmpty) updateFields = false;
-          else{
-            //ELSE... its the first time we open up the name
-            //so its not possible for the FIELDS to have the data we would want
-            updateFields = true;
-          }
+        //wipe all fields
+        for(int i = 0; i < nameFields.length; i++){
+          nameFields[i].controller.text = "";
         }
 
-        //if we have to update the fields then we do so
-        if(updateFields){
-          print("-------------------------UPDATING");
+        //split the names
+        List<String> names = nameField.controller.text.split(" ");
 
-          //wipe all fields
-          for(int i = 0; i < nameFields.length; i++){
-            nameFields[i].controller.text = "";
+        //trim all the names of whitespace
+        for(int i = 0; i < names.length; i++){
+          names[i] = names[i].trim();
+        }
+
+        //start processing the split
+        if(names.length > 0){
+          //check if the first name is a prefix
+          String maybePrefix = onlyCharacters(names[0].toLowerCase());
+          bool isAPrefix = isPrefix(maybePrefix); 
+          if(isAPrefix){
+            nameFields[0].controller.text = names[0];
+            names.removeAt(0);
           }
 
-          //split the names
-          List<String> names = nameField.controller.text.split(" ");
+          //NOTE: now first name is at 0
 
-          //trim all the names of whitespace
-          for(int i = 0; i < names.length; i++){
-            names[i] = names[i].trim();
-          }
-
-          //start processing the split
           if(names.length > 0){
-            //check if the first name is a prefix
-            String maybePrefix = onlyCharacters(names[0].toLowerCase());
-            bool isAPrefix = isPrefix(maybePrefix); 
-            if(isAPrefix){
-              nameFields[0].controller.text = names[0];
-              names.removeAt(0);
-            }
+            //NOTE: below we could implement more complex logic like samsung does
+            //but this is realistically never going to be used
 
-            //NOTE: now first name is at 0
+            //NOTE: if not prefix the first name is considered the first name
+            //    then 2nd is middle, 3rd is last... if more than that we know the first name has multiple names
+            //  else if yes prefix the first name is considered the last name
+            //    then ditto as above but first name is prefix
+
+            //NOTE: suffix is never implied unless there is a comma and then that name
+            //for suffix implied atleast two names first
+            //if one name and then comma then suffix... its considered Lastname, Firstname
+            //if comma then name... its considered firstname then last name... EX: ',' 'name' eventhough written ',name'
+
+            //now try to extract the name suffix
+            //only last name can be suffix and only if it has a comma before it
+            //or after the name before
+            int lastNameIndex = names.length - 1;
+            String lastName = names[lastNameIndex];
+            bool commaBeforeLast = (lastName.length > 0 && lastName[0] == ",");
+            if(commaBeforeLast){
+              //remove the comma
+              names[lastNameIndex] = names[lastNameIndex].substring(1);
+              //0(prefix), 1, 2, 3, 4(suffix)
+              nameFields[4].controller.text = names[lastNameIndex];
+              //remove this name from the list since it's been handled
+              names.removeLast();
+            }
+            else{
+              if(names.length > 1){
+                String beforeLastName = names[lastNameIndex - 1];
+                bool commaAfterBeforeLast = (beforeLastName.length > 0 && beforeLastName[beforeLastName.length - 1] == ",");
+                if(commaAfterBeforeLast){
+                  //remove the comma
+                  names[lastNameIndex - 1] = names[lastNameIndex - 1].substring(0, beforeLastName.length - 1);
+                  //0(prefix), 1, 2, 3, 4(suffix)
+                  nameFields[4].controller.text = names[lastNameIndex - 1];
+                  //remove this name from the list since it's been handled
+                  names.removeLast();
+                } 
+                //ELSE... no preffix exists
+              }
+              //ELSE... we have no name before to check
+            }
 
             if(names.length > 0){
-              //NOTE: below we could implement more complex logic like samsung does
-              //but this is realistically never going to be used
+              //NOTE: now only first(s), middle, and last names are left
+              //1 name is first
+              //2 names first, last
+              //3 names first, middle, last
+              //4+ mames (other), before last, last
 
-              //NOTE: if not prefix the first name is considered the first name
-              //    then 2nd is middle, 3rd is last... if more than that we know the first name has multiple names
-              //  else if yes prefix the first name is considered the last name
-              //    then ditto as above but first name is prefix
-
-              //NOTE: suffix is never implied unless there is a comma and then that name
-              //for suffix implied atleast two names first
-              //if one name and then comma then suffix... its considered Lastname, Firstname
-              //if comma then name... its considered firstname then last name... EX: ',' 'name' eventhough written ',name'
-
-              //now try to extract the name suffix
-              //only last name can be suffix and only if it has a comma before it
-              //or after the name before
-              int lastNameIndex = names.length - 1;
-              String lastName = names[lastNameIndex];
-              bool commaBeforeLast = (lastName.length > 0 && lastName[0] == ",");
-              if(commaBeforeLast){
-                //remove the comma
-                names[lastNameIndex] = names[lastNameIndex].substring(1);
-                //0(prefix), 1, 2, 3, 4(suffix)
-                nameFields[4].controller.text = names[lastNameIndex];
-                //remove this name from the list since it's been handled
-                names.removeLast();
-              }
-              else{
-                if(names.length > 1){
-                  String beforeLastName = names[lastNameIndex - 1];
-                  bool commaAfterBeforeLast = (beforeLastName.length > 0 && beforeLastName[beforeLastName.length - 1] == ",");
-                  if(commaAfterBeforeLast){
-                    //remove the comma
-                    names[lastNameIndex - 1] = names[lastNameIndex - 1].substring(0, beforeLastName.length - 1);
-                    //0(prefix), 1, 2, 3, 4(suffix)
-                    nameFields[4].controller.text = names[lastNameIndex - 1];
-                    //remove this name from the list since it's been handled
-                    names.removeLast();
-                  } 
-                  //ELSE... no preffix exists
-                }
-                //ELSE... we have no name before to check
-              }
-
-              if(names.length > 0){
-                //NOTE: now only first(s), middle, and last names are left
-                //1 name is first
-                //2 names first, last
-                //3 names first, middle, last
-                //4+ mames (other), before last, last
-
-                switch(names.length){
-                  case 1:
-                    if(isAPrefix){ //consider last name
-                      nameFields[3].controller.text = names[0];
-                    }
-                    else{
-                      nameFields[1].controller.text = names[0];
-                    }
-
-                    break;
-                  case 2:
-                    //set first name
+              switch(names.length){
+                case 1:
+                  if(isAPrefix){ //consider last name
+                    nameFields[3].controller.text = names[0];
+                  }
+                  else{
                     nameFields[1].controller.text = names[0];
-                    //set last name
-                    nameFields[3].controller.text = names[1];
+                  }
 
-                    break;
-                  case 3:
-                    //set first name
-                    nameFields[1].controller.text = names[0];
-                    //set middle name
-                    nameFields[2].controller.text = names[1];
-                    //set last name
-                    nameFields[3].controller.text = names[2];
+                  break;
+                case 2:
+                  //set first name
+                  nameFields[1].controller.text = names[0];
+                  //set last name
+                  nameFields[3].controller.text = names[1];
 
-                    break;
-                  default:
-                    //the first removal is the last name
-                    String lastName = names.removeLast();
-                    nameFields[3].controller.text = lastName;
+                  break;
+                case 3:
+                  //set first name
+                  nameFields[1].controller.text = names[0];
+                  //set middle name
+                  nameFields[2].controller.text = names[1];
+                  //set last name
+                  nameFields[3].controller.text = names[2];
 
-                    //the second removal is the middle name
-                    String middleName = names.removeLast();
-                    nameFields[2].controller.text = middleName;
+                  break;
+                default:
+                  //the first removal is the last name
+                  String lastName = names.removeLast();
+                  nameFields[3].controller.text = lastName;
 
-                    //sum all the rest of the names as the first name
-                    String firstName = "";
-                    for(int i = 0; i < names.length; i++){
-                      firstName = firstName + names[i];
-                    }
-                    nameFields[3].controller.text = firstName;
+                  //the second removal is the middle name
+                  String middleName = names.removeLast();
+                  nameFields[2].controller.text = middleName;
 
-                    break;
-                }
+                  //sum all the rest of the names as the first name
+                  String firstName = "";
+                  for(int i = 0; i < names.length; i++){
+                    firstName = firstName + names[i];
+                  }
+                  nameFields[3].controller.text = firstName;
+
+                  break;
               }
             }
           }
         }
-        else print("-------------------------NOT UPDATING");
-        //ELSE... fields don't have to be updated
-        //they already contain everything they need
       }
       else{ //If all the names have been closed
         //combine all the names into a single name
@@ -524,13 +487,9 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
             }
           }
         }
-        
+
         //set the combine name into our field
         nameField.controller.text = name;
-
-        //we just closed up the names so 
-        //we could not have possibly made a recent change on the merged name
-        mergedNameChanged.value = false;
       }
 
       //actually open the names
@@ -721,8 +680,6 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     //handle permissions
     PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
     if(isAuthorized(permissionStatus)){
-      print("AUTHORIZED-------------------------");
-
       //with permission we can both
       //1. add the contact
       //NOTE: The contact must have a firstName / lastName to be successfully added  
