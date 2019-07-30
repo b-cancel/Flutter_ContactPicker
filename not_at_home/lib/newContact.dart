@@ -335,13 +335,39 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
         //Feature copied for samsung contacts
         if(namesSpread.value){
           //if all the names have been spread
+          
           //TODO... break apart all the names
+
+          //NOTE: if the name hasn't been changed then its parts wont have changed either
+          //  if it hasn't been changed... not if it has not actally changed...
+          //  so replace an M with an M is still considered a change
+          //ELSE... everything below
+
+          //NOTE: the first name is a prefix (there are a preset of these)
+          //  well then include it as such... else dont regardless of how many names there are
+
+          //NOTE: if not prefix the first name is considered the first name
+          //    then 2nd is middle, 3rd is last... if more than that we know the first name has multiple names
+          //  else if yes prefix the first name is considered the last name
+          //    then ditto as above but first name is prefix
+
+          //NOTE: suffix is never implied unless there is a comma and then that name
+          //for suffix implied atleast two names first
+          //if one name and then comma then suffix... its considered Lastname, Firstname
+          //if comma then name... its considered firstname then last name... EX: ',' 'name' eventhough written ',name'
+
+          //NOTE: if more than 5 seperate names between spaces... assume the first name is multiple names
+
           //focus on the first name
           FocusScope.of(context).requestFocus(nameFields[1].focusNode);
         }
         else{
           //If all the names have been close
+
           //TODO... combine all the names into a single name in nameFocusNode
+
+          //NOTE: before suffix we add a ','
+
           //then focus on the combined names
           FocusScope.of(context).requestFocus(nameField.focusNode);
         }

@@ -55,17 +55,22 @@ class NewContactOuterShell extends StatelessWidget {
         Stack(
           children: <Widget>[
             Container(
+              color: Theme.of(context).primaryColorDark,
               padding: EdgeInsets.fromLTRB(
-                8,
+                0,
                 //push CARD down to the ABOUT middle of the picture
                 imageDiameter * (5/7),
-                8,
+                0,
                 16,
               ),
               width: MediaQuery.of(context).size.width,
               child: Column(
                 children: <Widget>[
                   Card(
+                    margin: EdgeInsets.all(0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(32.0),
+                    ),
                     child: Container(
                       width: MediaQuery.of(context).size.width,
                       padding: EdgeInsets.fromLTRB(
@@ -154,6 +159,7 @@ class NewContactOuterShell extends StatelessWidget {
     if(isPortrait){
       //in portrait mode the buttons are large and at the bottom of the screen
       return Scaffold(
+        backgroundColor: Theme.of(context).primaryColorDark,
         body: Stack(
           children: <Widget>[
             bodyWidget,
@@ -189,7 +195,9 @@ class NewContactOuterShell extends StatelessWidget {
     else{
       //In landscape mode the buttons are small and on the app bar
       return Scaffold(
+        backgroundColor: Theme.of(context).primaryColorDark,
         appBar: AppBar(
+          backgroundColor: Theme.of(context).primaryColorDark,
           automaticallyImplyLeading: false,
           actions: <Widget>[
             new LandscapeButton(
