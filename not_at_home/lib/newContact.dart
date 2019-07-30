@@ -376,6 +376,11 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
           //split the names
           List<String> names = nameField.controller.text.split(" ");
 
+          //trim all the names of whitespace
+          for(int i = 0; i < names.length; i++){
+            names[i] = names[i].trim();
+          }
+
           //start processing the split
           if(names.length > 0){
             //check if the first name is a prefix
@@ -385,8 +390,6 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
               nameFields[0].controller.text = names[0];
               names.removeAt(0);
             }
-
-            print(maybePrefix + " is prefix " + isAPrefix.toString());
 
             //NOTE: now first name is at 0
 
@@ -515,11 +518,13 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
             if(i == 0) name = text;
             else{ //there is some text already in the name
               //so to do things properly we have to add a space behind us
-               name = name + " " + text;
+              if(text != ""){
+                name = name + " " + text;
+              }
             }
           }
         }
-
+        
         //set the combine name into our field
         nameField.controller.text = name;
 
