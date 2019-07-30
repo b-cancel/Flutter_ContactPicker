@@ -392,11 +392,48 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
     //TODO... fill all the function arguments depending on current vars
 
-    return NewContactOuterShell(
-      cancelContact: cancelContact,
-      createContact: createContact,
-      imageLocation: imageLocation,
-      onImagePicked: () => setState(() {}),
+    //from our name field we move onto the first phone
+    //or whatever else we can
+    nameField.nextFunction = toFirstPhone;
+    
+    //only if we are in our last name do we move onto our first phone
+    //or whatever else we can
+    for(int i = 0; i < nameFields.length; i++){
+      FieldData thisField = nameFields[i];
+      if(i != (nameFields.length - 1)){
+        thisField.nextFunction = (){
+          FocusScope.of(context).requestFocus(nameFields[i+1].focusNode);
+        };
+      }
+      else thisField.nextFunction = toFirstPhone;
+    }
+    
+    //TODO... move onto doing phone section
+
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        bool isPortrait = (orientation == Orientation.portrait);
+
+        //calc bottom bar height
+        double bottomBarHeight = 32;
+        if(isPortrait == false) bottomBarHeight = 0;
+
+        return NewContactOuterShell(
+          cancelContact: cancelContact,
+          createContact: createContact,
+          imageLocation: imageLocation,
+          onImagePicked: () => setState(() {}),
+          isPortrait: isPortrait,
+          bottomBarHeight: bottomBarHeight,
+          fields: NewContactUX(
+            bottomBarHeight: bottomBarHeight,
+            namesSpread: namesSpread,
+            nameField: nameField,
+            nameFields: nameFields,
+            nameLabels: nameLabels,
+          ),
+        );
+      }
     );
   }
 

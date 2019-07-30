@@ -1,54 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:not_at_home/newContactHelper.dart';
 
 class NewContactUX extends StatelessWidget {
   NewContactUX({
-    this.imageDiameter,
     this.bottomBarHeight,
-    this.imageLocation,
-    this.isPortrait,
-    this.contactSaved,
-    this.imagePicked,
     this.namesSpread,
 
-    this.nameFC,
-    this.prefixFC,
-    this.firstFC,
-    this.middleFC,
-    this.lastFC,
-    this.suffixFC,
-
-    this.nameCtrl,
-    this.prefixCtrl,
-    this.firstCtrl,
-    this.middleCtrl,
-    this.lastCtrl,
-    this.suffixCtrl,
+    this.nameField,
+    this.nameFields,
+    this.nameLabels,
   });
 
-  final double imageDiameter;
   final double bottomBarHeight;
-  final ValueNotifier<String> imageLocation;
-  final bool isPortrait;
-  final Function contactSaved;
-  final Function imagePicked;
   final ValueNotifier<bool> namesSpread;
 
-  final FocusNode nameFC;
-  final FocusNode prefixFC;
-  final FocusNode firstFC;
-  final FocusNode middleFC;
-  final FocusNode lastFC;
-  final FocusNode suffixFC;
-
-  final TextEditingController nameCtrl;
-  final TextEditingController prefixCtrl;
-  final TextEditingController firstCtrl;
-  final TextEditingController middleCtrl;
-  final TextEditingController lastCtrl;
-  final TextEditingController suffixCtrl;
+  final FieldData nameField;
+  final List<FieldData> nameFields;
+  final List<String> nameLabels;
 
   @override
   Widget build(BuildContext context) {
+    //create all the needed rows
+    List<Widget> nameRows = new List<Widget>();
+    for(int i = 0; i < nameLabels.length; i++){
+      FieldData thisField = nameFields[i];
+      nameRows.add(
+        new NameRow(
+          bottomBarHeight: bottomBarHeight,
+          nameOpen: namesSpread,
+          icon: (i == 0) 
+            ? Icons.keyboard_arrow_up
+            : null,
+          focusNode: thisField.focusNode,
+          controller: thisField.controller,
+          nextFunction: thisField.nextFunction,
+          label: nameLabels[i],
+        ), 
+      );
+    }
+
+    //build
     return Column(
       children: <Widget>[
         new Title(
@@ -66,53 +57,18 @@ class NewContactUX extends StatelessWidget {
             nameOpen: namesSpread,
             icon: Icons.keyboard_arrow_down,
             label: "Name",
-            focusNode: nameFC,
-            controller: nameCtrl,
+            focusNode: nameField.focusNode,
+            controller: nameField.controller,
+            nextFunction: nameField.nextFunction,
           ),
         ),
         Visibility(
           visible: namesSpread.value,
           child: Column(
-            children: <Widget>[
-              new NameRow(
-                bottomBarHeight: bottomBarHeight,
-                nameOpen: namesSpread,
-                icon: Icons.keyboard_arrow_up,
-                label: "Name prefix",
-                focusNode: prefixFC,
-                controller: prefixCtrl,
-              ), 
-              new NameRow(
-                bottomBarHeight: bottomBarHeight,
-                nameOpen: namesSpread,
-                label: "First name",
-                focusNode: firstFC,
-                controller: firstCtrl,
-              ),
-              new NameRow(
-                bottomBarHeight: bottomBarHeight,
-                nameOpen: namesSpread,
-                label: "Middle name",
-                focusNode: middleFC,
-                controller: middleCtrl,
-              ),
-              new NameRow(
-                bottomBarHeight: bottomBarHeight,
-                nameOpen: namesSpread,
-                label: "Last name",
-                focusNode: lastFC,
-                controller: lastCtrl,
-              ),
-              new NameRow(
-                bottomBarHeight: bottomBarHeight,
-                nameOpen: namesSpread,
-                label: "Name suffix",
-                focusNode: suffixFC,
-                controller: suffixCtrl,
-              ),  
-            ],
+            children: nameRows,
           ),
         ),
+        /*
         new Title( 
           icon: Icons.work,
           name: "Work",
@@ -141,6 +97,7 @@ class NewContactUX extends StatelessWidget {
             print("tapped");
           }
         ),
+        */
       ],
     );
   }
@@ -154,10 +111,11 @@ class NameRow extends StatelessWidget {
     Key key,
     @required this.bottomBarHeight,
     this.icon,
-    this.label,
-    this.nameOpen,
-    this.focusNode,
-    this.controller,
+    @required this.label,
+    @required this.nameOpen,
+    @required this.focusNode,
+    @required this.controller,
+    @required this.nextFunction,
   }) : super(key: key);
 
   final double bottomBarHeight;
@@ -166,6 +124,7 @@ class NameRow extends StatelessWidget {
   final ValueNotifier<bool> nameOpen;
   final FocusNode focusNode;
   final TextEditingController controller;
+  final Function nextFunction;
 
   @override
   Widget build(BuildContext context) {
@@ -183,6 +142,10 @@ class NameRow extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
               ),
+              onEditingComplete: (){
+                nextFunction();
+              },
+              textInputAction: TextInputAction.next,
               decoration: InputDecoration(
                 contentPadding: EdgeInsets.only(bottom: 4),
                 hintText: label,
