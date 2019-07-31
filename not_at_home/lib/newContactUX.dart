@@ -44,19 +44,17 @@ class NewContactUX extends StatelessWidget {
     List<Widget> nameRows = new List<Widget>();
     for(int i = 0; i < nameLabels.length; i++){
       FieldData thisField = nameFields[i];
+      /*
       nameRows.add(
         new NameRow(
           bottomBarHeight: bottomBarHeight,
-          nameOpen: namesSpread,
-          icon: (i == 0) 
-            ? Icons.keyboard_arrow_up
-            : null,
           focusNode: thisField.focusNode,
           controller: thisField.controller,
           nextFunction: thisField.nextFunction,
           label: nameLabels[i],
         ), 
       );
+      */
     }
 
     //build
@@ -72,20 +70,70 @@ class NewContactUX extends StatelessWidget {
         //display name = prefix, first name, middle name, last name, ',' suffix
         Visibility(
           visible: (namesSpread.value == false),
-          child: new NameRow(
-            bottomBarHeight: bottomBarHeight,
-            nameOpen: namesSpread,
-            icon: Icons.keyboard_arrow_down,
-            label: "Name",
-            focusNode: nameField.focusNode,
-            controller: nameField.controller,
-            nextFunction: nameField.nextFunction,
+          child: Container(
+            child: Row(
+              children: <Widget>[
+                Flexible(
+                  child: new NameRow(
+                    bottomBarHeight: bottomBarHeight,
+                    label: "Name",
+                    focusNode: nameField.focusNode,
+                    controller: nameField.controller,
+                    nextFunction: nameField.nextFunction,
+                  ),
+                ),
+                Container(
+                  height: 42,
+                  child: GestureDetector(
+                    onTap: (){
+                      namesSpread.value = !namesSpread.value;
+                    },
+                    child: Container(
+                      child: IconWidget(
+                        icon: Icons.keyboard_arrow_down,
+                        right: 16,
+                        left: 32,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         Visibility(
           visible: namesSpread.value,
-          child: Column(
-            children: nameRows,
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: nameRows,
+                ),
+              ),
+              Container(
+                width: 20,
+                child: Text("sdf"),
+              )
+              /*
+              Container(
+                height: 42,
+                child: GestureDetector(
+                  onTap: (){
+                    namesSpread.value = !namesSpread.value;
+                  },
+                  child: Container(
+                    child: IconWidget(
+                      icon: Icons.keyboard_arrow_down,
+                      right: 16,
+                      left: 32,
+                    ),
+                  ),
+                ),
+              ),
+              */
+            ],
           ),
         ),
         new Title( 
@@ -200,18 +248,14 @@ class NameRow extends StatelessWidget {
   const NameRow({
     Key key,
     @required this.bottomBarHeight,
-    this.icon,
     @required this.label,
-    @required this.nameOpen,
     @required this.focusNode,
     @required this.controller,
     @required this.nextFunction,
   }) : super(key: key);
 
   final double bottomBarHeight;
-  final IconData icon;
   final String label;
-  final ValueNotifier<bool> nameOpen;
   final FocusNode focusNode;
   final TextEditingController controller;
   final Function nextFunction;
@@ -219,32 +263,20 @@ class NameRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(bottom: 8),
       child: Row(
+        mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           IconWidget(),
           Flexible(
-            child: new TheField(
-              focusNode: focusNode, 
-              controller: controller, 
-              bottomBarHeight: bottomBarHeight, 
-              nextFunction: nextFunction, 
-              label: label,
-            ),
-          ),
-          GestureDetector(
-            onTap: (){
-              if(icon == down){
-                nameOpen.value = true;
-              }
-              else if(icon == up){
-                nameOpen.value = false;
-              }
-            },
-            child: IconWidget(
-              icon: icon,
-              right: 16,
-              left: 32,
+            child: Container(
+              padding: EdgeInsets.only(top: 8, bottom: 8),
+              child: new TheField(
+                focusNode: focusNode, 
+                controller: controller, 
+                bottomBarHeight: bottomBarHeight, 
+                nextFunction: nextFunction, 
+                label: label,
+              ),
             ),
           ),
         ],

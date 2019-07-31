@@ -77,7 +77,7 @@ class NewContactOuterShell extends StatelessWidget {
                         0, 
                         //push CARD CONTENT down to past the picture
                         imageDiameter * (2/7) + 16 * 2, 
-                        16, 
+                        0, 
                         16,
                       ),
                       child: fields,
