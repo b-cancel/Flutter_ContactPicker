@@ -44,7 +44,6 @@ class NewContactUX extends StatelessWidget {
     List<Widget> nameRows = new List<Widget>();
     for(int i = 0; i < nameLabels.length; i++){
       FieldData thisField = nameFields[i];
-      /*
       nameRows.add(
         new NameRow(
           bottomBarHeight: bottomBarHeight,
@@ -54,11 +53,11 @@ class NewContactUX extends StatelessWidget {
           label: nameLabels[i],
         ), 
       );
-      */
     }
 
     //build
     return Column(
+      mainAxisSize: MainAxisSize.max,
       children: <Widget>[
         new Title(
           icon: Icons.person,
@@ -82,18 +81,31 @@ class NewContactUX extends StatelessWidget {
                     nextFunction: nameField.nextFunction,
                   ),
                 ),
-                Container(
-                  height: 42,
-                  child: GestureDetector(
-                    onTap: (){
-                      namesSpread.value = !namesSpread.value;
-                    },
-                    child: Container(
-                      child: IconWidget(
-                        icon: Icons.keyboard_arrow_down,
-                        right: 16,
-                        left: 32,
-                      ),
+                FlatButton(
+                  padding: EdgeInsets.all(0),
+                  splashColor: Colors.transparent,  
+                  highlightColor: Colors.transparent,
+                  onPressed: (){
+                    namesSpread.value = !namesSpread.value;
+                  },
+                  child: Container(
+                    height: 42,
+                    width: 80,
+                    padding: EdgeInsets.only(right: 0),
+                    alignment: Alignment.topCenter,
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          height: 42,
+                          width: 24,
+                          child: Icon(
+                            Icons.keyboard_arrow_down,
+                          ),
+                        ),
+                        Expanded(
+                          child: Container(),
+                        )
+                      ],
                     ),
                   ),
                 ),
@@ -108,31 +120,62 @@ class NewContactUX extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: nameRows,
                 ),
               ),
               Container(
-                width: 20,
-                child: Text("sdf"),
-              )
-              /*
-              Container(
-                height: 42,
-                child: GestureDetector(
-                  onTap: (){
-                    namesSpread.value = !namesSpread.value;
-                  },
-                  child: Container(
-                    child: IconWidget(
-                      icon: Icons.keyboard_arrow_down,
-                      right: 16,
-                      left: 32,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    /*
+                    //GUIDE BELOW
+                    Container(
+                      color: Colors.pink,
+                      //32 from right + 24 icon + 24 left
+                      width: 80,
+                      padding: EdgeInsets.only(
+                        left: 24,
+                        right: 32,
+                      ),
+                      child: Container(
+                        width: 24,
+                        height: 42,
+                        color: Colors.green,
+                      ),
                     ),
-                  ),
+                    */
+                    FlatButton(
+                      padding: EdgeInsets.all(0),
+                      splashColor: Colors.transparent,  
+                      highlightColor: Colors.transparent,
+                      onPressed: (){
+                        namesSpread.value = !namesSpread.value;
+                      },
+                      child: Container(
+                        height: 42 * 5.0,
+                        width: 80,
+                        padding: EdgeInsets.only(right: 0),
+                        alignment: Alignment.topCenter,
+                        child: Column(
+                          children: <Widget>[
+                            Container(
+                              height: 42,
+                              width: 24,
+                              child: Icon(
+                                Icons.keyboard_arrow_up,
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              */
             ],
           ),
         ),
@@ -164,7 +207,7 @@ class NewContactUX extends StatelessWidget {
           child: Column(
             children: <Widget>[
               Container(
-                padding: EdgeInsets.only(bottom: 8),
+                padding: EdgeInsets.only(bottom: 16, right: 32),
                 child: Row(
                   children: <Widget>[
                     IconWidget(),
@@ -181,7 +224,7 @@ class NewContactUX extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: EdgeInsets.only(bottom: 8),
+                padding: EdgeInsets.only(bottom: 16, right: 32),
                 child: Row(
                   children: <Widget>[
                     IconWidget(),
@@ -219,7 +262,7 @@ class NewContactUX extends StatelessWidget {
         Visibility(
           visible: noteOpen.value,
           child: Container(
-            padding: EdgeInsets.only(bottom: 8),
+            padding: EdgeInsets.only(bottom: 16, right: 32),
             child: Row(
               children: <Widget>[
                 IconWidget(),
