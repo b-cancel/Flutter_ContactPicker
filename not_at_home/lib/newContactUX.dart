@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:not_at_home/newContactHelper.dart';
 
 //phones, emails, work (job title, company), addresses, note
@@ -62,6 +63,7 @@ class NewContactUX extends StatelessWidget {
         new Title(
           icon: Icons.person,
           name: "Name",
+          onPressed: null,
         ),
         //displayName, givenName, middleName, prefix, suffix, familyName;
         //Name prefix(prefix), Name suffix(suffix)
@@ -81,33 +83,13 @@ class NewContactUX extends StatelessWidget {
                     nextFunction: nameField.nextFunction,
                   ),
                 ),
-                FlatButton(
-                  padding: EdgeInsets.all(0),
-                  splashColor: Colors.transparent,  
-                  highlightColor: Colors.transparent,
+                RightIconButton(
                   onPressed: (){
                     namesSpread.value = !namesSpread.value;
                   },
-                  child: Container(
-                    height: 42,
-                    width: 80,
-                    padding: EdgeInsets.only(right: 0),
-                    alignment: Alignment.topCenter,
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          height: 42,
-                          width: 24,
-                          child: Icon(
-                            Icons.keyboard_arrow_down,
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(),
-                        )
-                      ],
-                    ),
-                  ),
+                  height: 42,
+                  icon: Icon(Icons.keyboard_arrow_down),
+                  padding: EdgeInsets.only(left: 8),
                 ),
               ],
             ),
@@ -136,7 +118,7 @@ class NewContactUX extends StatelessWidget {
                       width: 80,
                       padding: EdgeInsets.only(
                         left: 24,
-                        right: 32,
+                        right: 24,
                       ),
                       child: Container(
                         width: 24,
@@ -155,7 +137,7 @@ class NewContactUX extends StatelessWidget {
                       child: Container(
                         height: 42 * 5.0,
                         width: 80,
-                        padding: EdgeInsets.only(right: 0),
+                        padding: EdgeInsets.only(left: 8),
                         alignment: Alignment.topCenter,
                         child: Column(
                           children: <Widget>[
@@ -184,14 +166,64 @@ class NewContactUX extends StatelessWidget {
           name: "Phone",
           onPressed: (){
             print("tapped phone");
-          }
+          },
+          rightButton: RightIconButton(
+            height: 42,
+            icon: Icon(
+              Icons.add,
+              color: Colors.green,
+            ),
+          ),
+        ),
+        Column(
+          children: <Widget>[
+            //PHONE START-------------------------
+            Container(
+              child: Row(
+                children: <Widget>[
+                  IconWidget(),
+                  Flexible(
+                    child: TheField(
+                      focusNode: jobTitleField.focusNode, 
+                      controller: jobTitleField.controller, 
+                      bottomBarHeight: bottomBarHeight, 
+                      nextFunction: jobTitleField.nextFunction, 
+                      label: "Phone 1",
+                    ),
+                  ),
+                  Container(
+                    child: RightIconButton(
+                      height: 42,
+                      onPressed: (){
+                        print("right icon button pressed");
+                      },
+                      icon: Icon(
+                        FontAwesomeIcons.minus,
+                        color: Colors.red,
+                        size: 16,
+                      ),
+                      padding: EdgeInsets.only(left: 8),
+                    ),
+                  ),
+                ]
+              ),
+            ),
+            //PHONE END-------------------------
+          ],
         ),
         new Title( 
           icon: Icons.email,
           name: "Email",
           onPressed: (){
             print("tapped email");
-          }
+          },
+          rightButton: RightIconButton(
+            height: 42,
+            icon: Icon(
+              Icons.add,
+              color: Colors.green,
+            ),
+          ),
         ),
         new Title( 
           icon: Icons.work,
@@ -206,38 +238,22 @@ class NewContactUX extends StatelessWidget {
           visible: workOpen.value,
           child: Column(
             children: <Widget>[
-              Container(
-                padding: EdgeInsets.only(bottom: 16, right: 32),
-                child: Row(
-                  children: <Widget>[
-                    IconWidget(),
-                    Flexible(
-                      child: TheField(
-                        focusNode: jobTitleField.focusNode, 
-                        controller: jobTitleField.controller, 
-                        bottomBarHeight: bottomBarHeight, 
-                        nextFunction: jobTitleField.nextFunction, 
-                        label: "Job title",
-                      ),
-                    ),
-                  ]
+              RegularItemSpacing(
+                theField: TheField(
+                  focusNode: jobTitleField.focusNode, 
+                  controller: jobTitleField.controller, 
+                  bottomBarHeight: bottomBarHeight, 
+                  nextFunction: jobTitleField.nextFunction, 
+                  label: "Job title",
                 ),
               ),
-              Container(
-                padding: EdgeInsets.only(bottom: 16, right: 32),
-                child: Row(
-                  children: <Widget>[
-                    IconWidget(),
-                    Flexible(
-                      child: TheField(
-                        focusNode: companyField.focusNode, 
-                        controller: companyField.controller, 
-                        bottomBarHeight: bottomBarHeight, 
-                        nextFunction: companyField.nextFunction, 
-                        label: "Company",
-                      ),
-                    ),
-                  ]
+              RegularItemSpacing(
+                theField: TheField(
+                  focusNode: companyField.focusNode, 
+                  controller: companyField.controller, 
+                  bottomBarHeight: bottomBarHeight, 
+                  nextFunction: companyField.nextFunction, 
+                  label: "Company",
                 ),
               ),
             ],
@@ -248,7 +264,14 @@ class NewContactUX extends StatelessWidget {
           name: "Address",
           onPressed: (){
             print("tapped address");
-          }
+          },
+          rightButton: RightIconButton(
+            height: 42,
+            icon: Icon(
+              Icons.add,
+              color: Colors.green,
+            ),
+          ),
         ),
         new Title( 
           icon: Icons.note,
@@ -412,18 +435,24 @@ class Title extends StatelessWidget {
   final IconData icon;
   final String name;
   final Function onPressed;
+  final Widget rightButton;
 
   const Title({
-    this.icon,
-    this.name,
-    this.onPressed,
+    @required this.icon,
+    @required this.name,
+    @required this.onPressed,
+    this.rightButton,
     Key key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     Container theTitle = Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.only(
+        left: 16, 
+        bottom: 16, 
+        top: 16,
+      ),
       child: Row(
         children: <Widget>[
           Container(
@@ -433,13 +462,16 @@ class Title extends StatelessWidget {
               color: Theme.of(context).primaryColorLight,
             ),
           ),
-          Text(
-            name,
-            style: TextStyle(
-              color: Theme.of(context).primaryColorLight,
-              fontSize: 20,
+          Expanded(
+            child: Text(
+              name,
+              style: TextStyle(
+                color: Theme.of(context).primaryColorLight,
+                fontSize: 20,
+              ),
             ),
           ),
+          rightButton ?? Container(),
         ],
       ),
     );
@@ -447,10 +479,76 @@ class Title extends StatelessWidget {
     //whether or not the area is clickable
     if(onPressed == null) return theTitle;
     else{
-      return InkWell(
-        onTap: onPressed,
+      return FlatButton(
+        padding: EdgeInsets.all(0),
+        onPressed: onPressed,
         child: theTitle,
       );
     }
+  }
+}
+
+class RightIconButton extends StatelessWidget {
+  RightIconButton({
+    this.onPressed,
+    this.height,
+    this.icon,
+    this.padding,
+  });
+
+  final Function onPressed;
+  final double height;
+  final Icon icon;
+  final EdgeInsets padding;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget child = Container(
+      height: height,
+      width: 80,
+      alignment: Alignment.center,
+      padding: padding,
+      child: Container(
+        width: 24,
+        child: icon,
+      ),
+    );
+
+    //button or no button
+    if(onPressed == null){
+      return child;
+    }
+    else{
+      return FlatButton(
+        padding: EdgeInsets.all(0),
+        splashColor: Colors.transparent,  
+        highlightColor: Colors.transparent,
+        onPressed: onPressed,
+        child: child,
+      );
+    } 
+  }
+}
+
+class RegularItemSpacing extends StatelessWidget {
+  RegularItemSpacing({
+    this.theField,
+  });
+
+  final Widget theField;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(bottom: 16, right: 32),
+      child: Row(
+        children: <Widget>[
+          IconWidget(),
+          Flexible(
+            child: theField,
+          ),
+        ]
+      ),
+    );
   }
 }
