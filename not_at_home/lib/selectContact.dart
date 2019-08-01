@@ -294,6 +294,38 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
 
       //add all these items into the section
       sectionWidgets.add(
+        StickyHeaderBuilder(
+          builder: (context, stuckAmount) {
+            stuckAmount = stuckAmount.clamp(0.0, 1.0);
+            return Container(
+              color: Theme.of(context).primaryColor,
+              padding: new EdgeInsets.only(
+                left: 32,
+                right: 16,
+                top: 16 + (40 * (1-stuckAmount)), //16,
+                bottom: 8,
+              ),
+              alignment: Alignment.centerLeft,
+              child: new Text(
+                String.fromCharCode(key),
+                style: TextStyle(
+                  fontSize: 12,
+                ),
+              ),
+            );
+          },
+          content: Card(
+            margin: EdgeInsets.all(0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25.0),
+            ),
+            child: Column(
+              children: widgetsWithDividers,
+            ),
+          ),
+        ),
+
+        /*
         new StickyHeader(
           header: new Container(
             color: Theme.of(context).primaryColor,
@@ -311,28 +343,9 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
               ),
             ),
           ),
-          content: Card(
-            margin: EdgeInsets.all(0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25.0),
-            ),
-            child: Column(
-              children: widgetsWithDividers,
-            ),
-          ),
+          content: 
         ),
-      );
-    }
-
-    //IF there are atleast 2 contacts with the last same first letter
-    //then we will not have placed it inside sectionWidgets
-    if(letterToListItems.isEmpty == false){
-      sectionWidgets.add(
-        Card(
-          child: Column(
-            children: sectionWidgets,
-          ),
-        ),
+        */
       );
     }
 

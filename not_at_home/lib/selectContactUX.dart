@@ -54,141 +54,151 @@ class SelectContactUX extends StatelessWidget {
 
     //build widgets
     return Scaffold(
-      body: Stack(
-        children: <Widget>[
-          NotificationListener<ScrollNotification>(
-            onNotification: (ScrollNotification scrollNotification) {
-              //do your logic
-              if(scrollNotification is ScrollUpdateNotification){
-                Offset change = scrollNotification.dragDetails?.delta;
-                //if a change actually occured
-                if(change != null){
-                  //stop slow scrolling from making any changes
-                  double absoluteChange = math.sqrt(math.pow(change.dy, 2));
-                  if(absoluteChange > 2.5){
-                    //show one thing or the other given our scroll direction
-                    showNewContact.value = (change.dy > 0);
+      body: SafeArea(
+        child: Stack(
+          children: <Widget>[
+            NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification scrollNotification) {
+                //do your logic
+                if(scrollNotification is ScrollUpdateNotification){
+                  Offset change = scrollNotification.dragDetails?.delta;
+                  //if a change actually occured
+                  if(change != null){
+                    //stop slow scrolling from making any changes
+                    double absoluteChange = math.sqrt(math.pow(change.dy, 2));
+                    if(absoluteChange > 2.5){
+                      //show one thing or the other given our scroll direction
+                      showNewContact.value = (change.dy > 0);
+                    }
                   }
                 }
-              }
-              //return true since this function requires it
-              return true;
-            },
-            child: Container(
-              color: Theme.of(context).primaryColor,
-              child: CustomScrollView(
-                slivers: <Widget>[
-                  SliverAppBar(
-                    //true so that we get the safe area added on top
-                    primary: true,
-
-                    //Pinned MUST be True for ease of use
-                    pinned: true, //show the user then can search regardless of where they are on the list
-                    //Floating MUST be true so for ease of use
-                    floating: true, //show scroll bar as soon as user starts scrolling up
-                    //Snap is TRUE so that our flexible space result looks as best as it can
-                    snap: false, //but NAW its FALSE cuz it snaps weird...
+                //return true since this function requires it
+                return true;
+              },
+              child: Container(
+                color: Theme.of(context).primaryColor,
+                child: CustomScrollView(
+                  slivers: <Widget>[
                     
-                    //Lets the user know what they are select a contact for
-                    expandedHeight: MediaQuery.of(context).size.height / 2,
-                    flexibleSpace: FlexibleSpaceBar(
-                      title: Container(
-                        padding: EdgeInsets.fromLTRB(
-                          0, 
-                          //random height / 4 + 16 actual padding
-                          (MediaQuery.of(context).size.height / 4) + 16, 
-                          0, 
-                          //random 16 + 16 actual padding
-                          16 + 16.0, 
+                    SliverAppBar(
+                      //true so that we get the safe area added on top
+                      primary: true,
+
+                      //Pinned MUST be True for ease of use
+                      pinned: true, //show the user then can search regardless of where they are on the list
+                      //Floating MUST be true so for ease of use
+                      floating: true, //show scroll bar as soon as user starts scrolling up
+                      //Snap is TRUE so that our flexible space result looks as best as it can
+                      snap: false, //but NAW its FALSE cuz it snaps weird...
+                      
+                      //Lets the user know what they are select a contact for
+                      expandedHeight: MediaQuery.of(context).size.height / 2,
+                      flexibleSpace: FlexibleSpaceBar(
+                        title: Container(
+                          color: Colors.transparent,
+                          padding: EdgeInsets.fromLTRB(
+                            0, 
+                            //random height / 4 + 16 actual padding
+                            (MediaQuery.of(context).size.height / 4) + 16, 
+                            0, 
+                            //random 16 + 16 actual padding
+                            16 + 16.0, 
+                          ),
+                          height: MediaQuery.of(context).size.height,
+                          width: MediaQuery.of(context).size.width,
+                          child: Container(
+                            color: Colors.transparent,
+                            alignment: Alignment.center,
+                            child: RichText(
+                              textAlign: TextAlign.center,
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: "Prompt The User\n",
+                                    style: questionStyle,
+                                  ),
+                                  TextSpan(
+                                    text: "For A Contact",
+                                    style: questionStyle,
+                                  )
+                                ]
+                              ),
+                            ),
+                          )
                         ),
-                        height: MediaQuery.of(context).size.height,
-                        width: MediaQuery.of(context).size.width,
+                        centerTitle: true,
+                        collapseMode: CollapseMode.none,
+                      ),
+
+                      //Lets the user know they can search
+                      bottom: PreferredSize(
+                        preferredSize: Size(
+                          MediaQuery.of(context).size.width,
+                          (20 + 16.0 + 4.0),
+                        ),
                         child: Container(
-                          alignment: Alignment.center,
-                          child: RichText(
-                            textAlign: TextAlign.center,
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "Prompt The User\n",
-                                  style: questionStyle,
-                                ),
-                                TextSpan(
-                                  text: "For A Contact",
-                                  style: questionStyle,
-                                )
-                              ]
+                          padding: EdgeInsets.only(
+                            left: 8,
+                            right: 8,
+                            bottom: 8,
+                            top: 8
+                          ),
+                          width: MediaQuery.of(context).size.width,
+                          child: DefaultTextStyle(
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text("Select Contact"),
+                                Icon(Icons.search)
+                              ],
                             ),
                           ),
-                        )
-                      ),
-                      centerTitle: true,
-                      collapseMode: CollapseMode.none,
-                    ),
-
-                    //Lets the user know they can search
-                    bottom: PreferredSize(
-                      preferredSize: Size(
-                        MediaQuery.of(context).size.width,
-                        (20 + 16.0 + 4.0),
-                      ),
-                      child: Container(
-                        padding: EdgeInsets.all(8),
-                        width: MediaQuery.of(context).size.width,
-                        child: DefaultTextStyle(
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Text("Select Contact"),
-                              Icon(Icons.search)
-                            ],
-                          ),
                         ),
                       ),
                     ),
-                  ),
-                  bodyWidget,
-                ],
+                    bodyWidget,
+                  ],
+                ),
               ),
             ),
-          ),
 
-          //Let the user know they can add a new contact
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: AnimatedBuilder(
-              animation: showNewContact,
-              builder: (context, child){
-                return Opacity(
-                  opacity: (showNewContact.value) ? 1 : 0,
-                  child: Container(
-                    padding: EdgeInsets.all(16),
-                    child: FloatingActionButton.extended(
-                      onPressed: (){
-                        backFromNewContact.value = true;
-                        Navigator.push(
-                          context, PageTransition(
-                            type: PageTransitionType.rightToLeft,
-                            child: NewContact(
-                              onSelect: onSelect,
+            //Let the user know they can add a new contact
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: AnimatedBuilder(
+                animation: showNewContact,
+                builder: (context, child){
+                  return Opacity(
+                    opacity: (showNewContact.value) ? 1 : 0,
+                    child: Container(
+                      padding: EdgeInsets.all(16),
+                      child: FloatingActionButton.extended(
+                        onPressed: (){
+                          backFromNewContact.value = true;
+                          Navigator.push(
+                            context, PageTransition(
+                              type: PageTransitionType.rightToLeft,
+                              child: NewContact(
+                                onSelect: onSelect,
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                      icon: Icon(Icons.add),
-                      label: Text("Create Contact"),
+                          );
+                        },
+                        icon: Icon(Icons.add),
+                        label: Text("Create Contact"),
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
