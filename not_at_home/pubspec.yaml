@@ -30,6 +30,7 @@ dependencies:
   contacts_service: ^0.2.9
   font_awesome_flutter: ^8.4.0
   image: ^2.1.4 #
+  sticky_headers: "^0.1.8"
   #---permission plugins
   #permission_handler: ^3.2.0 #don't upgrade beyond this (works but not fully)
   permission: ^0.1.2 #works not tested

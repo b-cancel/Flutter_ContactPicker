@@ -6,6 +6,7 @@ import 'package:not_at_home/permission.dart';
 import 'package:not_at_home/request.dart';
 import 'package:not_at_home/selectContactUX.dart';
 import 'package:permission/permission.dart';
+import 'package:sticky_headers/sticky_headers.dart';
 
 import 'contactTile.dart';
 
@@ -241,16 +242,96 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //build
   @override
   Widget build(BuildContext context) {
-    //convert the retreived contacts into widgets
-    List<Widget> contactWidgets = new List<Widget>();
 
-    //for each contact that we do have create the appropriate widget
+    //for each contact letter assemble a list of widget
+    Map<int, List<Widget>> letterToListItems = new Map<int,List<Widget>>();
     for(int i = 0; i < contacts.length; i++){
-      contactWidgets.add(
+      //create the new list if we have to
+      int letterCode = contacts[i].givenName?.toUpperCase()?.codeUnitAt(0) ?? 63;
+      if(letterToListItems.containsKey(letterCode) == false){
+        letterToListItems[letterCode] = new List<Widget>();
+      }
+
+      //add to the list
+      letterToListItems[letterCode].add(
         ContactListTile(
           thisContact: contacts[i],
           thisColor: colorsForContacts[i],
           onSelect: onSelect,
+        ),
+      );
+    }
+
+    //sort keys
+    List<int> sortedKeys = letterToListItems.keys.toList();
+    sortedKeys.sort();
+
+    //iterate through all letters
+    List<Widget> sectionWidgets = new List<Widget>();
+    for(int i = 0; i < sortedKeys.length; i++){
+      List<Widget> widgetsWithDividers = new List<Widget>();
+      int key = sortedKeys[i];
+
+      //go through keys, grab widgets, and place dividers between
+      List<Widget> widgetsForSection = letterToListItems[key];
+      for(int item = 0; item < widgetsForSection.length; item++){
+        //add divider above all items except first
+        if(item > 0){
+          widgetsWithDividers.add(
+            Padding(
+              padding: EdgeInsets.only(left: 80, right: 24),
+              child: Container(
+                color: Theme.of(context).dividerColor,
+                height: 2,
+              ),
+            ),
+          );
+        }
+
+        //add widget
+        widgetsWithDividers.add(widgetsForSection[item]);
+      }
+
+      //add all these items into the section
+      sectionWidgets.add(
+        new StickyHeader(
+          header: new Container(
+            color: Theme.of(context).primaryColor,
+            padding: new EdgeInsets.only(
+              left: 32,
+              right: 16,
+              top: 16,
+              bottom: 8,
+            ),
+            alignment: Alignment.centerLeft,
+            child: new Text(
+              String.fromCharCode(key),
+              style: TextStyle(
+                fontSize: 12,
+              ),
+            ),
+          ),
+          content: Card(
+            margin: EdgeInsets.all(0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25.0),
+            ),
+            child: Column(
+              children: widgetsWithDividers,
+            ),
+          ),
+        ),
+      );
+    }
+
+    //IF there are atleast 2 contacts with the last same first letter
+    //then we will not have placed it inside sectionWidgets
+    if(letterToListItems.isEmpty == false){
+      sectionWidgets.add(
+        Card(
+          child: Column(
+            children: sectionWidgets,
+          ),
         ),
       );
     }
@@ -262,7 +343,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       onWillPop: () async => !(widget.forceSelection && !firstPage),
       child: SelectContactUX(
         retreivingContacts: retreivingContacts,
-        contactWidgets: contactWidgets,
+        sectionWidgets: sectionWidgets,
         backFromNewContact: backFromNewContactPage,
         onSelect: onSelect,
       ),

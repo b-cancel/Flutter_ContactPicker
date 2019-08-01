@@ -7,13 +7,13 @@ import 'dart:math' as math;
 class SelectContactUX extends StatelessWidget {
   SelectContactUX({
     this.retreivingContacts: false,
-    @required this.contactWidgets,
+    @required this.sectionWidgets,
     @required this.backFromNewContact,
     @required this.onSelect,
   });
 
   final bool retreivingContacts;
-  final List<Widget> contactWidgets;
+  final List<Widget> sectionWidgets;
   final ValueNotifier<bool> backFromNewContact;
   final Function onSelect;
 
@@ -30,7 +30,7 @@ class SelectContactUX extends StatelessWidget {
     //Generate the Widget shown in the contacts scroll area
     //Depending on whether or not there are contacts or they are being retreived
     Widget bodyWidget;
-    if(retreivingContacts || contactWidgets.length == 0){
+    if(retreivingContacts || sectionWidgets.length == 0){
       bodyWidget = SliverFillRemaining(
         child: Container(
           alignment: Alignment.center,
@@ -47,7 +47,7 @@ class SelectContactUX extends StatelessWidget {
     else{
       bodyWidget = SliverList(
         delegate: SliverChildListDelegate(
-          contactWidgets,
+          sectionWidgets,
         )
       );
     }
@@ -74,83 +74,86 @@ class SelectContactUX extends StatelessWidget {
               //return true since this function requires it
               return true;
             },
-            child: CustomScrollView(
-              slivers: <Widget>[
-                SliverAppBar(
-                  //true so that we get the safe area added on top
-                  primary: true,
+            child: Container(
+              color: Theme.of(context).primaryColor,
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  SliverAppBar(
+                    //true so that we get the safe area added on top
+                    primary: true,
 
-                  //Pinned MUST be True for ease of use
-                  pinned: true, //show the user then can search regardless of where they are on the list
-                  //Floating MUST be true so for ease of use
-                  floating: true, //show scroll bar as soon as user starts scrolling up
-                  //Snap is TRUE so that our flexible space result looks as best as it can
-                  snap: false, //but NAW its FALSE cuz it snaps weird...
-                  
-                  //Lets the user know what they are select a contact for
-                  expandedHeight: MediaQuery.of(context).size.height / 2,
-                  flexibleSpace: FlexibleSpaceBar(
-                    title: Container(
-                      padding: EdgeInsets.fromLTRB(
-                        0, 
-                        //random height / 4 + 16 actual padding
-                        (MediaQuery.of(context).size.height / 4) + 16, 
-                        0, 
-                        //random 16 + 16 actual padding
-                        16 + 16.0, 
+                    //Pinned MUST be True for ease of use
+                    pinned: true, //show the user then can search regardless of where they are on the list
+                    //Floating MUST be true so for ease of use
+                    floating: true, //show scroll bar as soon as user starts scrolling up
+                    //Snap is TRUE so that our flexible space result looks as best as it can
+                    snap: false, //but NAW its FALSE cuz it snaps weird...
+                    
+                    //Lets the user know what they are select a contact for
+                    expandedHeight: MediaQuery.of(context).size.height / 2,
+                    flexibleSpace: FlexibleSpaceBar(
+                      title: Container(
+                        padding: EdgeInsets.fromLTRB(
+                          0, 
+                          //random height / 4 + 16 actual padding
+                          (MediaQuery.of(context).size.height / 4) + 16, 
+                          0, 
+                          //random 16 + 16 actual padding
+                          16 + 16.0, 
+                        ),
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width,
+                        child: Container(
+                          alignment: Alignment.center,
+                          child: RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Prompt The User\n",
+                                  style: questionStyle,
+                                ),
+                                TextSpan(
+                                  text: "For A Contact",
+                                  style: questionStyle,
+                                )
+                              ]
+                            ),
+                          ),
+                        )
                       ),
-                      height: MediaQuery.of(context).size.height,
-                      width: MediaQuery.of(context).size.width,
+                      centerTitle: true,
+                      collapseMode: CollapseMode.none,
+                    ),
+
+                    //Lets the user know they can search
+                    bottom: PreferredSize(
+                      preferredSize: Size(
+                        MediaQuery.of(context).size.width,
+                        (20 + 16.0 + 4.0),
+                      ),
                       child: Container(
-                        alignment: Alignment.center,
-                        child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Prompt The User\n",
-                                style: questionStyle,
-                              ),
-                              TextSpan(
-                                text: "For A Contact",
-                                style: questionStyle,
-                              )
-                            ]
+                        padding: EdgeInsets.all(8),
+                        width: MediaQuery.of(context).size.width,
+                        child: DefaultTextStyle(
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text("Select Contact"),
+                              Icon(Icons.search)
+                            ],
                           ),
                         ),
-                      )
-                    ),
-                    centerTitle: true,
-                    collapseMode: CollapseMode.none,
-                  ),
-
-                  //Lets the user know they can search
-                  bottom: PreferredSize(
-                    preferredSize: Size(
-                      MediaQuery.of(context).size.width,
-                      (20 + 16.0 + 4.0),
-                    ),
-                    child: Container(
-                      padding: EdgeInsets.all(8),
-                      width: MediaQuery.of(context).size.width,
-                      child: DefaultTextStyle(
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text("Select Contact"),
-                            Icon(Icons.search)
-                          ],
-                        ),
                       ),
                     ),
                   ),
-                ),
-                bodyWidget,
-              ],
+                  bodyWidget,
+                ],
+              ),
             ),
           ),
 
