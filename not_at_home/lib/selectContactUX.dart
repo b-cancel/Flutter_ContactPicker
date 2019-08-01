@@ -4,6 +4,8 @@ import 'package:page_transition/page_transition.dart';
 import 'newContact.dart';
 import 'dart:math' as math;
 
+import 'package:vector_math/vector_math_64.dart' as VECT;
+
 class SelectContactUX extends StatelessWidget {
   SelectContactUX({
     this.retreivingContacts: false,
@@ -23,7 +25,6 @@ class SelectContactUX extends StatelessWidget {
   Widget build(BuildContext context) {
     //Styling of the User Question Prompt
     TextStyle questionStyle = TextStyle(
-      fontSize: 26,
       fontWeight: FontWeight.bold,
     );
 
@@ -173,8 +174,15 @@ class SelectContactUX extends StatelessWidget {
               child: AnimatedBuilder(
                 animation: showNewContact,
                 builder: (context, child){
-                  return Opacity(
-                    opacity: (showNewContact.value) ? 1 : 0,
+                  return AnimatedContainer(
+                    duration: Duration(milliseconds: 200),
+                    transform: Matrix4.translation(
+                      VECT.Vector3(
+                        0, 
+                        (showNewContact.value) ? 0.0 : (16.0 + 48), 
+                        0,
+                      ),
+                    ),
                     child: Container(
                       padding: EdgeInsets.all(16),
                       child: FloatingActionButton.extended(
