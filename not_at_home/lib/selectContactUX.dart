@@ -52,6 +52,28 @@ class SelectContactUX extends StatelessWidget {
         )
       );
     }
+    
+    //User Prompt
+    Widget prompt = RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: "Prompt The User\n",
+            style: questionStyle,
+          ),
+          TextSpan(
+            text: "For A Contact",
+            style: questionStyle,
+          )
+        ]
+      ),
+    );
+
+    //width of screen
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    print("screenwidth " + screenWidth.toString());
 
     //build widgets
     return Scaffold(
@@ -91,43 +113,30 @@ class SelectContactUX extends StatelessWidget {
                       floating: true, //show scroll bar as soon as user starts scrolling up
                       //Snap is TRUE so that our flexible space result looks as best as it can
                       snap: false, //but NAW its FALSE cuz it snaps weird...
+
+                      //NOTE: title and leading not being used 
+                      //because they are simply above the flexible widget
+                      //but it hides after the flexible widget gets closed
                       
                       //Lets the user know what they are select a contact for
-                      expandedHeight: MediaQuery.of(context).size.height / 2,
+                      expandedHeight: MediaQuery.of(context).size.height / 3,
                       flexibleSpace: FlexibleSpaceBar(
-                        title: Container(
-                          color: Colors.transparent,
-                          padding: EdgeInsets.fromLTRB(
-                            0, 
-                            //random height / 4 + 16 actual padding
-                            (MediaQuery.of(context).size.height / 4) + 16, 
-                            0, 
-                            //random 16 + 16 actual padding
-                            16 + 16.0, 
-                          ),
-                          height: MediaQuery.of(context).size.height,
-                          width: MediaQuery.of(context).size.width,
-                          child: Container(
-                            color: Colors.transparent,
-                            alignment: Alignment.center,
-                            child: RichText(
-                              textAlign: TextAlign.center,
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: "Prompt The User\n",
-                                    style: questionStyle,
-                                  ),
-                                  TextSpan(
-                                    text: "For A Contact",
-                                    style: questionStyle,
-                                  )
-                                ]
-                              ),
-                            ),
-                          )
-                        ),
                         centerTitle: true,
+                        titlePadding: EdgeInsets.only(
+                          bottom: 40,
+                        ),
+                        title: Container(
+                          color: Colors.blue,
+                          width: screenWidth,
+                          padding: EdgeInsets.all(16),
+                          child: Container(
+                            color: Colors.red,
+                            child: prompt,
+                          ),
+                        ),
+                        //this does not seem to make any difference
+                        //but it MIGHT so ill keep it
+                        //it changes FlexibleSpaceBarSettings
                         collapseMode: CollapseMode.none,
                       ),
 
@@ -135,15 +144,13 @@ class SelectContactUX extends StatelessWidget {
                       bottom: PreferredSize(
                         preferredSize: Size(
                           MediaQuery.of(context).size.width,
-                          (20 + 16.0 + 4.0),
+                          //16 from top and bottom padding below
+                          //24 from the content in the child
+                          16.0 + 24.0,
                         ),
                         child: Container(
-                          padding: EdgeInsets.only(
-                            left: 8,
-                            right: 8,
-                            bottom: 8,
-                            top: 8
-                          ),
+                          color: Theme.of(context).primaryColor,
+                          padding: EdgeInsets.all(8),
                           width: MediaQuery.of(context).size.width,
                           child: DefaultTextStyle(
                             style: TextStyle(
