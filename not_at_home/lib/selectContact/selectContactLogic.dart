@@ -28,6 +28,7 @@ enum SelectContactBackUp {manualInput, systemContactPicker}
 
 class SelectContact extends StatefulWidget {
   SelectContact({
+    @required this.userPrompt,
     @required this.routeName,
     @required this.forceSelection, 
     this.selectContactBackUp: SelectContactBackUp.manualInput,
@@ -36,6 +37,7 @@ class SelectContact extends StatefulWidget {
   });
 
   //required
+  final List<String> userPrompt;
   final String routeName;
   final bool forceSelection;
   //IF the user does not want to give us permission
@@ -347,6 +349,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         sectionWidgets: sectionWidgets,
         backFromNewContact: backFromNewContactPage,
         onSelect: onSelect,
+        userPrompt: widget.userPrompt,
       ),
     );
   }

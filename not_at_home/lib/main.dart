@@ -69,6 +69,7 @@ class _InitRouterState extends State<InitRouter> {
             duration: Duration(seconds: 0),
             //since this is how the app starts the user MUST select a contact
             child: SelectContact(
+              userPrompt: ["Prompt The User", "For A Contact"],
               selectContactBackUp: SelectContactBackUp.systemContactPicker,
               routeName: ContactDisplayHelper.routeName,
               forceSelection: true,

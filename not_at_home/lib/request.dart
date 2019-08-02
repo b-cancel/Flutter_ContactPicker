@@ -100,6 +100,7 @@ class _ContactDisplayState extends State<ContactDisplay> {
                       context, PageTransition(
                         type: PageTransitionType.rightToLeft,
                         child: SelectContact(
+                          userPrompt: ["Prompt The User", "For A Contact"],
                           selectContactBackUp: SelectContactBackUp.systemContactPicker,
                           routeName: ContactDisplayHelper.routeName,
                           forceSelection: forceContactUpdate,
