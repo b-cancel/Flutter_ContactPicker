@@ -7,6 +7,19 @@ import 'package:not_at_home/newContact.dart';
 
 import 'package:scroll_to_index/scroll_to_index.dart';
 
+//add search bar
+//https://blog.usejournal.com/flutter-search-in-listview-1ffa40956685
+
+//Potential but complicated
+//https://github.com/zhahao/list_view_item_builder
+
+//Scrollable.ensureVisible(_key);
+
+/*
+await controller.scrollToIndex(verseID, preferPosition: AutoScrollPosition.begin);
+controller.highlight(verseID);
+*/
+
 class SelectContactUX extends StatefulWidget {
   SelectContactUX({
     this.retreivingContacts: false,
@@ -208,6 +221,24 @@ class _SelectContactUXState extends State<SelectContactUX> {
                   );
                 }
 
+                List<Widget> scrollBarItems = new List<Widget>();
+                for(int i = 0; i < widget.sortedKeys.length; i++){
+                  Color color = (i%2==0) ? Colors.red : Colors.blue;
+
+                  scrollBarItems.add(
+                    Expanded(
+                      child: GestureDetector(
+                        onVerticalDragUpdate: (tdd){
+                          print("---" + i.toString());
+                        },
+                        child: Container(
+                          color: color,
+                        ),
+                      ),
+                    )
+                  );
+                }
+
                 //build
                 return Container(
                   color: Theme.of(context).primaryColor,
@@ -345,11 +376,15 @@ class _SelectContactUXState extends State<SelectContactUX> {
                             ),
                           ),
                           child: Container(
-                            color: Colors.red,
+                            color: Colors.green,
                             padding: EdgeInsets.all(16),
                             child: Container(
                               color: Colors.blue,
                               width: 24,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: scrollBarItems,
+                              ),
                             ),
                           ),
                         ),
