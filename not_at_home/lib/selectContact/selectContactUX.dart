@@ -337,8 +337,8 @@ class SelectContactUX extends StatelessWidget {
                                           child: Text("Select Contact"),
                                         ),
                                       ),
-                                      Container(
-                                        alignment: Alignment.center,
+                                      Material(
+                                        color: Theme.of(context).primaryColor,
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: <Widget>[
