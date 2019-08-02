@@ -5,9 +5,12 @@ import 'package:vector_math/vector_math_64.dart' as VECT;
 import 'dart:math' as math;
 import 'package:not_at_home/newContact.dart';
 
+import 'package:scroll_to_index/scroll_to_index.dart';
+
 class SelectContactUX extends StatelessWidget {
   SelectContactUX({
     this.retreivingContacts: false,
+    @required this.sortedKeys,
     @required this.sectionWidgets,
     @required this.backFromNewContact,
     @required this.onSelect,
@@ -15,16 +18,32 @@ class SelectContactUX extends StatelessWidget {
   });
 
   final bool retreivingContacts;
+  final List<int> sortedKeys;
   final List<Widget> sectionWidgets;
   final ValueNotifier<bool> backFromNewContact;
   final Function onSelect;
   final List<String> userPrompt;
 
   final ValueNotifier<bool> showNewContact = new ValueNotifier(true);
-  final ValueNotifier<bool> flexibleClosed = new ValueNotifier(false);
+  final ValueNotifier<double> flexibleHeight = new ValueNotifier(0);
+
+  final AutoScrollController autoScrollController = new AutoScrollController();
 
   @override
   Widget build(BuildContext context) {
+    //add the autoscroll stuff to section widgets
+    for(int i = 0; i < sectionWidgets.length; i++){
+      Widget section = sectionWidgets[i];
+
+      sectionWidgets[i] = AutoScrollTag(
+        key: ValueKey(i),
+        controller: autoScrollController,
+        index: i,
+        child: section,
+        highlightColor: Colors.red,
+      );
+    }
+
     //Styling of the User Question Prompt
     TextStyle questionStyle = TextStyle(
       fontWeight: FontWeight.bold,
@@ -152,6 +171,7 @@ class SelectContactUX extends StatelessWidget {
                     child: Stack(
                       children: <Widget>[
                         CustomScrollView(
+                          controller: autoScrollController,
                           slivers: <Widget>[
                             SliverAppBar(
                               //true so that we get the safe area added on top
@@ -160,9 +180,11 @@ class SelectContactUX extends StatelessWidget {
                               //Pinned MUST be True for ease of use
                               pinned: true, //show the user then can search regardless of where they are on the list
                               //Floating MUST be true so for ease of use
+                              //but NAW its false because any user that is going to search or add a contact will do so at the start
                               floating: true, //show scroll bar as soon as user starts scrolling up
                               //Snap is TRUE so that our flexible space result looks as best as it can
-                              snap: false, //but NAW its FALSE cuz it snaps weird...
+                              //but NAW its FALSE cuz it snaps weird...
+                              snap: true, //ONLY if floating is true
 
                               //NOTE: title and leading not being used 
                               //because they are simply above the flexible widget
@@ -174,7 +196,7 @@ class SelectContactUX extends StatelessWidget {
                                 builder: (BuildContext context, BoxConstraints constraints) {
                                   //determine whether the space bar is open or closed
                                   WidgetsBinding.instance.addPostFrameCallback((_){
-                                    flexibleClosed.value = (constraints.biggest.height == 40.0);
+                                    flexibleHeight.value = constraints.biggest.height;
                                   });
 
                                   //build
@@ -232,11 +254,12 @@ class SelectContactUX extends StatelessWidget {
                           ],
                         ),
                         AnimatedBuilder(
-                          animation: flexibleClosed,
-                          child: Positioned(
-                            top: 0,
-                            bottom: 0,
-                            right: 0,
+                          animation: flexibleHeight,
+                          child: Container(
+                            padding: EdgeInsets.only(
+                              top: 24.0 + 16 + 24 + 16,
+                              bottom: 16 + 32.0 + 16,
+                            ),
                             child: Container(
                               color: Colors.red,
                               padding: EdgeInsets.all(16),
@@ -247,10 +270,13 @@ class SelectContactUX extends StatelessWidget {
                             ),
                           ),
                           builder: (BuildContext context, Widget child) {
-                            print("flex closed: " + flexibleClosed.value.toString()); 
-                            return Visibility(
-                              visible: flexibleClosed.value ? true : false,
-                              child: child,
+                            return Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                height: MediaQuery.of(context).size.height - flexibleHeight.value,
+                                child: child,
+                              ),
                             );
                           },
                         ),
@@ -297,6 +323,28 @@ class SelectContactUX extends StatelessWidget {
                     ),
                   );
                 },
+              ),
+            ),
+
+            //scroll to top button
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                alignment: Alignment.bottomCenter,
+                padding: EdgeInsets.only(bottom: 16),
+                child: FloatingActionButton(
+                  onPressed: (){
+                    print("pressed");
+                    autoScrollController.scrollToIndex(
+                      0, 
+                      preferPosition: AutoScrollPosition.begin,
+                      duration: Duration(milliseconds: 1),
+                    );
+                  },
+                  child: Icon(Icons.laptop),
+                )
               ),
             ),
           ],
