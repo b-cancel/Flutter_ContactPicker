@@ -1,6 +1,6 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
-import 'package:not_at_home/selectContact.dart';
+import 'package:not_at_home/selectContact/selectContactLogic.dart';
 import 'package:not_at_home/theme.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
@@ -100,6 +100,8 @@ class _ContactDisplayState extends State<ContactDisplay> {
                       context, PageTransition(
                         type: PageTransitionType.rightToLeft,
                         child: SelectContact(
+                          selectContactBackUp: SelectContactBackUp.systemContactPicker,
+                          routeName: ContactDisplayHelper.routeName,
                           forceSelection: forceContactUpdate,
                           contactToUpdate: contact,
                         ),

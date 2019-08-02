@@ -4,10 +4,9 @@ import 'package:flutter/widgets.dart';
 import 'package:not_at_home/helper.dart';
 import 'package:not_at_home/permission.dart';
 import 'package:not_at_home/request.dart';
-import 'package:not_at_home/selectContactUX.dart';
+import 'package:not_at_home/selectContact/selectContactUX.dart';
 import 'package:permission/permission.dart';
 import 'package:sticky_headers/sticky_headers.dart';
-
 import 'contactTile.dart';
 
 /*
@@ -25,14 +24,25 @@ IF FORCE SELECTION
 ELSE -> user should be able to back away at any step
 */
 
+enum SelectContactBackUp {manualInput, systemContactPicker}
+
 class SelectContact extends StatefulWidget {
   SelectContact({
+    @required this.routeName,
     @required this.forceSelection, 
-    //if set -> then we know we are not in the first page
+    this.selectContactBackUp: SelectContactBackUp.manualInput,
+    //if set -> then we know we are NOT IN THE FIRST PAGE
     this.contactToUpdate,
   });
 
+  //required
+  final String routeName;
   final bool forceSelection;
+  //IF the user does not want to give us permission
+  //the can either, type the contact in manually
+  //or use the system contact picker
+  final SelectContactBackUp selectContactBackUp;
+  //only if not first time
   final ValueNotifier<Contact> contactToUpdate;
 
   @override
@@ -52,7 +62,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //init
   @override
   void initState(){
-    print("*************************SELECT CONTACT INIT");
     //super init
     super.initState(); 
     //observer for onResume
@@ -76,7 +85,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         //2. remove all other pages from the stack in the background
         Navigator.pushNamedAndRemoveUntil(
           context, 
-          ContactDisplayHelper.routeName,
+          widget.routeName,
           (r) => false,
           arguments: ContactDisplayArgs(
             contact,
@@ -93,7 +102,9 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         //   until we arrive at the page where we selected our contact from
         Navigator.popUntil(
           context, 
-          ModalRoute.withName(ContactDisplayHelper.routeName),
+          ModalRoute.withName(
+            widget.routeName,
+          ),
         );
 
         //NOTE: #2 is made possible by using the guide below
@@ -114,6 +125,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         widget.forceSelection, //we force selection
         true, //we are selecting
         onSelect, //we will pass a context and contact to the this function after manual input
+        selectContactBackUp: widget.selectContactBackUp,
       );
     }
   }
@@ -137,8 +149,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   ValueNotifier<bool> backFromNewContactPage = new ValueNotifier<bool>(false);
 
   reactToResume() async{
-    print("*************************SELECT CONTACT RESUME");
-
     //IF -> we came back from the permissions page
     //  IF we now have permission -> refill the contacts list with our contacts
     //  ELSE -> EITHER manual input OR (back because not forced) [CAN ASSUME back because not forced]
@@ -324,28 +334,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
             ),
           ),
         ),
-
-        /*
-        new StickyHeader(
-          header: new Container(
-            color: Theme.of(context).primaryColor,
-            padding: new EdgeInsets.only(
-              left: 32,
-              right: 16,
-              top: 16,
-              bottom: 8,
-            ),
-            alignment: Alignment.centerLeft,
-            child: new Text(
-              String.fromCharCode(key),
-              style: TextStyle(
-                fontSize: 12,
-              ),
-            ),
-          ),
-          content: 
-        ),
-        */
       );
     }
 

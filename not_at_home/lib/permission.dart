@@ -3,26 +3,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:not_at_home/helper.dart';
+import 'package:not_at_home/selectContact/selectContactLogic.dart';
 import 'package:permission/permission.dart';
+import 'package:contact_picker/contact_picker.dart' as contactPicker;
 
 //required because of how the permission plugin operates
 final ValueNotifier<bool> firstTime = new ValueNotifier<bool>(true);
 
 //request contact permission from the user
-permissionRequired(BuildContext context, bool forcePermission, bool selectingContact, Function onSecondaryOption) async{
-  //---bottom
+permissionRequired(
+  BuildContext context, 
+  bool forcePermission, 
+  bool selectingContact, 
+  Function onSecondaryOption,
+  {SelectContactBackUp selectContactBackUp: SelectContactBackUp.manualInput}
+) async{
   PermissionStatus startStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
-  print("-------------------------before start " + startStatus.toString() + " " + firstTime.value.toString());
   if(isAuthorized(startStatus) == false){
-    print("-------------------------Before (NOT AUTH) " + DateTime.now().toString());
     //NOTE: if notAgain && not firstTime -> guaranted notAgain
     //else if notAgain && firstTime -> maybe not valid notAgain 
     //  IF valid should show manual ELSE should ASK FOR PERMISSION
     //else we can ASK FOR PERMISSION -> if fail ask again
 
-
     if(startStatus == PermissionStatus.notAgain && !firstTime.value){
-      print("-------------------------pushing new screen");
       showDialog(
         context: context,
         barrierDismissible: (forcePermission == false),
@@ -31,22 +34,26 @@ permissionRequired(BuildContext context, bool forcePermission, bool selectingCon
             forcePermission: forcePermission,
             selectingContact: selectingContact,
             onSecondaryOption: onSecondaryOption,
+            selectContactBackUp: selectContactBackUp,
           );
         },
       );
     }
     else{
-      print("-------------------------permission request " + DateTime.now().toIso8601String());
-
       //covers edge case where the first time we request a permission its status is not at home
       firstTime.value = false;
 
       //ask for permission
       PermissionStatus status = (await Permission.requestPermissions([PermissionName.Contacts]))[0].permissionStatus;
-      print("-------------------------result " + status.toString() + " " + DateTime.now().toIso8601String());
       if(isAuthorized(status) == false){
         //---top
-        permissionRequired(context, forcePermission, selectingContact, onSecondaryOption);
+        permissionRequired(
+          context, 
+          forcePermission, 
+          selectingContact, 
+          onSecondaryOption,
+          selectContactBackUp: selectContactBackUp,
+        );
       }
     }
   }
@@ -58,11 +65,13 @@ class Manual extends StatefulWidget {
   final bool forcePermission;
   final bool selectingContact;
   final Function onSecondaryOption;
+  final SelectContactBackUp selectContactBackUp;
 
   Manual({
     @required this.forcePermission,
     @required this.selectingContact,
     @required this.onSecondaryOption,
+    @required this.selectContactBackUp,
   });
 
   @override
@@ -102,10 +111,29 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
     }
   }
 
+  final contactPicker.ContactPicker contactPickerInstance = new contactPicker.ContactPicker();
+
   //build
   @override
   Widget build(BuildContext context) {
     bool isSelecting = widget.selectingContact;
+    bool manualInput = (widget.selectContactBackUp == SelectContactBackUp.manualInput);
+
+    String inOrderTo = "In order to " + ((isSelecting) ? "\"Select\"" : "\"Save\"") + " a Contact.";
+    String action = "Enable \"Contacts\" in the \"Permissions\" section of \"App Settings\"";
+    String options;
+    if(isSelecting){
+      if(manualInput) options = "Or Manually Input the Contact below";
+      else options = "Or \"System Select Contact\" below";
+    }
+    else options = "Use the Contact without saving it below";
+
+    String altButton;
+    if(isSelecting){
+      if(manualInput) altButton = "Manual Input";
+      else altButton = "System Select Contact";
+    }
+    else altButton = "Use Don't Save";
 
     return WillPopScope(
       onWillPop:  () async => (widget.forcePermission == false),
@@ -125,27 +153,50 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
             ],
           ),
           content: new Text(
-            "In order to " + ((isSelecting) ? "\"Select\"" : "\"Save\"") + " a Contact. "
-            + "\n\n" + "Enable \"Contacts\" in the \"Permissions\" section of \"App Settings\""
-            + "\n" + ((isSelecting) ? "Or Manually Input the Contact below" : "Use the Contact without saving it below"),
+            inOrderTo + "\n\n" + action + "\n" + options,
           ),
           actions: <Widget>[
             new FlatButton(
-              child: new Text((isSelecting) ? "Manual Input" : "Use Don't Save"),
-              onPressed: () {
+              child: new Text(altButton),
+              onPressed: () async{
                 if(isSelecting){ //manual input
-                  showDialog(
-                    context: context,
-                    //NOTE: the barrier should be dismissible ALWAYS
-                    barrierDismissible: true,
-                    builder: (BuildContext context) {
-                      return ManualInput(
-                        //this is simply passing a reference to a dynamic function 
-                        //that can take 2 params 1. context 2. contact
-                        onSubmit: widget.onSecondaryOption,
+                  if(manualInput){
+                    showDialog(
+                      context: context,
+                      //NOTE: the barrier should be dismissible ALWAYS
+                      barrierDismissible: true,
+                      builder: (BuildContext context) {
+                        return ManualInput(
+                          //this is simply passing a reference to a dynamic function 
+                          //that can take 2 params 1. context 2. contact
+                          onSubmit: widget.onSecondaryOption,
+                        );
+                      },
+                    );
+                  }
+                  else{
+                    contactPicker.Contact selectedContact = await contactPickerInstance.selectContact();
+                    if(selectedContact != null){
+                      //retreive system contact
+                      String name = selectedContact.fullName;
+                      Item number = Item(
+                        value: selectedContact.phoneNumber.number,
+                        label: selectedContact.phoneNumber.label,
                       );
-                    },
-                  );
+
+                      //conver to other contact
+                      Contact newContact = new Contact(
+                        givenName: name,
+                        phones: [number],
+                      );
+
+                      //select the contact
+                      widget.onSecondaryOption(
+                        context,
+                        newContact,
+                      );
+                    }
+                  }
                 }
                 else{ //use don't save
                   widget.onSecondaryOption();
@@ -155,7 +206,7 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
             new RaisedButton(
               textColor: Colors.white,
               child: new Text(
-                "Settings",
+                "App Settings",
               ),
               onPressed: (){
                 Permission.openSettings();
@@ -317,7 +368,6 @@ class _ManualInputState extends State<ManualInput> {
                 },
                 //update valid status
                 onChanged: (str){
-                  print("change phone");
                   isPhoneValid();
                 },
               ),

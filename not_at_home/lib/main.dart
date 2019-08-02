@@ -1,7 +1,7 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:not_at_home/request.dart';
-import 'package:not_at_home/selectContact.dart';
+import 'selectContact/selectContactLogic.dart';
 import 'package:not_at_home/theme.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
@@ -69,6 +69,8 @@ class _InitRouterState extends State<InitRouter> {
             duration: Duration(seconds: 0),
             //since this is how the app starts the user MUST select a contact
             child: SelectContact(
+              selectContactBackUp: SelectContactBackUp.systemContactPicker,
+              routeName: ContactDisplayHelper.routeName,
               forceSelection: true,
             ),
           ),
