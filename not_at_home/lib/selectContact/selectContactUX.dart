@@ -63,6 +63,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 class SelectContactUX extends StatelessWidget {
   SelectContactUX({
     this.retreivingContacts: false,
+    @required this.contactCount,
     @required this.sortedKeys,
     @required this.sectionWidgets,
     @required this.backFromNewContact,
@@ -71,6 +72,7 @@ class SelectContactUX extends StatelessWidget {
   });
 
   final bool retreivingContacts;
+  final int contactCount;
   final List<int> sortedKeys;
   final List<Widget> sectionWidgets;
   final ValueNotifier<bool> backFromNewContact;
@@ -120,9 +122,34 @@ class SelectContactUX extends StatelessWidget {
         controller: autoScrollController,
         index: i,
         child: section,
-        highlightColor: Colors.red,
       );
     }
+
+    //spacer on bottom of list
+    int nextIndex = sectionWidgets.length;
+    sectionWidgets.add(
+      AutoScrollTag(
+        key: ValueKey(nextIndex),
+        controller: autoScrollController,
+        index: nextIndex,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(16),
+              child: Center(
+                child: Text(contactCount.toString() + " Contacts"),
+              ),
+            ),
+            Container(
+              width: MediaQuery.of(context).size.width,
+              //make sure to top button isnt covered
+              height: 16.0 + 48 + 16,
+            ),
+          ],
+        ),
+      ),
+    );
 
     //Styling of the User Question Prompt
     TextStyle questionStyle = TextStyle(
@@ -359,8 +386,9 @@ class SelectContactUX extends StatelessWidget {
                         animation: flexibleHeight,
                         child: Container(
                           padding: EdgeInsets.only(
-                            top: 24.0 + 16 + 24 + 16,
-                            bottom: 16 + 32.0 + 16,
+                            top: 27.0 + 16 + (
+                              (flexibleClosed.value) ? (24.0 + 16) : 0.0
+                            ),
                           ),
                           child: Container(
                             color: Colors.red,
@@ -426,7 +454,7 @@ class SelectContactUX extends StatelessWidget {
                       transform: Matrix4.translation(
                         VECT.Vector3(
                           0, 
-                          (showNewContact.value) ? (16.0 + 48) : 0.0, 
+                          /*(flexibleClosed.value) ? (16.0 + 48) :*/ 0.0, 
                           0,
                         ),
                       ),

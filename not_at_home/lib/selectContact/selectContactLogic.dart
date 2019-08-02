@@ -346,6 +346,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       onWillPop: () async => !(widget.forceSelection && !firstPage),
       child: SelectContactUX(
         retreivingContacts: retreivingContacts,
+        contactCount: contacts.length,
         sortedKeys: sortedKeys,
         sectionWidgets: sectionWidgets,
         backFromNewContact: backFromNewContactPage,
