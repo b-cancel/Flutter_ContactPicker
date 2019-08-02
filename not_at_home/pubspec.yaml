@@ -33,6 +33,7 @@ dependencies:
   sticky_headers: "^0.1.8"
   scroll_to_index: any
   contact_picker: ^0.0.2
+  map_view: ^0.0.14
   #---permission plugins
   #permission_handler: ^3.2.0 #don't upgrade beyond this (works but not fully)
   permission: ^0.1.2 #works not tested

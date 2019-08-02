@@ -1,56 +1,3 @@
-/*
-class _ScrollToTopBottomListViewState extends State<ScrollToTopBottomListView> {
-  ScrollController _scrollController;
-  bool _isOnTop = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  _scrollToTop() {
-    _scrollController.animateTo(_scrollController.position.minScrollExtent,
-        duration: Duration(milliseconds: 1000), curve: Curves.easeIn);
-    setState(() => _isOnTop = true);
-  }
-
-  _scrollToBottom() {
-    _scrollController.animateTo(_scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 1000), curve: Curves.easeOut);
-    setState(() => _isOnTop = false);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('Scroll to Top / Bottom Example'),
-        ),
-        body: ListView(
-          controller: _scrollController,
-          padding: EdgeInsets.all(10.0),
-          children: _listViewData
-              .map((data) => ListTile(
-                    leading: Icon(Icons.person),
-                    title: Text(data),
-                  ))
-              .toList(),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _isOnTop ? _scrollToBottom : _scrollToTop,
-          child: Icon(_isOnTop ? Icons.arrow_downward : Icons.arrow_upward),
-        ));
-  }
-}
-*/
-
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -60,7 +7,7 @@ import 'package:not_at_home/newContact.dart';
 
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-class SelectContactUX extends StatelessWidget {
+class SelectContactUX extends StatefulWidget {
   SelectContactUX({
     this.retreivingContacts: false,
     @required this.contactCount,
@@ -79,45 +26,52 @@ class SelectContactUX extends StatelessWidget {
   final Function onSelect;
   final List<String> userPrompt;
 
-  final ValueNotifier<double> flexibleHeight = new ValueNotifier(0);
-  final ValueNotifier<bool> flexibleClosed = new ValueNotifier(false);
+  @override
+  _SelectContactUXState createState() => _SelectContactUXState();
+}
 
-  final AutoScrollController autoScrollController = new AutoScrollController();
+class _SelectContactUXState extends State<SelectContactUX> {
+  //assume the flexible is open at the start
+  final ValueNotifier<bool> flexibleClosed = new ValueNotifier(true);
+  //TODO... use largest not smallest
+  final ValueNotifier<double> flexibleHeight = new ValueNotifier(40); 
 
-  //on load we start on top
-  final ValueNotifier<bool> isOnTop = new ValueNotifier(true);
+  //starts off on top
+  final ValueNotifier<bool> onTop = new ValueNotifier(true);
 
-  scrollToTop() async{
-    await autoScrollController.animateTo(
-      autoScrollController.position.minScrollExtent,
-      duration: Duration(milliseconds: 200), 
-      curve: Curves.ease,
-      //curve: Curves.easeIn,
-    );
+  //the scroll conroller
+  AutoScrollController autoScrollController;
 
-    //we scrolled to top so we are on top
-    isOnTop.value = true;
+  //init
+  @override
+  void initState() {
+    autoScrollController = new AutoScrollController();
+    autoScrollController.addListener((){
+      ScrollPosition position = autoScrollController.position;
+      //&& !position.outOfRange
+      if (autoScrollController.offset <= position.minScrollExtent) {
+        onTop.value = true;
+      }
+      else onTop.value = false;
+    });
+    super.initState();
   }
 
-  scrollToBottom() async{
-    await autoScrollController.animateTo(
-      autoScrollController.position.maxScrollExtent,
-      duration: Duration(milliseconds: 200),
-      curve: Curves.ease,
-      //curve: Curves.easeOut,
-    );
-
-    //we scroll to bottom so we are not on top
-    isOnTop.value = false;
+  //dispose
+  @override
+  void dispose() {
+    autoScrollController.dispose();
+    super.dispose();
   }
 
+  //build
   @override
   Widget build(BuildContext context) {
     //add the autoscroll stuff to section widgets
-    for(int i = 0; i < sectionWidgets.length; i++){
-      Widget section = sectionWidgets[i];
+    for(int i = 0; i < widget.sectionWidgets.length; i++){
+      Widget section = widget.sectionWidgets[i];
 
-      sectionWidgets[i] = AutoScrollTag(
+      widget.sectionWidgets[i] = AutoScrollTag(
         key: ValueKey(i),
         controller: autoScrollController,
         index: i,
@@ -126,8 +80,8 @@ class SelectContactUX extends StatelessWidget {
     }
 
     //spacer on bottom of list
-    int nextIndex = sectionWidgets.length;
-    sectionWidgets.add(
+    int nextIndex = widget.sectionWidgets.length;
+    widget.sectionWidgets.add(
       AutoScrollTag(
         key: ValueKey(nextIndex),
         controller: autoScrollController,
@@ -138,7 +92,7 @@ class SelectContactUX extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(16),
               child: Center(
-                child: Text(contactCount.toString() + " Contacts"),
+                child: Text(widget.contactCount.toString() + " Contacts"),
               ),
             ),
             Container(
@@ -159,13 +113,13 @@ class SelectContactUX extends StatelessWidget {
     //Generate the Widget shown in the contacts scroll area
     //Depending on whether or not there are contacts or they are being retreived
     Widget bodyWidget;
-    if(retreivingContacts || sectionWidgets.length == 0){
+    if(widget.retreivingContacts || widget.sectionWidgets.length == 0){
       bodyWidget = SliverFillRemaining(
         child: Container(
           alignment: Alignment.center,
           padding: EdgeInsets.all(16),
           child: Text(
-            (retreivingContacts) ? "Retreiving Contacts" : "No Contacts Found",
+            (widget.retreivingContacts) ? "Retreiving Contacts" : "No Contacts Found",
             style: TextStyle(
               fontSize: 18,
             ),
@@ -176,7 +130,7 @@ class SelectContactUX extends StatelessWidget {
     else{
       bodyWidget = SliverList(
         delegate: SliverChildListDelegate(
-          sectionWidgets,
+          widget.sectionWidgets,
         ),
       );
     }
@@ -208,7 +162,7 @@ class SelectContactUX extends StatelessWidget {
                 if(isPortrait){
                   //generate the multi lined string
                   List<TextSpan> textSpans = new List<TextSpan>();
-                  for(int i = 0; i < userPrompt.length; i++){
+                  for(int i = 0; i < widget.userPrompt.length; i++){
                     //add a spacer before each textspan that is not the first
                     if(i != 0){
                       textSpans.add(
@@ -219,7 +173,7 @@ class SelectContactUX extends StatelessWidget {
                     //add the actual textSpan
                     textSpans.add(
                       TextSpan(
-                        text: userPrompt[i],
+                        text: widget.userPrompt[i],
                         style: questionStyle,
                       ),
                     );
@@ -239,9 +193,9 @@ class SelectContactUX extends StatelessWidget {
                 else{
                   //generate the single lined string
                   String generateString = "";
-                  for(int i = 0; i < userPrompt.length; i++){
-                    if(i == 0) generateString += userPrompt[i];
-                    else generateString += (" " + userPrompt[i]);
+                  for(int i = 0; i < widget.userPrompt.length; i++){
+                    if(i == 0) generateString += widget.userPrompt[i];
+                    else generateString += (" " + widget.userPrompt[i]);
                   }
 
                   //create the widget
@@ -344,12 +298,12 @@ class SelectContactUX extends StatelessWidget {
                                           children: <Widget>[
                                             InkWell(
                                               onTap: (){
-                                                backFromNewContact.value = true;
+                                                widget.backFromNewContact.value = true;
                                                 Navigator.push(
                                                   context, PageTransition(
                                                     type: PageTransitionType.rightToLeft,
                                                     child: NewContact(
-                                                      onSelect: onSelect,
+                                                      onSelect: widget.onSelect,
                                                     ),
                                                   ),
                                                 );
@@ -425,10 +379,16 @@ class SelectContactUX extends StatelessWidget {
                 alignment: Alignment.bottomCenter,
                 padding: EdgeInsets.only(bottom: 16),
                 child: AnimatedBuilder(
-                  animation: flexibleClosed,
+                  animation: onTop,
                   child: FloatingActionButton(
                     mini: true,
-                    onPressed: scrollToTop,
+                    onPressed: (){
+                      autoScrollController.animateTo(
+                        autoScrollController.position.minScrollExtent,
+                        duration: Duration(milliseconds: 200), 
+                        curve: Curves.easeOut,
+                      );
+                    },
                     child: Transform.translate(
                       offset: Offset(0,-4),
                       child: Column(
@@ -454,7 +414,7 @@ class SelectContactUX extends StatelessWidget {
                       transform: Matrix4.translation(
                         VECT.Vector3(
                           0, 
-                          /*(flexibleClosed.value) ? (16.0 + 48) :*/ 0.0, 
+                          (onTop.value) ? (16.0 + 48) : 0.0, 
                           0,
                         ),
                       ),
