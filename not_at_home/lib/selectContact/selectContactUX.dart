@@ -21,6 +21,7 @@ class SelectContactUX extends StatelessWidget {
   final List<String> userPrompt;
 
   final ValueNotifier<bool> showNewContact = new ValueNotifier(true);
+  final ValueNotifier<bool> flexibleClosed = new ValueNotifier(false);
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +51,7 @@ class SelectContactUX extends StatelessWidget {
       bodyWidget = SliverList(
         delegate: SliverChildListDelegate(
           sectionWidgets,
-        )
+        ),
       );
     }
 
@@ -148,74 +149,111 @@ class SelectContactUX extends StatelessWidget {
                   },
                   child: Container(
                     color: Theme.of(context).primaryColor,
-                    child: CustomScrollView(
-                      slivers: <Widget>[
-                        SliverAppBar(
-                          //true so that we get the safe area added on top
-                          primary: true,
+                    child: Stack(
+                      children: <Widget>[
+                        CustomScrollView(
+                          slivers: <Widget>[
+                            SliverAppBar(
+                              //true so that we get the safe area added on top
+                              primary: true,
 
-                          //Pinned MUST be True for ease of use
-                          pinned: true, //show the user then can search regardless of where they are on the list
-                          //Floating MUST be true so for ease of use
-                          floating: true, //show scroll bar as soon as user starts scrolling up
-                          //Snap is TRUE so that our flexible space result looks as best as it can
-                          snap: false, //but NAW its FALSE cuz it snaps weird...
+                              //Pinned MUST be True for ease of use
+                              pinned: true, //show the user then can search regardless of where they are on the list
+                              //Floating MUST be true so for ease of use
+                              floating: true, //show scroll bar as soon as user starts scrolling up
+                              //Snap is TRUE so that our flexible space result looks as best as it can
+                              snap: false, //but NAW its FALSE cuz it snaps weird...
 
-                          //NOTE: title and leading not being used 
-                          //because they are simply above the flexible widget
-                          //but it hides after the flexible widget gets closed
-                          
-                          //Lets the user know what they are select a contact for
-                          expandedHeight: expandedHeight,
-                          flexibleSpace: FlexibleSpaceBar(
-                            background: Container(
-                              width: screenWidth,
-                              padding: EdgeInsets.fromLTRB(
-                                extraPadding,
-                                extraPadding,
-                                extraPadding,
-                                //extras come from the select contact bar
-                                extraPadding + 16 + 24,
+                              //NOTE: title and leading not being used 
+                              //because they are simply above the flexible widget
+                              //but it hides after the flexible widget gets closed
+                              
+                              //Lets the user know what they are select a contact for
+                              expandedHeight: expandedHeight,
+                              flexibleSpace: LayoutBuilder(
+                                builder: (BuildContext context, BoxConstraints constraints) {
+                                  //determine whether the space bar is open or closed
+                                  WidgetsBinding.instance.addPostFrameCallback((_){
+                                    flexibleClosed.value = (constraints.biggest.height == 40.0);
+                                  });
+
+                                  //build
+                                  return FlexibleSpaceBar(
+                                    background: Container(
+                                      width: screenWidth,
+                                      padding: EdgeInsets.fromLTRB(
+                                        extraPadding,
+                                        extraPadding,
+                                        extraPadding,
+                                        //extras come from the select contact bar
+                                        extraPadding + 16 + 24,
+                                      ),
+                                      child: Container(
+                                        child: orientationPrompt,
+                                      ),
+                                    ),
+                                    //this does not seem to make any difference
+                                    //but it MIGHT so ill keep it
+                                    //it changes FlexibleSpaceBarSettings
+                                    collapseMode: CollapseMode.parallax,
+                                  );
+                                }
                               ),
-                              child: Container(
-                                child: orientationPrompt,
-                              ),
-                            ),
-                            //this does not seem to make any difference
-                            //but it MIGHT so ill keep it
-                            //it changes FlexibleSpaceBarSettings
-                            collapseMode: CollapseMode.parallax,
-                          ),
 
-                          //Lets the user know they can search
-                          bottom: PreferredSize(
-                            preferredSize: Size(
-                              MediaQuery.of(context).size.width,
-                              //16 from top and bottom padding below
-                              //24 from the content in the child
-                              16.0 + 24.0,
-                            ),
-                            child: Container(
-                              color: Theme.of(context).primaryColor,
-                              padding: EdgeInsets.all(8),
-                              width: MediaQuery.of(context).size.width,
-                              child: DefaultTextStyle(
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
+                              //Lets the user know they can search
+                              bottom: PreferredSize(
+                                preferredSize: Size(
+                                  MediaQuery.of(context).size.width,
+                                  //16 from top and bottom padding below
+                                  //24 from the content in the child
+                                  16.0 + 24.0,
                                 ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: <Widget>[
-                                    Text("Select Contact"),
-                                    Icon(Icons.search)
-                                  ],
+                                child: Container(
+                                  color: Theme.of(context).primaryColor,
+                                  padding: EdgeInsets.all(8),
+                                  width: MediaQuery.of(context).size.width,
+                                  child: DefaultTextStyle(
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        Text("Select Contact"),
+                                        Icon(Icons.search)
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
+                            bodyWidget,
+                          ],
                         ),
-                        bodyWidget,
+                        AnimatedBuilder(
+                          animation: flexibleClosed,
+                          child: Positioned(
+                            top: 0,
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              color: Colors.red,
+                              padding: EdgeInsets.all(16),
+                              child: Container(
+                                color: Colors.blue,
+                                width: 24,
+                              ),
+                            ),
+                          ),
+                          builder: (BuildContext context, Widget child) {
+                            print("flex closed: " + flexibleClosed.value.toString()); 
+                            return Visibility(
+                              visible: flexibleClosed.value ? true : false,
+                              child: child,
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ),
