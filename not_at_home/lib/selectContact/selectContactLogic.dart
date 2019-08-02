@@ -314,7 +314,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
               padding: new EdgeInsets.only(
                 left: 32,
                 right: 16,
-                top: 16 + (40 * (1-stuckAmount)), //16,
+                top: 16.0 + (40 * (1-stuckAmount)), //16,
                 bottom: 8,
               ),
               alignment: Alignment.centerLeft,
