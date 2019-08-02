@@ -53,25 +53,28 @@ class SelectContactUX extends StatelessWidget {
       );
     }
     
-    //User Prompt
-    Widget prompt = RichText(
-      textAlign: TextAlign.center,
-      text: TextSpan(
-        children: [
-          TextSpan(
-            text: "Prompt The User\n",
-            style: questionStyle,
-          ),
-          TextSpan(
-            text: "For A Contact",
-            style: questionStyle,
-          )
-        ]
+    //User Prompt (can't use default text style)
+    Widget prompt = Container(
+      child: RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: "Prompt The User\n",
+              style: questionStyle,
+            ),
+            TextSpan(
+              text: "For A Contact",
+              style: questionStyle,
+            )
+          ]
+        ),
       ),
     );
 
     //width of screen
     double screenWidth = MediaQuery.of(context).size.width;
+    double expandedHeight = MediaQuery.of(context).size.height / 3;
 
     print("screenwidth " + screenWidth.toString());
 
@@ -102,7 +105,6 @@ class SelectContactUX extends StatelessWidget {
                 color: Theme.of(context).primaryColor,
                 child: CustomScrollView(
                   slivers: <Widget>[
-                    
                     SliverAppBar(
                       //true so that we get the safe area added on top
                       primary: true,
@@ -119,25 +121,28 @@ class SelectContactUX extends StatelessWidget {
                       //but it hides after the flexible widget gets closed
                       
                       //Lets the user know what they are select a contact for
-                      expandedHeight: MediaQuery.of(context).size.height / 3,
+                      expandedHeight: expandedHeight,
                       flexibleSpace: FlexibleSpaceBar(
-                        centerTitle: true,
-                        titlePadding: EdgeInsets.only(
-                          bottom: 40,
-                        ),
-                        title: Container(
-                          color: Colors.blue,
+                        background: Container(
                           width: screenWidth,
-                          padding: EdgeInsets.all(16),
+                          padding: EdgeInsets.fromLTRB(
+                            16,
+                            16,
+                            16,
+                            //extras come from the select contact bar
+                            16.0 + 16 + 24,
+                          ),
                           child: Container(
-                            color: Colors.red,
-                            child: prompt,
+                            child: FittedBox(
+                              fit: BoxFit.fitWidth,
+                              child: prompt,
+                            )
                           ),
                         ),
                         //this does not seem to make any difference
                         //but it MIGHT so ill keep it
                         //it changes FlexibleSpaceBarSettings
-                        collapseMode: CollapseMode.none,
+                        collapseMode: CollapseMode.parallax,
                       ),
 
                       //Lets the user know they can search
