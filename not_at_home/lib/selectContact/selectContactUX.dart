@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:not_at_home/selectContact/alphaScrollBarOverlay.dart';
+import 'package:not_at_home/selectContact/scrollBar.dart';
 import 'package:page_transition/page_transition.dart';
 
 import 'package:vector_math/vector_math_64.dart' as VECT;
-import 'dart:math' as math;
 import 'package:not_at_home/newContact.dart';
 
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -52,6 +51,9 @@ class _SelectContactUXState extends State<SelectContactUX> {
 
   //starts off on top
   final ValueNotifier<bool> onTop = new ValueNotifier(true);
+
+  //determines whether or not to show the scrolling thumb tack
+  final ValueNotifier<bool> showThumbTack = new ValueNotifier(false);
 
   //the scroll conroller
   AutoScrollController autoScrollController;
@@ -158,7 +160,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
               builder: (context, orientation){
                 //variables prepped
                 bool isPortrait = (orientation == Orientation.portrait);
-                double screenWidth = MediaQuery.of(context).size.width;
                 double expandedHeight = MediaQuery.of(context).size.height;
 
                 //is portrait can have more of the screen taken up
@@ -222,26 +223,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
                   child: orientationPrompt,
                 );
 
-                //make the scroll bar items
-                List<Widget> scrollBarItems = new List<Widget>();
-                for(int i = 0; i < widget.sortedKeys.length; i++){
-                  Color color = (i%2==0) ? Colors.red : Colors.blue;
-
-                  scrollBarItems.add(
-                    Expanded(
-                      child: GestureDetector(
-                        onVerticalDragUpdate: (tdd){
-                          print("---" + i.toString());
-                        },
-                        child: Container(
-                          //TODO... show where gesture detectors are
-                          //color: color,
-                        ),
-                      ),
-                    )
-                  );
-                }
-
                 //build
                 return Container(
                   color: Theme.of(context).primaryColor,
@@ -259,13 +240,15 @@ class _SelectContactUXState extends State<SelectContactUX> {
                             backFromNewContact: widget.backFromNewContact,
                             onSelect: widget.onSelect,
                           ),
+                          //IF no contacts OR retreiving contacts -> fill remaining
+                          //ELSE -> list of widgets
                           bodyWidget,
                         ],
                       ),
                       new ScrollBar(
                         flexibleHeight: flexibleHeight, 
-                        scrollBarItems: scrollBarItems, 
-                        widget: widget,
+                        sortedKeys: widget.sortedKeys,
+                        showThumbTack: showThumbTack,
                       ),
                     ],
                   ),
@@ -279,103 +262,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class ScrollBar extends StatelessWidget {
-  const ScrollBar({
-    Key key,
-    @required this.flexibleHeight,
-    @required this.scrollBarItems,
-    @required this.widget,
-  }) : super(key: key);
-
-  final ValueNotifier<double> flexibleHeight;
-  final List<Widget> scrollBarItems;
-  final SelectContactUX widget;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: flexibleHeight,
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12),
-        width: 24,
-        decoration: new BoxDecoration(
-            color: Theme.of(context).primaryColor.withOpacity(0.5),
-            borderRadius: new BorderRadius.all(
-              Radius.circular(25.0),
-            ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: scrollBarItems,
-        ),
-      ),
-      builder: (BuildContext context, Widget child) {
-        //prep vars for below
-        double totalHeight = MediaQuery.of(context).size.height;
-        double appBarHeight = flexibleHeight.value;
-        double stickyHeaderHeight = 24.0 + 16;
-        double halfPadding = 16;
-        double paddingForScrollBar = 12;
-
-        //calculate scroll overlay height
-        double scrollOverlayHeight = totalHeight - appBarHeight;
-        scrollOverlayHeight -= (stickyHeaderHeight * 2);
-        scrollOverlayHeight -= (halfPadding * 2);
-
-        //build
-        return Positioned(
-          right: 0,
-          top: 0,
-          bottom: 0,
-          child: Container(
-            padding: EdgeInsets.only(
-              //avoids flexible app bar height
-              top: appBarHeight,
-            ),
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                //avoids sticky header bar
-                vertical: stickyHeaderHeight,
-              ),
-              child: Container(
-                //extra padding
-                padding: EdgeInsets.all(halfPadding),
-                child: Stack(
-                  children: <Widget>[
-                    child,
-                    Positioned.fill(
-                      child: Center(
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            vertical: paddingForScrollBar,
-                          ),
-                          width: 24,
-                          decoration: new BoxDecoration(
-                            color: Theme.of(context).primaryColor.withOpacity(0.5),
-                            borderRadius: new BorderRadius.all(
-                              Radius.circular(25.0),
-                            ),
-                          ),
-                          child: AlphaScrollBarOverlay(
-                            scrollBarHeight: scrollOverlayHeight,
-                            itemHeight: 18,
-                            minimumSpacing: 2,
-                            items: widget.sortedKeys,
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }
