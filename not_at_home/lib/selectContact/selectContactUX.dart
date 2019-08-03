@@ -194,13 +194,10 @@ class _SelectContactUXState extends State<SelectContactUX> {
                   } 
 
                   //create the widget
-                  orientationPrompt = FittedBox(
-                    fit: BoxFit.fitWidth,
-                    child: RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(
-                        children: textSpans,
-                      ),
+                  orientationPrompt = RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      children: textSpans,
                     ),
                   );
                 }
@@ -213,15 +210,19 @@ class _SelectContactUXState extends State<SelectContactUX> {
                   }
 
                   //create the widget
-                  orientationPrompt = FittedBox(
-                    fit: BoxFit.fitHeight,
-                    child: Text(
-                      generateString,
-                      style: questionStyle,
-                    ),
+                  orientationPrompt = Text(
+                    generateString,
+                    style: questionStyle,
                   );
                 }
 
+                //add the fitted box to the widget
+                orientationPrompt = FittedBox(
+                  fit: BoxFit.contain,
+                  child: orientationPrompt,
+                );
+
+                //make the scroll bar items
                 List<Widget> scrollBarItems = new List<Widget>();
                 for(int i = 0; i < widget.sortedKeys.length; i++){
                   Color color = (i%2==0) ? Colors.red : Colors.blue;
@@ -249,122 +250,14 @@ class _SelectContactUXState extends State<SelectContactUX> {
                       CustomScrollView(
                         controller: autoScrollController,
                         slivers: <Widget>[
-                          SliverAppBar(
-                            //true so that we get the safe area added on top
-                            primary: true,
-
-                            //Pinned MUST be True for ease of use
-                            pinned: true, //show the user then can search regardless of where they are on the list
-                            //Floating MUST be true so for ease of use
-                            //but NAW its false because any user that is going to search or add a contact will do so at the start
-                            floating: true, //show scroll bar as soon as user starts scrolling up
-                            //Snap is TRUE so that our flexible space result looks as best as it can
-                            //but NAW its FALSE cuz it snaps weird...
-                            snap: true, //ONLY if floating is true
-
-                            //NOTE: title and leading not being used 
-                            //because they are simply above the flexible widget
-                            //but it hides after the flexible widget gets closed
-                            
-                            //Lets the user know what they are select a contact for
-                            expandedHeight: expandedHeight,
-                            flexibleSpace: LayoutBuilder(
-                              builder: (BuildContext context, BoxConstraints constraints) {
-                                //determine whether the space bar is open or closed
-                                WidgetsBinding.instance.addPostFrameCallback((_){
-                                  flexibleHeight.value = constraints.biggest.height;
-                                  flexibleClosed.value = (flexibleHeight.value == 40.0);
-                                });
-
-                                //build
-                                return FlexibleSpaceBar(
-                                  background: Container(
-                                    width: screenWidth,
-                                    padding: EdgeInsets.fromLTRB(
-                                      extraPadding,
-                                      extraPadding,
-                                      extraPadding,
-                                      //extras come from the select contact bar
-                                      extraPadding + 16 + 24,
-                                    ),
-                                    child: Container(
-                                      child: orientationPrompt,
-                                    ),
-                                  ),
-                                  //this does not seem to make any difference
-                                  //but it MIGHT so ill keep it
-                                  //it changes FlexibleSpaceBarSettings
-                                  collapseMode: CollapseMode.parallax,
-                                );
-                              }
-                            ),
-
-                            //Lets the user know they can search
-                            bottom: PreferredSize(
-                              preferredSize: Size(
-                                MediaQuery.of(context).size.width,
-                                //16 from top and bottom padding below
-                                //24 from the content in the child
-                                16.0 + 24.0,
-                              ),
-                              child: Container(
-                                color: Theme.of(context).primaryColor,
-                                width: MediaQuery.of(context).size.width,
-                                child: DefaultTextStyle(
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: <Widget>[
-                                      Expanded(
-                                        child: Container(
-                                          padding: EdgeInsets.all(8),
-                                          child: Text("Select Contact"),
-                                        ),
-                                      ),
-                                      Material(
-                                        color: Theme.of(context).primaryColor,
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: <Widget>[
-                                            InkWell(
-                                              onTap: (){
-                                                widget.backFromNewContact.value = true;
-                                                Navigator.push(
-                                                  context, PageTransition(
-                                                    type: PageTransitionType.rightToLeft,
-                                                    child: NewContact(
-                                                      onSelect: widget.onSelect,
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                              child: Container(
-                                                height: 40,
-                                                width: 16.0 + 24 + 16,
-                                                child: Icon(Icons.add),
-                                              ),
-                                            ),
-                                            InkWell(
-                                              onTap: (){
-                                                print("SEARCH");
-                                              },
-                                              child: Container(
-                                                height: 40,
-                                                width: 16.0 + 24 + 16,
-                                                child: Icon(Icons.search),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
+                          new TopAppBar(
+                            expandedHeight: expandedHeight, 
+                            flexibleHeight: flexibleHeight, 
+                            flexibleClosed: flexibleClosed, 
+                            extraPadding: extraPadding, 
+                            orientationPrompt: orientationPrompt, 
+                            backFromNewContact: widget.backFromNewContact,
+                            onSelect: widget.onSelect,
                           ),
                           bodyWidget,
                         ],
@@ -386,50 +279,54 @@ class _SelectContactUXState extends State<SelectContactUX> {
                           ),
                         ),
                         builder: (BuildContext context, Widget child) {
-                          double topPadding = 27.0 + 16;
+                          //prep vars for below
+                          double totalHeight = MediaQuery.of(context).size.height;
+                          double appBarHeight = flexibleHeight.value;
+                          double stickyHeaderHeight = 24.0 + 16;
+                          double halfPadding = 16;
+                          double paddingForScrollBar = 12;
 
-                          //padding so sticky header isnt covered
-                          if(flexibleClosed.value){
-                           topPadding += (24.0 + 16); 
-                          }
-
-                          //padding that must be removed in landscape mode from some reason
-                          if(isPortrait == false){
-                            topPadding -= 18;
-                          }
-
-                          //live calced
-                          double scrollAreaHeight = MediaQuery.of(context).size.height - flexibleHeight.value;
+                          //calculate scroll overlay height
+                          double scrollOverlayHeight = totalHeight - appBarHeight;
+                          scrollOverlayHeight -= (stickyHeaderHeight * 2);
+                          scrollOverlayHeight -= (halfPadding * 2);
 
                           //build
                           return Positioned(
-                            bottom: 0,
                             right: 0,
+                            top: 0,
+                            bottom: 0,
                             child: Container(
-                              height: scrollAreaHeight,
+                              padding: EdgeInsets.only(
+                                //avoids flexible app bar height
+                                top: appBarHeight,
+                              ),
                               child: Container(
-                                padding: EdgeInsets.only(
-                                  top: topPadding,
+                                padding: EdgeInsets.symmetric(
+                                  //avoids sticky header bar
+                                  vertical: stickyHeaderHeight,
                                 ),
-                                //padding of container with no color
-                                child: Padding(
-                                  padding: EdgeInsets.only(
-                                    right: 16,
-                                    bottom: 16,
-                                    //() for the header that can still get in the way with the transition
-                                    top: 16.0 + (24),
-                                  ),
+                                child: Container(
+                                  //extra padding
+                                  padding: EdgeInsets.all(halfPadding),
                                   child: Stack(
                                     children: <Widget>[
                                       child,
                                       Positioned.fill(
                                         child: Center(
                                           child: Container(
-                                            padding: EdgeInsets.symmetric(vertical: 12),
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: paddingForScrollBar,
+                                            ),
                                             width: 24,
+                                            decoration: new BoxDecoration(
+                                              color: Theme.of(context).primaryColor.withOpacity(0.5),
+                                              borderRadius: new BorderRadius.all(
+                                                Radius.circular(25.0),
+                                              ),
+                                            ),
                                             child: AlphaScrollBar(
-                                              //- 16 from padding above
-                                              scrollBarHeight: scrollAreaHeight - topPadding - 32 - (12 * 2),
+                                              scrollBarHeight: scrollOverlayHeight,
                                               itemHeight: 18,
                                               minimumSpacing: 2,
                                               items: widget.sortedKeys,
@@ -450,62 +347,223 @@ class _SelectContactUXState extends State<SelectContactUX> {
                 );
               },
             ),
-
-            //scroll to top button
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                alignment: Alignment.bottomCenter,
-                padding: EdgeInsets.only(bottom: 16),
-                child: AnimatedBuilder(
-                  animation: onTop,
-                  child: FloatingActionButton(
-                    mini: true,
-                    onPressed: (){
-                      autoScrollController.animateTo(
-                        autoScrollController.position.minScrollExtent,
-                        duration: Duration(milliseconds: 200), 
-                        curve: Curves.easeOut,
-                      );
-                    },
-                    child: Transform.translate(
-                      offset: Offset(0,-4),
-                      child: Column(
-                        children: <Widget>[
-                          Container(
-                            height: 12,
-                            child: Icon(Icons.minimize),
-                          ),
-                          Container(
-                            height: 12,
-                            child: Icon(
-                              Icons.keyboard_arrow_up,
-                              size: 28,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  builder: (context, child){
-                    return AnimatedContainer(
-                      duration: Duration(milliseconds: 200),
-                      transform: Matrix4.translation(
-                        VECT.Vector3(
-                          0, 
-                          (onTop.value) ? (16.0 + 48) : 0.0, 
-                          0,
-                        ),
-                      ),
-                      child: child,
-                    );
-                  },
-                ),
-              ),
+            ScrollToTopButton(
+                onTop: onTop, 
+                autoScrollController: autoScrollController,
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class TopAppBar extends StatelessWidget {
+  const TopAppBar({
+    Key key,
+    @required this.expandedHeight,
+    @required this.flexibleHeight,
+    @required this.flexibleClosed,
+    @required this.extraPadding,
+    @required this.orientationPrompt,
+    @required this.backFromNewContact,
+    @required this.onSelect,
+  }) : super(key: key);
+
+  final double expandedHeight;
+  final ValueNotifier<double> flexibleHeight;
+  final ValueNotifier<bool> flexibleClosed;
+  final double extraPadding;
+  final Widget orientationPrompt;
+  final ValueNotifier<bool> backFromNewContact;
+  final Function onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBar(
+      //true so that we get the safe area added on top
+      primary: true,
+
+      //Pinned MUST be True for ease of use
+      pinned: true, //show the user then can search regardless of where they are on the list
+      //Floating MUST be true so for ease of use
+      //but NAW its false because any user that is going to search or add a contact will do so at the start
+      floating: true, //show scroll bar as soon as user starts scrolling up
+      //Snap is TRUE so that our flexible space result looks as best as it can
+      //but NAW its FALSE cuz it snaps weird...
+      snap: true, //ONLY if floating is true
+
+      //NOTE: title and leading not being used 
+      //because they are simply above the flexible widget
+      //but it hides after the flexible widget gets closed
+      
+      //Lets the user know what they are select a contact for
+      expandedHeight: expandedHeight,
+      flexibleSpace: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          //determine whether the space bar is open or closed
+          WidgetsBinding.instance.addPostFrameCallback((_){
+            flexibleHeight.value = constraints.biggest.height;
+            flexibleClosed.value = (flexibleHeight.value == 40.0);
+          });
+
+          //build
+          return FlexibleSpaceBar(
+            background: Container(
+              width: MediaQuery.of(context).size.width,
+              padding: EdgeInsets.fromLTRB(
+                extraPadding,
+                extraPadding,
+                extraPadding,
+                //extras come from the select contact bar
+                extraPadding + 16 + 24,
+              ),
+              child: Container(
+                child: orientationPrompt,
+              ),
+            ),
+            //this does not seem to make any difference
+            //but it MIGHT so ill keep it
+            //it changes FlexibleSpaceBarSettings
+            collapseMode: CollapseMode.parallax,
+          );
+        }
+      ),
+
+      //Lets the user know they can search
+      bottom: PreferredSize(
+        preferredSize: Size(
+          MediaQuery.of(context).size.width,
+          //16 from top and bottom padding below
+          //24 from the content in the child
+          16.0 + 24.0,
+        ),
+        child: Container(
+          color: Theme.of(context).primaryColor,
+          width: MediaQuery.of(context).size.width,
+          child: DefaultTextStyle(
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.all(8),
+                    child: Text("Select Contact"),
+                  ),
+                ),
+                Material(
+                  color: Theme.of(context).primaryColor,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      InkWell(
+                        onTap: (){
+                          backFromNewContact.value = true;
+                          Navigator.push(
+                            context, PageTransition(
+                              type: PageTransitionType.rightToLeft,
+                              child: NewContact(
+                                onSelect: onSelect,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          height: 40,
+                          width: 16.0 + 24 + 16,
+                          child: Icon(Icons.add),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: (){
+                          print("SEARCH");
+                        },
+                        child: Container(
+                          height: 40,
+                          width: 16.0 + 24 + 16,
+                          child: Icon(Icons.search),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ScrollToTopButton extends StatelessWidget {
+  const ScrollToTopButton({
+    Key key,
+    @required this.onTop,
+    @required this.autoScrollController,
+  }) : super(key: key);
+
+  final ValueNotifier<bool> onTop;
+  final AutoScrollController autoScrollController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        alignment: Alignment.bottomCenter,
+        padding: EdgeInsets.only(bottom: 16),
+        child: AnimatedBuilder(
+          animation: onTop,
+          child: FloatingActionButton(
+            mini: true,
+            onPressed: (){
+              //TODO... replace this for optimal solution
+              autoScrollController.animateTo(
+                autoScrollController.position.minScrollExtent,
+                duration: Duration(milliseconds: 200), 
+                curve: Curves.easeOut,
+              );
+            },
+            //slightly shift the combo of the two icons
+            child: Transform.translate(
+              offset: Offset(0,-4),
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    height: 12,
+                    child: Icon(Icons.minimize),
+                  ),
+                  Container(
+                    height: 12,
+                    child: Icon(
+                      Icons.keyboard_arrow_up,
+                      size: 28,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          builder: (context, child){
+            return AnimatedContainer(
+              duration: Duration(milliseconds: 200),
+              transform: Matrix4.translation(
+                VECT.Vector3(
+                  0, 
+                  (onTop.value) ? (16.0 + 48) : 0.0, 
+                  0,
+                ),
+              ),
+              child: child,
+            );
+          },
         ),
       ),
     );
