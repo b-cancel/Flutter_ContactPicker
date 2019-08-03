@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:not_at_home/selectContact/alphaScrollBar.dart';
 import 'package:page_transition/page_transition.dart';
 
 import 'package:vector_math/vector_math_64.dart' as VECT;
@@ -370,31 +371,47 @@ class _SelectContactUXState extends State<SelectContactUX> {
                       AnimatedBuilder(
                         animation: flexibleHeight,
                         child: Container(
-                          padding: EdgeInsets.only(
-                            top: 27.0 + 16 + (
-                              (flexibleClosed.value) ? (24.0 + 16) : 0.0
-                            ),
-                          ),
+                          color: Colors.green,
+                          padding: EdgeInsets.all(16),
                           child: Container(
-                            color: Colors.green,
-                            padding: EdgeInsets.all(16),
-                            child: Container(
-                              color: Colors.blue,
-                              width: 24,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: scrollBarItems,
-                              ),
+                            color: Colors.blue,
+                            width: 24,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: scrollBarItems,
                             ),
                           ),
                         ),
                         builder: (BuildContext context, Widget child) {
+                          double topPadding = 27.0 + 16 + (
+                            (flexibleClosed.value) ? (24.0 + 16) : 0.0
+                          );
+
+                          double scrollAreaHeight = MediaQuery.of(context).size.height - flexibleHeight.value;
+
                           return Positioned(
                             bottom: 0,
                             right: 0,
                             child: Container(
-                              height: MediaQuery.of(context).size.height - flexibleHeight.value,
-                              child: child,
+                              height: scrollAreaHeight,
+                              child: Container(
+                                padding: EdgeInsets.only(
+                                  top: topPadding,
+                                ),
+                                child: Stack(
+                                  children: <Widget>[
+                                    child,
+                                    Center(
+                                      child: AlphaScrollBar(
+                                        scrollBarHeight: scrollAreaHeight - topPadding - 32,
+                                        itemHeight: 14,
+                                        minimumSpacing: 8,
+                                        items: widget.sortedKeys,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
                             ),
                           );
                         },
