@@ -42,8 +42,8 @@ but this is the best that is possible if you want the overlay to still be reflec
 //So since we are using overlay box as a child of every item guide
 //thing will be aligned as expected
 
-class AlphaScrollBar extends StatelessWidget {
-  AlphaScrollBar({
+class AlphaScrollBarOverlay extends StatelessWidget {
+  AlphaScrollBarOverlay({
     @required this.items,
     @required this.scrollBarHeight,
     @required this.itemHeight,
