@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:not_at_home/selectContact/alphaScrollBarOverlay.dart';
 import 'package:not_at_home/selectContact/scrollThumb.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:flutter_xlider/flutter_xlider.dart';
 
 class ScrollBar extends StatelessWidget {
   ScrollBar({

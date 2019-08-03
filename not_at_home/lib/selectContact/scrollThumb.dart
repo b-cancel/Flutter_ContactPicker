@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_xlider/flutter_xlider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 //Mostly taken from this article
