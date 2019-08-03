@@ -246,6 +246,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                         ],
                       ),
                       new ScrollBar(
+                        autoScrollController: autoScrollController,
                         flexibleHeight: flexibleHeight, 
                         sortedKeys: widget.sortedKeys,
                         showThumbTack: showThumbTack,

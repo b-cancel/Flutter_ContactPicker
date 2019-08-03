@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:not_at_home/selectContact/alphaScrollBarOverlay.dart';
+import 'package:not_at_home/selectContact/scrollThumb.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 class ScrollBar extends StatelessWidget {
   ScrollBar({
     Key key,
+    @required this.autoScrollController,
     @required this.flexibleHeight,
     @required this.sortedKeys,
     @required this.showThumbTack,
   }) : super(key: key);
 
+  final AutoScrollController autoScrollController;
   final ValueNotifier<double> flexibleHeight;
   final List<int> sortedKeys;
   final ValueNotifier<bool> showThumbTack;
@@ -22,13 +26,17 @@ class ScrollBar extends StatelessWidget {
         double totalHeight = MediaQuery.of(context).size.height;
         double appBarHeight = flexibleHeight.value;
         double stickyHeaderHeight = 24.0 + 16;
-        double halfPadding = 16;
-        double paddingForScrollBar = 12;
+        double paddingAll = 16;
+        double paddingVertical = 12;
 
         //calculate scroll overlay height
         double scrollOverlayHeight = totalHeight - appBarHeight;
         scrollOverlayHeight -= (stickyHeaderHeight * 2);
-        scrollOverlayHeight -= (halfPadding * 2);
+        scrollOverlayHeight -= (paddingAll * 2);
+
+        //a couple of manually set vars
+        double itemHeight = 18;
+        double minSpacing = 2;
 
         //build
         return Positioned(
@@ -46,13 +54,12 @@ class ScrollBar extends StatelessWidget {
                 vertical: stickyHeaderHeight,
               ),
               child: Container(
-                color: Colors.red,
                 child: Stack(
                   children: <Widget>[
                     //-----Scroll Bar Base
                     new ScrollBarWrapper(
-                      halfPadding: halfPadding, 
-                      paddingForScrollBar: paddingForScrollBar, 
+                      paddingAll: paddingAll, 
+                      paddingVertical: paddingVertical, 
                       color: Theme.of(context).primaryColor.withOpacity(0.5),
                       widget: Container(),
                     ),
@@ -75,13 +82,12 @@ class ScrollBar extends StatelessWidget {
                             onPanCancel: (){
                               showThumbTack.value = false;
                             },
-                            child: Container(
-                              color: Colors.pink.withOpacity(0.25),
-                            ),
+                            child: Container(),
                           ),
                         ),
                     ),
                     //-----thumb tack test
+                    /*
                     AnimatedBuilder(
                       animation: showThumbTack,
                       builder: (context, child){
@@ -103,16 +109,23 @@ class ScrollBar extends StatelessWidget {
                         );
                       },
                     ),
+                    */
+                    DraggableScrollBar(
+                      paddingAll: paddingAll,
+                      paddingVertical: paddingVertical,
+                      autoScrollController: autoScrollController,
+                      scrollThumbHeight: 4 * itemHeight,
+                    ),
                     //-----Letters Overlay
                     IgnorePointer(
                       child: new ScrollBarWrapper(
-                        halfPadding: halfPadding, 
-                        paddingForScrollBar: paddingForScrollBar, 
+                        paddingAll: paddingAll, 
+                        paddingVertical: paddingVertical, 
                         color: Colors.transparent,
                         widget: AlphaScrollBarOverlay(
                           scrollBarHeight: scrollOverlayHeight,
-                          itemHeight: 18,
-                          minimumSpacing: 2,
+                          itemHeight: itemHeight,
+                          minimumSpacing: minSpacing,
                           items: sortedKeys,
                         ),
                       ),
@@ -131,26 +144,26 @@ class ScrollBar extends StatelessWidget {
 class ScrollBarWrapper extends StatelessWidget {
   const ScrollBarWrapper({
     Key key,
-    @required this.halfPadding,
-    @required this.paddingForScrollBar,
+    @required this.paddingAll,
+    @required this.paddingVertical,
     @required this.widget,
     @required this.color,
   }) : super(key: key);
 
-  final double halfPadding;
-  final double paddingForScrollBar;
+  final double paddingAll;
+  final double paddingVertical;
   final Widget widget;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(halfPadding),
+      padding: EdgeInsets.all(paddingAll),
       child: Container(
-        padding: EdgeInsets.symmetric(
-          vertical: paddingForScrollBar,
-        ),
         width: 24,
+        padding: EdgeInsets.symmetric(
+          vertical: paddingVertical,
+        ),
         decoration: new BoxDecoration(
           color: color,
           borderRadius: new BorderRadius.all(
@@ -162,173 +175,3 @@ class ScrollBarWrapper extends StatelessWidget {
     );
   }
 }
-
-/*
-import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
-
-/*
-new DraggableScrollbar(
-          child: _buildGrid(),
-          heightScrollThumb: 40.0,
-          controller: controller,
-        ),
-*/
-
-class DraggableScrollbar extends StatefulWidget {
-  final double heightScrollThumb;
-  final Widget child;
-  final ScrollController controller;
-
-  DraggableScrollbar({this.heightScrollThumb, this.child, this.controller});
-
-  @override
-  _DraggableScrollbarState createState() => new _DraggableScrollbarState();
-}
-
-class _DraggableScrollbarState extends State<DraggableScrollbar> {
-  //this counts offset for scroll thumb in Vertical axis
-  double _barOffset;
-  //this counts offset for list in Vertical axis
-  double _viewOffset;
-  //variable to track when scrollbar is dragged
-  bool _isDragInProcess;
-
-  @override
-  void initState() {
-    super.initState();
-    _barOffset = 0.0;
-    _viewOffset = 0.0;
-    _isDragInProcess = false;
-  }
-
-  //if list takes 300.0 pixels of height on screen and scrollthumb height is 40.0
-  //then max bar offset is 260.0
-  double get barMaxScrollExtent => context.size.height - widget.heightScrollThumb;
-  double get barMinScrollExtent => 0.0;
-
-  //this is usually lenght (in pixels) of list
-  //if list has 1000 items of 100.0 pixels each, maxScrollExtent is 100,000.0 pixels
-  double get viewMaxScrollExtent => widget.controller.position.maxScrollExtent;
-  //this is usually 0.0
-  double get viewMinScrollExtent => widget.controller.position.minScrollExtent;
-
-  double getScrollViewDelta(
-    double barDelta,
-    double barMaxScrollExtent,
-    double viewMaxScrollExtent,
-  ) {//propotion
-    return barDelta * viewMaxScrollExtent / barMaxScrollExtent;
-  }
-
-  double getBarDelta(
-    double scrollViewDelta,
-    double barMaxScrollExtent,
-    double viewMaxScrollExtent,
-  ) {//propotion
-    return scrollViewDelta * barMaxScrollExtent / viewMaxScrollExtent;
-  }
-
-  void _onVerticalDragStart(DragStartDetails details) {
-    setState(() {
-      _isDragInProcess = true;
-    });
-  }
-
-  void _onVerticalDragEnd(DragEndDetails details) {
-    setState(() {
-      _isDragInProcess = false;
-    });
-  }
-
-  void _onVerticalDragUpdate(DragUpdateDetails details) {
-    setState(() {
-      _barOffset += details.delta.dy;
-
-      if (_barOffset < barMinScrollExtent) {
-        _barOffset = barMinScrollExtent;
-      }
-      if (_barOffset > barMaxScrollExtent) {
-        _barOffset = barMaxScrollExtent;
-      }
-
-      double viewDelta = getScrollViewDelta(
-          details.delta.dy, barMaxScrollExtent, viewMaxScrollExtent);
-
-      _viewOffset = widget.controller.position.pixels + viewDelta;
-      if (_viewOffset < widget.controller.position.minScrollExtent) {
-        _viewOffset = widget.controller.position.minScrollExtent;
-      }
-      if (_viewOffset > viewMaxScrollExtent) {
-        _viewOffset = viewMaxScrollExtent;
-      }
-      widget.controller.jumpTo(_viewOffset);
-    });
-  }
-
-  //this function process events when scroll controller changes it's position
-  //by scrollController.jumpTo or scrollController.animateTo functions.
-  //It can be when user scrolls, drags scrollbar (see line 139)
-  //or any other manipulation with scrollController outside this widget
-  changePosition(ScrollNotification notification) {
-    //if notification was fired when user drags we don't need to update scrollThumb position
-    if (_isDragInProcess) {
-      return;
-    }
-
-    setState(() {
-      if (notification is ScrollUpdateNotification) {
-        _barOffset += getBarDelta(
-          notification.scrollDelta,
-          barMaxScrollExtent,
-          viewMaxScrollExtent,
-        );
-
-        if (_barOffset < barMinScrollExtent) {
-          _barOffset = barMinScrollExtent;
-        }
-        if (_barOffset > barMaxScrollExtent) {
-          _barOffset = barMaxScrollExtent;
-        }
-
-        _viewOffset += notification.scrollDelta;
-        if (_viewOffset < widget.controller.position.minScrollExtent) {
-          _viewOffset = widget.controller.position.minScrollExtent;
-        }
-        if (_viewOffset > viewMaxScrollExtent) {
-          _viewOffset = viewMaxScrollExtent;
-        }
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification notification) {
-          changePosition(notification);
-        },
-        child: new Stack(children: <Widget>[
-          widget.child,
-          GestureDetector(
-              //we've add functions for onVerticalDragStart and onVerticalDragEnd
-              //to track when dragging starts and finishes
-              onVerticalDragStart: _onVerticalDragStart,
-              onVerticalDragUpdate: _onVerticalDragUpdate,
-              onVerticalDragEnd: _onVerticalDragEnd,
-              child: Container(
-                  alignment: Alignment.topRight,
-                  margin: EdgeInsets.only(top: _barOffset),
-                  child: _buildScrollThumb())),
-        ]));
-  }
-
-  Widget _buildScrollThumb() {
-    return new Container(
-      height: widget.heightScrollThumb,
-      width: 20.0,
-      color: Colors.blue,
-    );
-  }
-}
-*/
