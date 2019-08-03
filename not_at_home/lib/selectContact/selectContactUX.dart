@@ -383,12 +383,22 @@ class _SelectContactUXState extends State<SelectContactUX> {
                           ),
                         ),
                         builder: (BuildContext context, Widget child) {
-                          double topPadding = 27.0 + 16 + (
-                            (flexibleClosed.value) ? (24.0 + 16) : 0.0
-                          );
+                          double topPadding = 27.0 + 16;
 
+                          //padding so sticky header isnt covered
+                          if(flexibleClosed.value){
+                           topPadding += (24.0 + 16); 
+                          }
+
+                          //padding that must be removed in landscape mode from some reason
+                          if(isPortrait == false){
+                            topPadding -= 18;
+                          }
+
+                          //live calced
                           double scrollAreaHeight = MediaQuery.of(context).size.height - flexibleHeight.value;
 
+                          //build
                           return Positioned(
                             bottom: 0,
                             right: 0,
@@ -402,11 +412,14 @@ class _SelectContactUXState extends State<SelectContactUX> {
                                   children: <Widget>[
                                     child,
                                     Center(
-                                      child: AlphaScrollBar(
-                                        scrollBarHeight: scrollAreaHeight - topPadding - 32,
-                                        itemHeight: 14,
-                                        minimumSpacing: 8,
-                                        items: widget.sortedKeys,
+                                      child: Container(
+                                        width: 24,
+                                        child: AlphaScrollBar(
+                                          scrollBarHeight: scrollAreaHeight - topPadding - 32,
+                                          itemHeight: 14,
+                                          minimumSpacing: 8,
+                                          items: widget.sortedKeys,
+                                        ),
                                       ),
                                     )
                                   ],

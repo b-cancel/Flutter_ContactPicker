@@ -181,23 +181,25 @@ class AlphaScrollBar extends StatelessWidget {
 
               //If we marked this as an itemGuide then make it so
               //else put a placer holder
-              /*
               Widget itemGuide;
               if(itemGuideIndices.contains(i)){
                 itemGuide = OverflowBox(
                   minHeight: itemHeight,
                   maxHeight: itemHeight,
                   //NOTE: width auto set
-                  child: SizedBox(
-                    //TODO... check if this is needed
-                    height: itemHeight,
-                    child: Container(
-                      color: (i%2 == 0) ? Colors.green : Colors.yellow,
-                      child: Text(
-                        String.fromCharCode(items[i]),
-                        style: TextStyle(
-                          //TODO... check if my random guess of font size = height is true
-                          height: itemHeight,
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4),
+                      child: Container(
+                        height: itemHeight,
+                        width: MediaQuery.of(context).size.width,
+                        color: Colors.black,
+                        child: Text(
+                          String.fromCharCode(items[i]),
+                          style: TextStyle(
+                            //TODO... check if my random guess of font size = height is true
+                            height: itemHeight,
+                          ),
                         ),
                       ),
                     ),
@@ -205,14 +207,13 @@ class AlphaScrollBar extends StatelessWidget {
                 );
               }
               else itemGuide = Container();
-              */
 
               //add the spacer BEFORE if not the first item
               if(i != 0){
                 widgets.add(
                   Expanded(
                     child: Container(
-                      color: Colors.orange,
+                      color: Colors.orange.withOpacity(0.5),
                     )
                   ),
                 );
@@ -221,9 +222,10 @@ class AlphaScrollBar extends StatelessWidget {
               //add the item widget
               widgets.add(
                 Container(
-                  width: 0,
-                  height: itemGuideIndices.contains(i) ? 2 : 0,
+                  width: MediaQuery.of(context).size.width,
+                  height: 1,
                   color: Colors.lightBlue,
+                  child: itemGuide,
                 )
               );
             }
@@ -294,73 +296,3 @@ class OnlyShowFirst extends StatelessWidget {
     );
   }
 }
-
-/*
-Container(
-        color: Colors.yellow,
-        height: 500,
-        alignment: Alignment.center,
-        width: MediaQuery.of(context).size.width,
-        child: Column(
-          children: <Widget>[
-            new OverFlowTest(),
-            Expanded(
-              child: Container(),
-            ),
-            new OverFlowTest(),
-            Expanded(
-              child: Container(),
-            ),
-            new OverFlowTest(),
-            Expanded(
-              child: Container(),
-            ),
-            new OverFlowTest(),
-            Expanded(
-              child: Container(),
-            ),
-            new OverFlowTest(),
-            Expanded(
-              child: Container(),
-            ),
-            new OverFlowTest(),
-            Expanded(
-              child: Container(),
-            ),
-            new OverFlowTest(),
-            Expanded(
-              child: Container(),
-            ),
-            new OverFlowTest(),
-            Expanded(
-              child: Container(),
-            ),
-            new OverFlowTest(),
-          ],
-        )
-      )
-
-      class OverFlowTest extends StatelessWidget {
-  const OverFlowTest({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.purple,
-      height: 0,
-      width: 0,
-      child: OverflowBox(
-        minHeight: 100,
-        maxHeight: 100,
-        minWidth: 100,
-        maxWidth: 100,
-        child: Container(
-          color: Colors.red.withOpacity(0.1),
-        ),
-      )
-    );
-  }
-}
-*/
