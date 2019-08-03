@@ -81,9 +81,6 @@ class AlphaScrollBar extends StatelessWidget {
     //no partial items can exist
     int itemGuideCount = ((scrollBarHeight + minimumSpacing) ~/ (itemHeight + minimumSpacing));
 
-    print("-------------------------Items We Want To Show " + items.length.toString());
-    print("-------------------------Items To Be Shown " + itemGuideCount.toString());
-
     //if there isnt enough space for anything then -> simply fill the space there is
     if(itemGuideCount == 0) return Container(height: scrollBarHeight);
     else{
@@ -113,9 +110,6 @@ class AlphaScrollBar extends StatelessWidget {
             );
           }
           else{
-            print("-------------------------Where we want to be");
-
-            
             //NOTE: we KNOW we have atleast 2 possible spots
             //AND 2 possible items
             //SO... we will be able to atleast have the first and last items
@@ -152,8 +146,6 @@ class AlphaScrollBar extends StatelessWidget {
                 groupSize++;
               }
 
-              print("-------------------------group size: " + groupSize.toString());
-
               //iterate through all the items and mark the ones we will be using as item guides
               for(int i = groupSize; i < items.length && itemGuideCount > 0; i += groupSize){
                 int addIndex;
@@ -164,19 +156,14 @@ class AlphaScrollBar extends StatelessWidget {
                 else addIndex = i;
 
                 //this item took up an item guide slot
-                print("-------------------------add index: " + addIndex.toString());
                 itemGuideIndices.add(addIndex);
                 itemGuideCount--;
               }
-
-              print("-------------------------size: " + itemGuideIndices.length.toString());
-              print("-------------------------array: " + itemGuideIndices.toString());
             }
 
             //generate widget list
             List<Widget> widgets = new List<Widget>();
             widgets.clear();
-            print("-------------------------widgets len on clear: " + widgets.length.toString());
             for(int i = 0; i < items.length; i++){
 
               //If we marked this as an itemGuide then make it so
@@ -187,19 +174,15 @@ class AlphaScrollBar extends StatelessWidget {
                   minHeight: itemHeight,
                   maxHeight: itemHeight,
                   //NOTE: width auto set
-                  child: Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4),
-                      child: Container(
-                        height: itemHeight,
-                        width: MediaQuery.of(context).size.width,
-                        color: Colors.black,
-                        child: Text(
-                          String.fromCharCode(items[i]),
-                          style: TextStyle(
-                            //TODO... check if my random guess of font size = height is true
-                            height: itemHeight,
-                          ),
+                  child: Container(
+                    height: itemHeight,
+                    width: MediaQuery.of(context).size.width,
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Text(
+                        String.fromCharCode(items[i]),
+                        style: TextStyle(
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -212,9 +195,7 @@ class AlphaScrollBar extends StatelessWidget {
               if(i != 0){
                 widgets.add(
                   Expanded(
-                    child: Container(
-                      color: Colors.orange.withOpacity(0.5),
-                    )
+                    child: Container(),
                   ),
                 );
               }
@@ -223,21 +204,15 @@ class AlphaScrollBar extends StatelessWidget {
               widgets.add(
                 Container(
                   width: MediaQuery.of(context).size.width,
-                  height: 1,
-                  color: Colors.lightBlue,
+                  height: 0,
                   child: itemGuide,
                 )
               );
             }
 
-            int len = itemGuideIndices.length;
-            print("-------------------------should be: " +  (len + len - 1).toString());
-            print("-------------------------widgets: " + widgets.length.toString());
-
             //output the widget
             return Container(
               height: scrollBarHeight,
-              color: Colors.pink,
               width: 24,
               child: Column(
                 mainAxisSize: MainAxisSize.max,

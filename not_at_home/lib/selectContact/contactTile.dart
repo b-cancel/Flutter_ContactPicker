@@ -58,7 +58,7 @@ class ContactListTile extends StatelessWidget {
       ),
       title: Text(name),
       subtitle: Text(phoneString),
-      trailing: Icon(Icons.keyboard_arrow_right),
+      //trailing: Icon(Icons.keyboard_arrow_right),
     );
   }
 }

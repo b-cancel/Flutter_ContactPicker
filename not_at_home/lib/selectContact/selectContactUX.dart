@@ -233,7 +233,8 @@ class _SelectContactUXState extends State<SelectContactUX> {
                           print("---" + i.toString());
                         },
                         child: Container(
-                          color: color,
+                          //TODO... show where gesture detectors are
+                          //color: color,
                         ),
                       ),
                     )
@@ -371,15 +372,17 @@ class _SelectContactUXState extends State<SelectContactUX> {
                       AnimatedBuilder(
                         animation: flexibleHeight,
                         child: Container(
-                          color: Colors.green,
-                          padding: EdgeInsets.all(16),
-                          child: Container(
-                            color: Colors.blue,
-                            width: 24,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: scrollBarItems,
-                            ),
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          width: 24,
+                          decoration: new BoxDecoration(
+                              color: Theme.of(context).primaryColor.withOpacity(0.5),
+                              borderRadius: new BorderRadius.all(
+                                Radius.circular(25.0),
+                              ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: scrollBarItems,
                           ),
                         ),
                         builder: (BuildContext context, Widget child) {
@@ -408,21 +411,34 @@ class _SelectContactUXState extends State<SelectContactUX> {
                                 padding: EdgeInsets.only(
                                   top: topPadding,
                                 ),
-                                child: Stack(
-                                  children: <Widget>[
-                                    child,
-                                    Center(
-                                      child: Container(
-                                        width: 24,
-                                        child: AlphaScrollBar(
-                                          scrollBarHeight: scrollAreaHeight - topPadding - 32,
-                                          itemHeight: 14,
-                                          minimumSpacing: 8,
-                                          items: widget.sortedKeys,
+                                //padding of container with no color
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                    right: 16,
+                                    bottom: 16,
+                                    //() for the header that can still get in the way with the transition
+                                    top: 16.0 + (24),
+                                  ),
+                                  child: Stack(
+                                    children: <Widget>[
+                                      child,
+                                      Positioned.fill(
+                                        child: Center(
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(vertical: 12),
+                                            width: 24,
+                                            child: AlphaScrollBar(
+                                              //- 16 from padding above
+                                              scrollBarHeight: scrollAreaHeight - topPadding - 32 - (12 * 2),
+                                              itemHeight: 18,
+                                              minimumSpacing: 2,
+                                              items: widget.sortedKeys,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    )
-                                  ],
+                                      )
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
