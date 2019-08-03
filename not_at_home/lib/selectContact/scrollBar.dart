@@ -45,77 +45,80 @@ class ScrollBar extends StatelessWidget {
                 //avoids sticky header bar
                 vertical: stickyHeaderHeight,
               ),
-              child: Stack(
-                children: <Widget>[
-                  //-----Scroll Bar Base
-                  new ScrollBarWrapper(
-                    halfPadding: halfPadding, 
-                    paddingForScrollBar: paddingForScrollBar, 
-                    color: Colors.transparent,
-                    alphaScrollBar: AlphaScrollBarOverlay(
-                      scrollBarHeight: scrollOverlayHeight,
-                      itemHeight: 18,
-                      minimumSpacing: 2,
-                      items: sortedKeys,
+              child: Container(
+                color: Colors.red,
+                child: Stack(
+                  children: <Widget>[
+                    //-----Scroll Bar Base
+                    new ScrollBarWrapper(
+                      halfPadding: halfPadding, 
+                      paddingForScrollBar: paddingForScrollBar, 
+                      color: Theme.of(context).primaryColor.withOpacity(0.5),
+                      widget: Container(),
                     ),
-                  ),
-                  //-----Thumb tack shower
-                  //Required since our mini scroll bar takes you to a section
-                  //so it will be very dificult to get the scroll bar to align
-                  //with the scroll area that holds the contacts
-                  //so to keep things simple...
-                  //we simply hide the scroll bar IF we are not dragging it specifically
-                  Positioned.fill(
-                    child: Container(
-                        padding: EdgeInsets.all(0),
-                        child: GestureDetector(
-                          onPanDown: (tapDownDetails){
-                            showThumbTack.value = true;
-                          },
-                          onPanEnd: (tapUpDetails){
-                            showThumbTack.value = false;
-                          },
-                          onPanCancel: (){
-                            showThumbTack.value = false;
-                          },
-                          child: Container(
-                          ),
-                        ),
-                      ),
-                  ),
-                  //-----thumb tack test
-                  AnimatedBuilder(
-                    animation: showThumbTack,
-                    builder: (context, child){
-                      return Positioned(
-                        left: 0,
-                        bottom: 0,
-                        child: Visibility(
-                          visible: showThumbTack.value,
-                          child: IgnorePointer(
+                    //-----Thumb tack shower
+                    //Required since our mini scroll bar takes you to a section
+                    //so it will be very dificult to get the scroll bar to align
+                    //with the scroll area that holds the contacts
+                    //so to keep things simple...
+                    //we simply hide the scroll bar IF we are not dragging it specifically
+                    Positioned.fill(
+                      child: Container(
+                          padding: EdgeInsets.all(0),
+                          child: GestureDetector(
+                            onPanDown: (tapDownDetails){
+                              showThumbTack.value = true;
+                            },
+                            onPanEnd: (tapUpDetails){
+                              showThumbTack.value = false;
+                            },
+                            onPanCancel: (){
+                              showThumbTack.value = false;
+                            },
                             child: Container(
-                              width: 100,
-                              height: 100,
-                              color: Colors.green.withOpacity(0.5),
+                              color: Colors.pink.withOpacity(0.25),
                             ),
                           ),
                         ),
-                      );
-                    },
-                  ),
-                  //-----Letters Overlay
-                  new ScrollBarWrapper(
-                    halfPadding: halfPadding, 
-                    paddingForScrollBar: paddingForScrollBar, 
-                    color: Theme.of(context).primaryColor.withOpacity(0.5),
-                    alphaScrollBar: AlphaScrollBarOverlay(
-                      scrollBarHeight: scrollOverlayHeight,
-                      itemHeight: 18,
-                      minimumSpacing: 2,
-                      items: sortedKeys,
                     ),
-                  ),
-                ],
+                    //-----thumb tack test
+                    AnimatedBuilder(
+                      animation: showThumbTack,
+                      builder: (context, child){
+                        return Positioned(
+                          left: 0,
+                          bottom: 0,
+                          child: IgnorePointer(
+                            child: Visibility(
+                              visible: showThumbTack.value,
+                              child: IgnorePointer(
+                                child: Container(
+                                  width: 100,
+                                  height: 100,
+                                  color: Colors.green.withOpacity(0.5),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    //-----Letters Overlay
+                    IgnorePointer(
+                      child: new ScrollBarWrapper(
+                        halfPadding: halfPadding, 
+                        paddingForScrollBar: paddingForScrollBar, 
+                        color: Colors.transparent,
+                        widget: AlphaScrollBarOverlay(
+                          scrollBarHeight: scrollOverlayHeight,
+                          itemHeight: 18,
+                          minimumSpacing: 2,
+                          items: sortedKeys,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -130,55 +133,31 @@ class ScrollBarWrapper extends StatelessWidget {
     Key key,
     @required this.halfPadding,
     @required this.paddingForScrollBar,
-    @required this.alphaScrollBar,
+    @required this.widget,
     @required this.color,
   }) : super(key: key);
 
   final double halfPadding;
   final double paddingForScrollBar;
-  final Widget alphaScrollBar;
+  final Widget widget;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.red,
-      //extra padding
       padding: EdgeInsets.all(halfPadding),
-      child: Stack(
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            width: 24,
-            decoration: new BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.5),
-                borderRadius: new BorderRadius.all(
-                  Radius.circular(25.0),
-                ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              //TODO... scroll items were here
-            ),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          vertical: paddingForScrollBar,
+        ),
+        width: 24,
+        decoration: new BoxDecoration(
+          color: color,
+          borderRadius: new BorderRadius.all(
+            Radius.circular(25.0),
           ),
-          Positioned.fill(
-            child: Center(
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  vertical: paddingForScrollBar,
-                ),
-                width: 24,
-                decoration: new BoxDecoration(
-                  color: color,
-                  borderRadius: new BorderRadius.all(
-                    Radius.circular(25.0),
-                  ),
-                ),
-                child: alphaScrollBar,
-              ),
-            ),
-          ),
-        ],
+        ),
+        child: widget,
       ),
     );
   }
