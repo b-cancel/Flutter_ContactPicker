@@ -114,6 +114,7 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
             ),
           ),
         ),
+        /*
         IgnorePointer(
           child: Padding(
             padding: EdgeInsets.all(widget.paddingAll),
@@ -132,6 +133,7 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
             ),
           ),
         ),
+       */ 
       ],
     );
   }

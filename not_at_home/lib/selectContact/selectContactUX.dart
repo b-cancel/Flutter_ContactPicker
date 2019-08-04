@@ -154,8 +154,11 @@ class _SelectContactUXState extends State<SelectContactUX> {
       );
     }
 
+    print("status bar " + MediaQuery.of(context).padding.top.toString());
+
     //build widgets
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColorDark,
       body: SafeArea(
         child: Stack(
           children: <Widget>[
@@ -250,6 +253,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                       ),
                       new ScrollBar(
                         //TODO... PASS THE KEYS
+                        isPortrait: isPortrait,
                         autoScrollController: autoScrollController,
                         flexibleHeight: flexibleHeight, 
                         sortedKeys: widget.sortedKeys,
