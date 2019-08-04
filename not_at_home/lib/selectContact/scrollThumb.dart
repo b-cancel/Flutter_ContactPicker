@@ -10,15 +10,15 @@ class DraggableScrollBar extends StatefulWidget {
   DraggableScrollBar({
     @required this.visualScrollBarHeight,
     @required this.programaticScrollBarHeight,
-    @required this.autoScrollController,
     @required this.scrollThumbHeight,
+    @required this.autoScrollController,
     @required this.paddingAll,
   });
 
   final double visualScrollBarHeight;
   final double programaticScrollBarHeight;
-  final AutoScrollController autoScrollController;
   final double scrollThumbHeight;
+  final AutoScrollController autoScrollController;
   final double paddingAll;
 
   @override
@@ -26,94 +26,74 @@ class DraggableScrollBar extends StatefulWidget {
 }
 
 class _DraggableScrollBarState extends State<DraggableScrollBar> {
-  /*
-  //this counts offset for scroll thumb in Vertical axis
-  double _barOffset;
-  //this counts offset for list in Vertical axis
-  double _viewOffset;
+  double barOffsetPercent;
+
+  //handle thumb
+  double thumbScrollBarHeight;
+  double thumbMultiplier;
+
+  //offsets
+  double barOffset;
+  double thumbOffset;
+
+  //init
   @override
   void initState() {
     super.initState();
-    _barOffset = 0.0;
-    _viewOffset = 0.0;
+    barOffsetPercent = 0.0;
+
+    doMath();
   }
 
+  //---------------
+  /*
   //if list takes 300.0 pixels of height on screen and scrollthumb height is 40.0
   //then max bar offset is 260.0
-  double get barMaxScrollExtent =>
-      context.size.height - widget.heightScrollThumb;
+  double get barMaxScrollExtent => context.size.height - widget.scrollThumbHeight;
   double get barMinScrollExtent => 0.0;
 
   //this is usually lenght (in pixels) of list
   //if list has 1000 items of 100.0 pixels each, maxScrollExtent is 100,000.0 pixels
-  double get viewMaxScrollExtent => widget.controller.position.maxScrollExtent;
+  double get viewMaxScrollExtent => widget.autoScrollController.position.maxScrollExtent;
   //this is usually 0.0
-  double get viewMinScrollExtent => widget.controller.position.minScrollExtent;
-
-  double getScrollViewDelta(
-    double barDelta,
-    double barMaxScrollExtent,
-    double viewMaxScrollExtent,
-  ) { //propotion
-    return barDelta * viewMaxScrollExtent / barMaxScrollExtent;
-  }
-
-  void _onVerticalDragUpdate(DragUpdateDetails details) {
-    setState(() {
-      _barOffset += details.delta.dy;
-
-      if (_barOffset < barMinScrollExtent) {
-        _barOffset = barMinScrollExtent;
-      }
-      if (_barOffset > barMaxScrollExtent) {
-        _barOffset = barMaxScrollExtent;
-      }
-
-      double viewDelta = getScrollViewDelta(
-          details.delta.dy, barMaxScrollExtent, viewMaxScrollExtent);
-
-      _viewOffset = widget.controller.position.pixels + viewDelta;
-      if (_viewOffset < widget.controller.position.minScrollExtent) {
-        _viewOffset = widget.controller.position.minScrollExtent;
-      }
-      if (_viewOffset > viewMaxScrollExtent) {
-        _viewOffset = viewMaxScrollExtent;
-      }
-      widget.controller.jumpTo(_viewOffset);
-    });
-  }
+  double get viewMinScrollExtent => widget.autoScrollController.position.minScrollExtent;
   */
+  //---------------
 
-  //this counts offset for scroll thumb for Vertical axis
-  double barOffset;
-  double thumbOffset;
+  void doMath(){
+    //handle thumb
+    thumbScrollBarHeight = widget.visualScrollBarHeight - widget.scrollThumbHeight;
+    thumbMultiplier = thumbScrollBarHeight / widget.programaticScrollBarHeight;
 
-  @override
-  void initState() {
-    super.initState();
-    barOffset = 0.0;
-    thumbOffset = 0.0;
+    //convert the percent to an actual valued offset
+    barOffset = widget.programaticScrollBarHeight * barOffsetPercent;
+    thumbOffset = barOffset * thumbMultiplier;
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
-    print("dets: " + details.localPosition.dy.toString());
-    print("double: " + widget.programaticScrollBarHeight.toString());
+    print("lskdfjlsadfj: " + widget.autoScrollController.position.maxScrollExtent.toString());
 
-    //widget.visualScrollBarHeight
-    double scrollThumbTravel = widget.visualScrollBarHeight - widget.scrollThumbHeight;
-    double mutliplier = scrollThumbTravel / widget.programaticScrollBarHeight;
-    setState(() {
-      //travel to our fingers position
-      barOffset = details.localPosition.dy;
-      //clamp the values
-      barOffset = barOffset.clamp(0, widget.programaticScrollBarHeight).toDouble();
-      //apply values to visual
-      thumbOffset = barOffset * mutliplier;
-    });
+    //travel to our fingers position
+    double barOffset = details.localPosition.dy;
+    //clamp the values
+    barOffset = barOffset.clamp(0, widget.programaticScrollBarHeight).toDouble();
+    //shift the offset to a percent of travel
+    barOffsetPercent = barOffset / widget.programaticScrollBarHeight;
+
+    //do math based on the barOffSet percent
+    doMath();
+
+    //TODO... jump to that location
+    
+    //set state to reflect all the changes
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    doMath();
+
+    //build
     return Stack(
       children: <Widget>[
         Center(
@@ -151,7 +131,7 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }

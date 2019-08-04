@@ -13,8 +13,6 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 //Potential but complicated
 //https://github.com/zhahao/list_view_item_builder
 
-//Scrollable.ensureVisible(_key);
-
 /*
 await controller.scrollToIndex(verseID, preferPosition: AutoScrollPosition.begin);
 controller.highlight(verseID);
@@ -44,6 +42,8 @@ class SelectContactUX extends StatefulWidget {
 }
 
 class _SelectContactUXState extends State<SelectContactUX> {
+  List<UniqueKey> keys = new List<UniqueKey>();
+
   //assume the flexible is open at the start
   final ValueNotifier<bool> flexibleClosed = new ValueNotifier(true);
   //TODO... use largest not smallest
@@ -87,9 +87,10 @@ class _SelectContactUXState extends State<SelectContactUX> {
     //1. add autotag on the outside
     for(int i = 0; i < widget.sectionWidgets.length; i++){
       Widget section = widget.sectionWidgets[i];
+      keys.add(UniqueKey());
 
       widget.sectionWidgets[i] = AutoScrollTag(
-        key: ValueKey(i),
+        key: keys.last,
         controller: autoScrollController,
         index: i,
         child: section,
@@ -98,9 +99,10 @@ class _SelectContactUXState extends State<SelectContactUX> {
 
     //spacer on bottom of list
     int nextIndex = widget.sectionWidgets.length;
+    keys.add(UniqueKey());
     widget.sectionWidgets.add(
       AutoScrollTag(
-        key: ValueKey(nextIndex),
+        key: keys.last,
         controller: autoScrollController,
         index: nextIndex,
         child: Column(
@@ -247,6 +249,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                         ],
                       ),
                       new ScrollBar(
+                        //TODO... PASS THE KEYS
                         autoScrollController: autoScrollController,
                         flexibleHeight: flexibleHeight, 
                         sortedKeys: widget.sortedKeys,
@@ -434,7 +437,8 @@ class ScrollToTopButton extends StatelessWidget {
           child: FloatingActionButton(
             mini: true,
             onPressed: (){
-              //TODO... replace this for optimal solution
+              //scrollToIndex -> too slow to find index
+              //jumpTo -> happens instant but scrolling to top should have some animation
               autoScrollController.animateTo(
                 autoScrollController.position.minScrollExtent,
                 duration: Duration(milliseconds: 200), 

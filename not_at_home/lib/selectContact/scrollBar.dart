@@ -3,7 +3,7 @@ import 'package:not_at_home/selectContact/alphaScrollBarOverlay.dart';
 import 'package:not_at_home/selectContact/scrollThumb.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-bool scrollBarColors = true;
+bool scrollBarColors = false;
 
 class ScrollBar extends StatelessWidget {
   ScrollBar({
@@ -142,9 +142,12 @@ class ScrollBar extends StatelessWidget {
                       */
                       DraggableScrollBar(
                         visualScrollBarHeight: scrollBarHeight - (paddingAll * 2),
-                        programaticScrollBarHeight: scrollBarHeight - paddingAll,
-                        autoScrollController: autoScrollController,
+                        //alphaOverlayHeight 
+                        //OR scrollBarHeight - (paddingAll * 2) - (endsVertical * 2)
+                        //yields the least ammount of vertical slack
+                        programaticScrollBarHeight: scrollBarHeight - (paddingAll * 2),
                         scrollThumbHeight: 4 * itemHeight,
+                        autoScrollController: autoScrollController,
                         paddingAll: paddingAll,
                       ),
                       //-----Letters Overlay
