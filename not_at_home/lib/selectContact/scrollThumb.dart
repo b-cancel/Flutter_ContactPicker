@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_xlider/flutter_xlider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 //Mostly taken from this article
@@ -105,34 +104,40 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
       child: Padding(
         //NOTE: to perfectly align with our scroll bar use paddingVertical
         //here we have it at zero so whoever is pressing the top of the scrollbar has some leway
+        //this does create some level of inaccuracy but it should be small enough to go unnoticed
+        //and since you get extra leway its worth it
         padding: EdgeInsets.symmetric(vertical: 0),
         child: GestureDetector(
           onVerticalDragUpdate: _onVerticalDragUpdate,
-          child: Container(
-            width: 16 + 24.0 + 16,
-            color: Colors.red.withOpacity(0.5),
-            alignment: Alignment.topRight,
-            margin: EdgeInsets.only(top: _barOffset),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: widget.paddingAll),
-              color: Colors.blue,
-              child: Container(
-                width: 24,
-                //only item spacing once since we just need 
-                //half of item spacing on top
-                //and half on the bottom
-                height: widget.scrollThumbHeight,
-                decoration: new BoxDecoration(
-                  color: Colors.purple,
-                  borderRadius: new BorderRadius.all(
-                    Radius.circular(25.0),
-                  ),
+          child: Stack(
+            children: <Widget>[
+              Container(
+                width: 16 + 24.0 + 16,
+                color: Colors.green.withOpacity(0.5),
+              ),
+              Container(
+                width: 16 + 24.0 + 16,
+                color: Colors.red.withOpacity(0.5),
+                alignment: Alignment.topRight,
+                margin: EdgeInsets.only(top: _barOffset),
+                child: Container(
+                  height: 0,
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),
     );
   }
 }
+
+/*
+widget.scrollThumbHeight,
+  decoration: new BoxDecoration(
+    color: Colors.purple,
+    borderRadius: new BorderRadius.all(
+      Radius.circular(25.0),
+    ),
+  ),
+*/
