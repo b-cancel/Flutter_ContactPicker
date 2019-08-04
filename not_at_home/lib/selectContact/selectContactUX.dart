@@ -83,7 +83,8 @@ class _SelectContactUXState extends State<SelectContactUX> {
   //build
   @override
   Widget build(BuildContext context) {
-    //add the autoscroll stuff to section widgets
+    //add wrappers to section widgets
+    //1. add autotag on the outside
     for(int i = 0; i < widget.sectionWidgets.length; i++){
       Widget section = widget.sectionWidgets[i];
 

@@ -47,11 +47,11 @@ class AlphaScrollBarOverlay extends StatelessWidget {
     @required this.items,
     @required this.scrollBarHeight,
     @required this.itemHeight,
-    @required this.minimumSpacing,
+    @required this.spacingVertical,
   });
 
   final double scrollBarHeight;
-  final double minimumSpacing;
+  final double spacingVertical;
   //TODO... convert this to a list of widgets
   final List<int> items;
   //this should be the height of all the equally sized widgets in items
@@ -79,7 +79,7 @@ class AlphaScrollBarOverlay extends StatelessWidget {
     //Since initially ATH >= function
     //we truncate the result of items
     //no partial items can exist
-    int itemGuideCount = ((scrollBarHeight + minimumSpacing) ~/ (itemHeight + minimumSpacing));
+    int itemGuideCount = ((scrollBarHeight + spacingVertical) ~/ (itemHeight + spacingVertical));
 
     //if there isnt enough space for anything then -> simply fill the space there is
     if(itemGuideCount == 0) return Container(height: scrollBarHeight);
@@ -211,12 +211,14 @@ class AlphaScrollBarOverlay extends StatelessWidget {
             }
 
             //output the widget
-            return Container(
-              height: scrollBarHeight,
-              width: 24,
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                children: widgets,
+            return Center(
+              child: Container(
+                height: scrollBarHeight,
+                width: 24,
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: widgets,
+                ),
               ),
             );
           }

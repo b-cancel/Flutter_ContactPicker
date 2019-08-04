@@ -8,14 +8,12 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 
 class DraggableScrollBar extends StatefulWidget {
   DraggableScrollBar({
-    @required this.paddingAll,
-    @required this.paddingVertical,
+    @required this.scrollBarHeight,
     @required this.autoScrollController,
     @required this.scrollThumbHeight,
   });
 
-  final double paddingAll;
-  final double paddingVertical;
+  final double scrollBarHeight;
   final AutoScrollController autoScrollController;
   final double scrollThumbHeight;
 
@@ -99,16 +97,12 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: widget.paddingAll),
-      child: Padding(
-        //NOTE: to perfectly align with our scroll bar use paddingVertical
-        //here we have it at zero so whoever is pressing the top of the scrollbar has some leway
-        //this does create some level of inaccuracy but it should be small enough to go unnoticed
-        //and since you get extra leway its worth it
-        padding: EdgeInsets.symmetric(vertical: 0),
-        child: GestureDetector(
-          onVerticalDragUpdate: _onVerticalDragUpdate,
+    return Center(
+      child: GestureDetector(
+        onVerticalDragUpdate: _onVerticalDragUpdate,
+        child: Container(
+          width: 16 + 24.0 + 16,
+          height: widget.scrollBarHeight,
           child: Stack(
             children: <Widget>[
               Container(
