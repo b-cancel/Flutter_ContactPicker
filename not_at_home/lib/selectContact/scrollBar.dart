@@ -141,10 +141,11 @@ class ScrollBar extends StatelessWidget {
                       ),
                       */
                       DraggableScrollBar(
-                        //paddingAll -> 2 half paddingAlls -> one on each end
-                        scrollBarHeight: scrollBarHeight - paddingAll,
+                        visualScrollBarHeight: scrollBarHeight - (paddingAll * 2),
+                        programaticScrollBarHeight: scrollBarHeight - paddingAll,
                         autoScrollController: autoScrollController,
                         scrollThumbHeight: 4 * itemHeight,
+                        paddingAll: paddingAll,
                       ),
                       //-----Letters Overlay
                       IgnorePointer(

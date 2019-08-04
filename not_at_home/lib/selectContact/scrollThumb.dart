@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'dart:math' as math;
 
 //Mostly taken from this article
 //https://medium.com/flutter-community/creating-draggable-scrollbar-in-flutter-a0ae8cf3143b
@@ -9,14 +8,18 @@ import 'dart:math' as math;
 
 class DraggableScrollBar extends StatefulWidget {
   DraggableScrollBar({
-    @required this.scrollBarHeight,
+    @required this.visualScrollBarHeight,
+    @required this.programaticScrollBarHeight,
     @required this.autoScrollController,
     @required this.scrollThumbHeight,
+    @required this.paddingAll,
   });
 
-  final double scrollBarHeight;
+  final double visualScrollBarHeight;
+  final double programaticScrollBarHeight;
   final AutoScrollController autoScrollController;
   final double scrollThumbHeight;
+  final double paddingAll;
 
   @override
   _DraggableScrollBarState createState() => new _DraggableScrollBarState();
@@ -83,61 +86,73 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
 
   //this counts offset for scroll thumb for Vertical axis
   double barOffset;
+  double thumbOffset;
 
   @override
   void initState() {
     super.initState();
     barOffset = 0.0;
+    thumbOffset = 0.0;
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
     print("dets: " + details.localPosition.dy.toString());
-    print("double: " + widget.scrollBarHeight.toString());
+    print("double: " + widget.programaticScrollBarHeight.toString());
+
+    //widget.visualScrollBarHeight
+    double scrollThumbTravel = widget.visualScrollBarHeight - widget.scrollThumbHeight;
+    double mutliplier = scrollThumbTravel / widget.programaticScrollBarHeight;
     setState(() {
-      //_barOffset += details.delta.dy;
+      //travel to our fingers position
       barOffset = details.localPosition.dy;
-      //370
-      barOffset = barOffset.clamp(0, widget.scrollBarHeight).toDouble();
+      //clamp the values
+      barOffset = barOffset.clamp(0, widget.programaticScrollBarHeight).toDouble();
+      //apply values to visual
+      thumbOffset = barOffset * mutliplier;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: GestureDetector(
-        onVerticalDragUpdate: _onVerticalDragUpdate,
-        child: Container(
-          width: 16 + 24.0 + 16,
-          height: widget.scrollBarHeight,
-          child: Stack(
-            children: <Widget>[
-              Container(
-                width: 16 + 24.0 + 16,
-                color: Colors.green.withOpacity(0.5),
-              ),
-              Container(
-                width: 16 + 24.0 + 16,
+    return Stack(
+      children: <Widget>[
+        Center(
+          child: GestureDetector(
+            onVerticalDragUpdate: _onVerticalDragUpdate,
+            child: Container(
+              color: Colors.green.withOpacity(0.5),
+              width: 24.0 + (2 * widget.paddingAll),
+              height: widget.programaticScrollBarHeight,
+              child: Container(
                 color: Colors.red.withOpacity(0.5),
-                alignment: Alignment.topRight,
+                alignment: Alignment.topCenter,
                 margin: EdgeInsets.only(top: barOffset),
                 child: Container(
                   height: 0,
                 ),
               ),
-            ],
+            ),
           ),
         ),
-      ),
+        IgnorePointer(
+          child: Padding(
+            padding: EdgeInsets.all(widget.paddingAll),
+            child: Padding(
+              padding: EdgeInsets.only(top: thumbOffset),
+              child: Container(
+                width: 24,
+                height: widget.scrollThumbHeight,
+                decoration: new BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: new BorderRadius.all(
+                    Radius.circular(25.0),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        )
+      ],
     );
   }
 }
-
-/*
-widget.scrollThumbHeight,
-  decoration: new BoxDecoration(
-    color: Colors.purple,
-    borderRadius: new BorderRadius.all(
-      Radius.circular(25.0),
-    ),
-  ),
-*/
