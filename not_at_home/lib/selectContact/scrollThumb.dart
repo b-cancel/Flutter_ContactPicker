@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'dart:math' as math;
 
 //Mostly taken from this article
 //https://medium.com/flutter-community/creating-draggable-scrollbar-in-flutter-a0ae8cf3143b
@@ -81,17 +82,22 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
   */
 
   //this counts offset for scroll thumb for Vertical axis
-  double _barOffset;
+  double barOffset;
 
   @override
   void initState() {
     super.initState();
-    _barOffset = 0.0;
+    barOffset = 0.0;
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
+    print("dets: " + details.localPosition.dy.toString());
+    print("double: " + widget.scrollBarHeight.toString());
     setState(() {
-      _barOffset += details.delta.dy;
+      //_barOffset += details.delta.dy;
+      barOffset = details.localPosition.dy;
+      //370
+      barOffset = barOffset.clamp(0, widget.scrollBarHeight).toDouble();
     });
   }
 
@@ -113,7 +119,7 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
                 width: 16 + 24.0 + 16,
                 color: Colors.red.withOpacity(0.5),
                 alignment: Alignment.topRight,
-                margin: EdgeInsets.only(top: _barOffset),
+                margin: EdgeInsets.only(top: barOffset),
                 child: Container(
                   height: 0,
                 ),
