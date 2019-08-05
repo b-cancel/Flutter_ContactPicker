@@ -291,7 +291,8 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         if(item > 0){
           widgetsWithDividers.add(
             Padding(
-              padding: EdgeInsets.only(left: 80, right: 24),
+              //TODO... perhaps change these valus to no hard coded
+              padding: EdgeInsets.only(left: 80, right: 24), 
               child: Container(
                 color: Theme.of(context).dividerColor,
                 height: 2,
@@ -311,6 +312,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
             stuckAmount = stuckAmount.clamp(0.0, 1.0);
             return Container(
               color: Theme.of(context).primaryColor,
+              //TODO... perhaps change these valus to no hard coded
               padding: new EdgeInsets.only(
                 left: 32,
                 right: 16,

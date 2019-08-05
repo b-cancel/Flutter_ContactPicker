@@ -3,19 +3,19 @@ import 'package:not_at_home/selectContact/alphaScrollBarOverlay.dart';
 import 'package:not_at_home/selectContact/scrollThumb.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-bool scrollBarColors = true;
+bool scrollBarColors = false;
 
 class ScrollBar extends StatelessWidget {
   ScrollBar({
     Key key,
-    @required this.isPortrait,
+    @required this.statusBarHeight,
     @required this.autoScrollController,
     @required this.flexibleHeight,
     @required this.sortedKeys,
     @required this.showThumbTack,
   }) : super(key: key);
 
-  final bool isPortrait;
+  final double statusBarHeight;
   final AutoScrollController autoScrollController;
   final ValueNotifier<double> flexibleHeight;
   final List<int> sortedKeys;
@@ -48,24 +48,25 @@ class ScrollBar extends StatelessWidget {
         //calculate scroll bar height
         //INCLUDES extra padding to make gesture detector stuff easy
         //SHOULD INCLUDE the area that turns white that has a child of stack
-        double scrollBarHeight = totalHeight - appBarHeight; //minus black
-        scrollBarHeight -= (stickyHeaderVertical * 2); //minus 2 grey
-        scrollBarHeight -= extraPaddingTop;
-        scrollBarHeight -= extraPaddingBottom;
+        double scrollBarAreaHeight = totalHeight - appBarHeight; //minus black
+        scrollBarAreaHeight -= (stickyHeaderVertical * 2); //minus 2 grey
+        scrollBarAreaHeight -= extraPaddingTop;
+        scrollBarAreaHeight -= extraPaddingBottom;
         //NOT -> minus 2 white
         //NOT -> minus 2 endsVertical
 
         //NOTE: the totalHeight we start off with is the actual total height
         //BUT because we are within a widget using safe area
-        //we need to remove and extra 40
-        //which is the size of the system top bar
-        scrollBarHeight -= 40;
+        //we need to remove statusBarHeight
+        scrollBarAreaHeight -= statusBarHeight;
 
         //--------------------------------------------------
         double paddingAll = 16;
 
+        double scrollBarVisualHeight = scrollBarAreaHeight - (paddingAll * 2);
+
         //based on this scrollBarHeight we can calculate the size of our alpha overlay
-        double alphaOverlayHeight = scrollBarHeight - (paddingAll * 2) - (endsVertical * 2);
+        double alphaOverlayHeight = scrollBarAreaHeight - (paddingAll * 2) - (endsVertical * 2);
 
         //build
         return Positioned(
@@ -92,36 +93,27 @@ class ScrollBar extends StatelessWidget {
                 ),
                 child: Container(
                   color: scrollBarColors ? Colors.white : Colors.transparent,
-                  height: scrollBarHeight,
+                  height: scrollBarAreaHeight,
                   width: 24 + (paddingAll * 2),
                   //-------------------------CUSTOM START-------------------------
                   child: Stack(
                     children: <Widget>[
-                      Center(
-                        child: Container(
-                          color: scrollBarColors ? Colors.orange.withOpacity(0.5) : Colors.transparent,
-                          height: scrollBarHeight - (paddingAll * 2),
-                        ),
-                      ),
                       //-----Scroll Bar Base
-                      /*
                       Center(
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: paddingAll),
                           child: Container(
-                            width: 24,
-                            height: scrollBarHeight,
+                            height: scrollBarVisualHeight,
                             decoration: new BoxDecoration(
                               color: Theme.of(context).primaryColor.withOpacity(0.5),
                               borderRadius: new BorderRadius.all(
-                                Radius.circular(5.0),
+                                Radius.circular(25.0),
                               ),
                             ),
                             child: Container(),
                           ),
                         ),
                       ),
-                      */
 
                       
                       //-----Thumb tack shower
@@ -130,8 +122,6 @@ class ScrollBar extends StatelessWidget {
                       //with the scroll area that holds the contacts
                       //so to keep things simple...
                       //we simply hide the scroll bar IF we are not dragging it specifically
-                      
-                      /*
                       GestureDetector(
                         onPanDown: (tapDownDetails){
                           showThumbTack.value = true;
@@ -143,12 +133,10 @@ class ScrollBar extends StatelessWidget {
                           showThumbTack.value = false;
                         },
                         child: Container(
-                          width: 24 + (paddingAll * 2),
-                          height: scrollBarHeight - 0,
+                          height: scrollBarAreaHeight,
                           color: scrollBarColors ? Colors.orange.withOpacity(0.5) : Colors.transparent,
                         ),
                       ),
-                      */
                       //-----thumb tack test
                       /*
                       AnimatedBuilder(
@@ -173,41 +161,24 @@ class ScrollBar extends StatelessWidget {
                         },
                       ),
                       */
-                      
-                      /*
                       DraggableScrollBar(
-                        visualScrollBarHeight: scrollBarHeight - (paddingAll * 2),
+                        thumbColor: Theme.of(context).accentColor.withOpacity(0.25),
+                        visualScrollBarHeight: scrollBarVisualHeight,
                         //alphaOverlayHeight 
                         //OR scrollBarHeight - (paddingAll * 2) - (endsVertical * 2)
                         //yields the least ammount of vertical slack
-                        programaticScrollBarHeight: alphaOverlayHeight,
+                        programaticScrollBarHeight: scrollBarAreaHeight,
                         scrollThumbHeight: 4 * itemHeight,
                         autoScrollController: autoScrollController,
                         paddingAll: paddingAll,
                       ),
-                      */
-                      
-                      /*
-                      IgnorePointer(
-                        child: Center(
-                          child: Container(
-                            color: scrollBarColors ? Colors.red.withOpacity(0.25) : Colors.transparent,
-                            height: alphaOverlayHeight,
-                            width: 24,
-                            child: Container(),
-                          ),
-                        ),
-                      ),
-                      */
                       //-----Letters Overlay
-                      /*
                       IgnorePointer(
                         child: Center(
                           child: Container(
                             padding: EdgeInsets.symmetric(horizontal: paddingAll),
                             child: Container(
                                 height: alphaOverlayHeight,
-                                width: 24,
                                 color: scrollBarColors ? Colors.red.withOpacity(0.25) : Colors.transparent,
                                 child: AlphaScrollBarOverlay(
                                   scrollBarHeight: alphaOverlayHeight,
@@ -219,7 +190,6 @@ class ScrollBar extends StatelessWidget {
                           ),
                         ),
                       ),
-                      */
                     ],
                   ),
                   //-------------------------CUSTOM END-------------------------

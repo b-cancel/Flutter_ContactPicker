@@ -58,6 +58,10 @@ class _SelectContactUXState extends State<SelectContactUX> {
   //the scroll conroller
   AutoScrollController autoScrollController;
 
+  //status bar height to be used throughout
+  double statusBarHeight;
+  double toolBarHeight;
+
   //init
   @override
   void initState() {
@@ -70,6 +74,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
       }
       else onTop.value = false;
     });
+    toolBarHeight = 40;
     super.initState();
   }
 
@@ -117,6 +122,8 @@ class _SelectContactUXState extends State<SelectContactUX> {
             Container(
               width: MediaQuery.of(context).size.width,
               //make sure to top button isnt covered
+              //16 is padding
+              //48 is the size of the button
               height: 16.0 + 48 + 16,
             ),
           ],
@@ -154,7 +161,8 @@ class _SelectContactUXState extends State<SelectContactUX> {
       );
     }
 
-    print("status bar " + MediaQuery.of(context).padding.top.toString());
+    //status bar height grabber (MUST NOT BE IN) init
+    statusBarHeight = MediaQuery.of(context).padding.top;
 
     //build widgets
     return Scaffold(
@@ -238,6 +246,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                         controller: autoScrollController,
                         slivers: <Widget>[
                           new TopAppBar(
+                            toolBarHeight: toolBarHeight,
                             expandedHeight: expandedHeight, 
                             flexibleHeight: flexibleHeight, 
                             flexibleClosed: flexibleClosed, 
@@ -252,8 +261,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                         ],
                       ),
                       new ScrollBar(
-                        //TODO... PASS THE KEYS
-                        isPortrait: isPortrait,
+                        statusBarHeight: statusBarHeight,
                         autoScrollController: autoScrollController,
                         flexibleHeight: flexibleHeight, 
                         sortedKeys: widget.sortedKeys,
@@ -278,6 +286,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
 class TopAppBar extends StatelessWidget {
   const TopAppBar({
     Key key,
+    @required this.toolBarHeight,
     @required this.expandedHeight,
     @required this.flexibleHeight,
     @required this.flexibleClosed,
@@ -287,6 +296,7 @@ class TopAppBar extends StatelessWidget {
     @required this.onSelect,
   }) : super(key: key);
 
+  final double toolBarHeight;
   final double expandedHeight;
   final ValueNotifier<double> flexibleHeight;
   final ValueNotifier<bool> flexibleClosed;
@@ -321,22 +331,21 @@ class TopAppBar extends StatelessWidget {
           //determine whether the space bar is open or closed
           WidgetsBinding.instance.addPostFrameCallback((_){
             flexibleHeight.value = constraints.biggest.height;
-            flexibleClosed.value = (flexibleHeight.value == 40.0);
+            flexibleClosed.value = (flexibleHeight.value == toolBarHeight);
           });
 
           //build
           return FlexibleSpaceBar(
             background: Container(
               width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.fromLTRB(
-                extraPadding,
-                extraPadding,
-                extraPadding,
-                //extras come from the select contact bar
-                extraPadding + 16 + 24,
-              ),
-              child: Container(
-                child: orientationPrompt,
+              padding: EdgeInsets.all(extraPadding),
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: toolBarHeight,
+                ),
+                child: Container(
+                  child: orientationPrompt,
+                ),
               ),
             ),
             //this does not seem to make any difference
@@ -351,9 +360,7 @@ class TopAppBar extends StatelessWidget {
       bottom: PreferredSize(
         preferredSize: Size(
           MediaQuery.of(context).size.width,
-          //16 from top and bottom padding below
-          //24 from the content in the child
-          16.0 + 24.0,
+          toolBarHeight,
         ),
         child: Container(
           color: Theme.of(context).primaryColor,
@@ -390,7 +397,7 @@ class TopAppBar extends StatelessWidget {
                           );
                         },
                         child: Container(
-                          height: 40,
+                          height: toolBarHeight,
                           width: 16.0 + 24 + 16,
                           child: Icon(Icons.add),
                         ),
@@ -400,7 +407,7 @@ class TopAppBar extends StatelessWidget {
                           print("SEARCH");
                         },
                         child: Container(
-                          height: 40,
+                          height: toolBarHeight,
                           width: 16.0 + 24 + 16,
                           child: Icon(Icons.search),
                         ),

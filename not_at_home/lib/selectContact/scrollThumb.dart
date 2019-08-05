@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:not_at_home/selectContact/scrollBar.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 //Mostly taken from this article
@@ -13,6 +14,7 @@ class DraggableScrollBar extends StatefulWidget {
     @required this.scrollThumbHeight,
     @required this.autoScrollController,
     @required this.paddingAll,
+    @required this.thumbColor,
   });
 
   final double visualScrollBarHeight;
@@ -20,6 +22,7 @@ class DraggableScrollBar extends StatefulWidget {
   final double scrollThumbHeight;
   final AutoScrollController autoScrollController;
   final double paddingAll;
+  final Color thumbColor;
 
   @override
   _DraggableScrollBarState createState() => new _DraggableScrollBarState();
@@ -71,8 +74,6 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
-    print("lskdfjlsadfj: " + widget.autoScrollController.position.maxScrollExtent.toString());
-
     //travel to our fingers position
     double barOffset = details.localPosition.dy;
     //clamp the values
@@ -100,40 +101,41 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
           child: GestureDetector(
             onVerticalDragUpdate: _onVerticalDragUpdate,
             child: Container(
-              color: Colors.green.withOpacity(0.5),
-              width: 24.0 + (2 * widget.paddingAll),
+              color: (scrollBarColors) ? Colors.green.withOpacity(0.5) : Colors.transparent,
               height: widget.programaticScrollBarHeight,
               child: Container(
-                color: Colors.red.withOpacity(0.5),
+                color: (scrollBarColors) ? Colors.red.withOpacity(0.5) : Colors.transparent,
                 alignment: Alignment.topCenter,
                 margin: EdgeInsets.only(top: barOffset),
-                child: Container(
-                  height: 0,
-                ),
+                child: Container(),
               ),
             ),
           ),
         ),
-        /*
         IgnorePointer(
-          child: Padding(
-            padding: EdgeInsets.all(widget.paddingAll),
-            child: Padding(
+          child: Center(
+            child: Container(
+              height: widget.visualScrollBarHeight,
+              width: 24,
               padding: EdgeInsets.only(top: thumbOffset),
-              child: Container(
-                width: 24,
-                height: widget.scrollThumbHeight,
-                decoration: new BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: new BorderRadius.all(
-                    Radius.circular(25.0),
+              color: (scrollBarColors) ? Colors.yellow : Colors.transparent,
+              child: Stack(
+                children: <Widget>[
+                  Container(
+                    width: 24,
+                    height: widget.scrollThumbHeight,
+                    decoration: new BoxDecoration(
+                      color: widget.thumbColor,
+                      borderRadius: new BorderRadius.all(
+                        Radius.circular(25.0),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
         ),
-       */ 
       ],
     );
   }
