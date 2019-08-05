@@ -132,15 +132,8 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
           )).toList(); 
         }
       }
-      else if(step == 2){ //got contacts with low quality thumbnails
-        //get the contacts (WITH THUMBNAILS)
-        if(rebuild(false)){
-          contacts.value = (await ContactsService.getContacts(
-            photoHighResolution: true,
-          )).toList(); 
-        }
-      }
-      else if(step == 3){ //got contacts with high quality thumbnails
+      else if(step == 2){ 
+        //got contacts with low quality thumbnails
         rebuild(false); //last build
         step = 0; //reset
       }
