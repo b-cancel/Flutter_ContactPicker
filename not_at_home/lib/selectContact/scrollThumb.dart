@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:not_at_home/selectContact/scrollBar.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'dart:math' as math;
 
 //Mostly taken from this article
 //https://medium.com/flutter-community/creating-draggable-scrollbar-in-flutter-a0ae8cf3143b
@@ -11,18 +12,22 @@ class DraggableScrollBar extends StatefulWidget {
   DraggableScrollBar({
     @required this.visualScrollBarHeight,
     @required this.programaticScrollBarHeight,
+    @required this.alphaOverlayHeight,
     @required this.scrollThumbHeight,
     @required this.autoScrollController,
     @required this.paddingAll,
     @required this.thumbColor,
+    @required this.positions,
   });
 
   final double visualScrollBarHeight;
   final double programaticScrollBarHeight;
+  final double alphaOverlayHeight;
   final double scrollThumbHeight;
   final AutoScrollController autoScrollController;
   final double paddingAll;
   final Color thumbColor;
+  final List<double> positions;
 
   @override
   _DraggableScrollBarState createState() => new _DraggableScrollBarState();
@@ -39,12 +44,27 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
   double barOffset;
   double thumbOffset;
 
+  //the index we will be scroll onto
+  int index;
+  int lastIndex;
+
+  //keeps track of the calculated offsets
+  //between start and end we might select difference indexes
+  //before start only FIRST
+  //after end only LAST
+  double space;
+  double offsetAtSart;
+  double offsetAtEnd;
+
   //init
   @override
   void initState() {
+    //super init
     super.initState();
+    //we start on top so this is set as such
+    index = 0;
     barOffsetPercent = 0.0;
-
+    //do initial math
     doMath();
   }
 
@@ -71,6 +91,11 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
     //convert the percent to an actual valued offset
     barOffset = widget.programaticScrollBarHeight * barOffsetPercent;
     thumbOffset = barOffset * thumbMultiplier;
+
+    //calculate the offset
+    space = (widget.programaticScrollBarHeight - widget.alphaOverlayHeight) / 2;
+    offsetAtSart = space;
+    offsetAtEnd = widget.programaticScrollBarHeight - space;
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
@@ -84,7 +109,45 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
     //do math based on the barOffSet percent
     doMath();
 
+    //idk why i need to do this here instead of in init
+    lastIndex = widget.positions.length - 1;
+
+    //determine what index to go to
+    int newIndex = 0;
+    /*
+    if(barOffset <= offsetAtSart) newIndex = 0;
+    else if(offsetAtEnd <= barOffset) newIndex = lastIndex;
+    else{
+      //we are between offsetAtStart AND offsetAtEnd
+      double adjustedOffset = barOffset;// - offsetAtSart;
+      //print("offset at end: " + offsetAtEnd.toString());
+      //print("last index: " + lastIndex.toString());
+      double ratio = lastIndex / offsetAtEnd; 
+      //print("ratio " + ratio.toString());
+      double roughIndex = adjustedOffset * ratio;
+      newIndex = roughIndex.round();
+      print("rough: " + roughIndex.toString());
+    }
+    */
+    //we are between offsetAtStart AND offsetAtEnd
+    double adjustedOffset = barOffset;// - offsetAtSart;
+    //print("offset at end: " + offsetAtEnd.toString());
+    //print("last index: " + lastIndex.toString());
+    double ratio = lastIndex / widget.programaticScrollBarHeight; 
+    //print("ratio " + ratio.toString());
+    double roughIndex = adjustedOffset * ratio;
+    newIndex = roughIndex.round();
+    print("rough: " + roughIndex.toString());
+    print("refined: " + newIndex.toString());
+
+    //only trigger new index thing IF this scroll position changes our index
+    if(newIndex != index){
+      index = newIndex;
+      print("---------------------------------------------------------TO INDEX: " + index.toString());
+    }
+
     //TODO... jump to that location
+    //widget.autoScrollController.jumpTo(widget.positions.first);
     
     //set state to reflect all the changes
     setState(() {});

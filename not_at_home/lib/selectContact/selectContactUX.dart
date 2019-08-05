@@ -23,6 +23,7 @@ class SelectContactUX extends StatefulWidget {
     this.retreivingContacts: false,
     @required this.contactCount,
     @required this.sortedKeys,
+    //@required this.positions, //the positions of each section
     @required this.sectionWidgets,
     @required this.backFromNewContact,
     @required this.onSelect,
@@ -32,6 +33,7 @@ class SelectContactUX extends StatefulWidget {
   final bool retreivingContacts;
   final int contactCount;
   final List<int> sortedKeys;
+  //final List<double> positions; //the positions of each section
   final List<Widget> sectionWidgets;
   final ValueNotifier<bool> backFromNewContact;
   final Function onSelect;
@@ -62,9 +64,13 @@ class _SelectContactUXState extends State<SelectContactUX> {
   double statusBarHeight;
   double toolBarHeight;
 
+  //TODO... use actual values
+  List<double> positions;
+
   //init
   @override
   void initState() {
+    //auto scroll controller
     autoScrollController = new AutoScrollController();
     autoScrollController.addListener((){
       ScrollPosition position = autoScrollController.position;
@@ -75,6 +81,8 @@ class _SelectContactUXState extends State<SelectContactUX> {
       else onTop.value = false;
     });
     toolBarHeight = 40;
+
+    //super
     super.initState();
   }
 
@@ -88,6 +96,14 @@ class _SelectContactUXState extends State<SelectContactUX> {
   //build
   @override
   Widget build(BuildContext context) {
+    //put in dummy positions
+    double thisOffset = 0;
+    positions = new List<double>();
+    for(int i = 0; i < widget.sortedKeys.length; i++){
+      positions.add(thisOffset);
+      thisOffset += 100;
+    }
+
     //add wrappers to section widgets
     //1. add autotag on the outside
     for(int i = 0; i < widget.sectionWidgets.length; i++){
@@ -266,6 +282,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                         flexibleHeight: flexibleHeight, 
                         sortedKeys: widget.sortedKeys,
                         showThumbTack: showThumbTack,
+                        positions: positions,
                       ),
                     ],
                   ),
@@ -337,6 +354,7 @@ class TopAppBar extends StatelessWidget {
           //build
           return FlexibleSpaceBar(
             background: Container(
+              color: Theme.of(context).primaryColorDark,
               width: MediaQuery.of(context).size.width,
               padding: EdgeInsets.all(extraPadding),
               child: Padding(
@@ -363,7 +381,7 @@ class TopAppBar extends StatelessWidget {
           toolBarHeight,
         ),
         child: Container(
-          color: Theme.of(context).primaryColor,
+          color: Theme.of(context).primaryColorDark,
           width: MediaQuery.of(context).size.width,
           child: DefaultTextStyle(
             style: TextStyle(
@@ -380,7 +398,7 @@ class TopAppBar extends StatelessWidget {
                   ),
                 ),
                 Material(
-                  color: Theme.of(context).primaryColor,
+                  color: Theme.of(context).primaryColorDark,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[

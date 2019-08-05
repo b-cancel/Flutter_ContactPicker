@@ -13,6 +13,7 @@ class ScrollBar extends StatelessWidget {
     @required this.flexibleHeight,
     @required this.sortedKeys,
     @required this.showThumbTack,
+    @required this.positions,
   }) : super(key: key);
 
   final double statusBarHeight;
@@ -20,6 +21,7 @@ class ScrollBar extends StatelessWidget {
   final ValueNotifier<double> flexibleHeight;
   final List<int> sortedKeys;
   final ValueNotifier<bool> showThumbTack;
+  final List<double> positions;
 
   @override
   Widget build(BuildContext context) {
@@ -168,9 +170,11 @@ class ScrollBar extends StatelessWidget {
                         //OR scrollBarHeight - (paddingAll * 2) - (endsVertical * 2)
                         //yields the least ammount of vertical slack
                         programaticScrollBarHeight: scrollBarAreaHeight,
+                        alphaOverlayHeight: alphaOverlayHeight,
                         scrollThumbHeight: 4 * itemHeight,
                         autoScrollController: autoScrollController,
                         paddingAll: paddingAll,
+                        positions: positions,
                       ),
                       //-----Letters Overlay
                       IgnorePointer(
