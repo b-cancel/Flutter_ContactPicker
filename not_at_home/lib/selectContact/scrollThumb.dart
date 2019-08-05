@@ -84,18 +84,28 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
   //---------------
 
   void doMath(){
-    //handle thumb
-    thumbScrollBarHeight = widget.visualScrollBarHeight - widget.scrollThumbHeight;
-    thumbMultiplier = thumbScrollBarHeight / widget.programaticScrollBarHeight;
-
-    //convert the percent to an actual valued offset
-    barOffset = widget.programaticScrollBarHeight * barOffsetPercent;
-    thumbOffset = barOffset * thumbMultiplier;
-
     //calculate the offset
     space = (widget.programaticScrollBarHeight - widget.alphaOverlayHeight) / 2;
     offsetAtSart = space;
     offsetAtEnd = widget.programaticScrollBarHeight - space;
+
+    //regular bar offset
+    barOffset = widget.programaticScrollBarHeight * barOffsetPercent;
+
+    //the thumbScrollHeight
+    thumbScrollBarHeight = widget.visualScrollBarHeight - widget.scrollThumbHeight;
+
+    //determine thumb offset
+    if(barOffset <= offsetAtSart) thumbOffset = 0;
+    else if(offsetAtEnd <= barOffset) thumbOffset = thumbScrollBarHeight;
+    else{
+      //adjusted offset: 0 -> (programatic - space)
+      //thumb offset: 0 -> thumbScrollBarHeight
+      double adjustedHeight = widget.programaticScrollBarHeight - (space * 2);
+      thumbMultiplier = thumbScrollBarHeight / adjustedHeight;
+      double adjustedOffset = barOffset - space;
+      thumbOffset = adjustedOffset * thumbMultiplier;
+    }
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
@@ -109,6 +119,7 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
     //do math based on the barOffSet percent
     doMath();
 
+    /*
     //idk why i need to do this here instead of in init
     lastIndex = widget.positions.length - 1;
 
@@ -145,6 +156,7 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
       index = newIndex;
       print("---------------------------------------------------------TO INDEX: " + index.toString());
     }
+    */
 
     //TODO... jump to that location
     //widget.autoScrollController.jumpTo(widget.positions.first);
