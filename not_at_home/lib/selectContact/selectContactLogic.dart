@@ -54,7 +54,8 @@ class SelectContact extends StatefulWidget {
 class _SelectContactState extends State<SelectContact> with WidgetsBindingObserver {
   //contact list then gets passed UX
   bool retreivingContacts = false;
-  List<Contact> contacts = new List<Contact>();
+  int step = 0;
+  ValueNotifier<List<Contact>> contacts = ValueNotifier<List<Contact>>(new List<Contact>());
   List<Color> colorsForContacts = new List<Color>();
 
   //set based on whether or not a contact to update was passed
@@ -114,13 +115,44 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       };
     }
 
+    //contact listener
+    contacts.addListener(()async{
+      step++; //starts at 0
+      print("-------------CHAGNED " + step.toString());
+      if(step == 1){ //got contacts without thumbnails
+        //assign a color to each contact
+        for(int i = 0; i < contacts.value.length; i++){
+          colorsForContacts.add(theColors[rnd.nextInt(theColors.length)]);
+        }
+
+        //get the contacts (WITH THUMBNAILS)
+        if(rebuild(false)){
+          contacts.value = (await ContactsService.getContacts(
+            photoHighResolution: false,
+          )).toList(); 
+        }
+      }
+      else if(step == 2){ //got contacts with low quality thumbnails
+        //get the contacts (WITH THUMBNAILS)
+        if(rebuild(false)){
+          contacts.value = (await ContactsService.getContacts(
+            photoHighResolution: true,
+          )).toList(); 
+        }
+      }
+      else if(step == 3){ //got contacts with high quality thumbnails
+        rebuild(false); //last build
+        step = 0; //reset
+      }
+    });
+
     //try to get contacts
     confirmPermission();
   }
 
   //async init
   confirmPermission() async{
-    PermissionStatus permissionStatus = await getContacts();
+    PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
     if(isAuthorized(permissionStatus) == false){
       permissionRequired(
         context, 
@@ -130,6 +162,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         selectContactBackUp: widget.selectContactBackUp,
       );
     }
+    else getContacts();
   }
 
   //dispose
@@ -162,7 +195,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     //if we came back from the permissions page
     bool backFromPermissionPage = (backFromNewContactPage.value == false);
     if(backFromPermissionPage){
-      PermissionStatus permissionStatus = await getContacts();
+      PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
       if(isAuthorized(permissionStatus) == false){
         //the permission page did not get the users permission
         //the user either backed up from the page OR selected manual input
@@ -197,52 +230,26 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
 
   //NOTE: If rebuild fails then we are no longer mounted
   //hence all the if(rebuild(bool)) snippets
-  Future<PermissionStatus> getContacts() async{
+
+  //starts the process
+  getContacts() async{
     PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
     if(isAuthorized(permissionStatus)){
-      contacts.clear();
-
-      //inform the user we are getting the contacts
+      //clear the contacts list
+      contacts.value.clear();
+      //tell the user the contacts are being retreived
       if(rebuild(true)){
-
         //get the contacts (WITHOUT THUMBNAILS)
-        Iterable<Contact> temp = await ContactsService.getContacts(
+        contacts.value = (await ContactsService.getContacts(
           withThumbnails: false,
-        ); 
-        contacts = temp.toList();
-
-        //assign a color to each contact
-        for(int i = 0; i < contacts.length; i++){
-          colorsForContacts.add(theColors[rnd.nextInt(theColors.length)]);
-        }
-
-        //inform the user we have the contacts
-        if(rebuild(false)){
-
-          //get the contacts (WITH THUMBNAILS)
-          temp = await ContactsService.getContacts(
-            photoHighResolution: false,
-          ); 
-          contacts = temp.toList();
-
-          //inform the user we have the contacts
-          if(rebuild(false)){
-            
-            //get the contacts (WITH HIGH RESOLUTION THUMBNAILS)
-            temp = await ContactsService.getContacts(); 
-            contacts = temp.toList();
-
-            //inform the user we have the contacts
-            rebuild(false);
-          }
-        }
+        )).toList(); 
       }
     }
-    return permissionStatus;
   }
 
   bool rebuild(bool isRetreiving){
     if(mounted){
+      print("mounted");
       setState(() {
         retreivingContacts = isRetreiving;
       });
@@ -254,12 +261,13 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //build
   @override
   Widget build(BuildContext context) {
+    print("contacts: " + contacts.value.length.toString());
 
     //for each contact letter assemble a list of widget
     Map<int, List<Widget>> letterToListItems = new Map<int,List<Widget>>();
-    for(int i = 0; i < contacts.length; i++){
+    for(int i = 0; i < contacts.value.length; i++){
       //create the new list if we have to
-      int letterCode = contacts[i].givenName?.toUpperCase()?.codeUnitAt(0) ?? 63;
+      int letterCode = contacts.value[i].givenName?.toUpperCase()?.codeUnitAt(0) ?? 63;
       if(letterToListItems.containsKey(letterCode) == false){
         letterToListItems[letterCode] = new List<Widget>();
       }
@@ -267,7 +275,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       //add to the list
       letterToListItems[letterCode].add(
         ContactListTile(
-          thisContact: contacts[i],
+          thisContact: contacts.value[i],
           thisColor: colorsForContacts[i],
           onSelect: onSelect,
         ),
@@ -341,6 +349,8 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       );
     }
 
+    print("section widgets: " + sectionWidgets.length.toString());
+
     //pass the widgets
     return WillPopScope(
       //IF first page I should be able to close the app
@@ -348,7 +358,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       onWillPop: () async => !(widget.forceSelection && !firstPage),
       child: SelectContactUX(
         retreivingContacts: retreivingContacts,
-        contactCount: contacts.length,
+        contactCount: contacts.value.length,
         sortedKeys: sortedKeys,
         sectionWidgets: sectionWidgets,
         backFromNewContact: backFromNewContactPage,

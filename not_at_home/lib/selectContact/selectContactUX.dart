@@ -118,34 +118,8 @@ class _SelectContactUXState extends State<SelectContactUX> {
       );
     }
 
-    //spacer on bottom of list
-    int nextIndex = widget.sectionWidgets.length;
-    keys.add(UniqueKey());
-    widget.sectionWidgets.add(
-      AutoScrollTag(
-        key: keys.last,
-        controller: autoScrollController,
-        index: nextIndex,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.all(16),
-              child: Center(
-                child: Text(widget.contactCount.toString() + " Contacts"),
-              ),
-            ),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              //make sure to top button isnt covered
-              //16 is padding
-              //48 is the size of the button
-              height: 16.0 + 48 + 16,
-            ),
-          ],
-        ),
-      ),
-    );
+    print("---------------widgets: " + widget.sectionWidgets.length.toString() + "---------------");
+    print("---------------retreiving: " + widget.retreivingContacts.toString() + "---------------");
 
     //Styling of the User Question Prompt
     TextStyle questionStyle = TextStyle(
@@ -170,6 +144,37 @@ class _SelectContactUXState extends State<SelectContactUX> {
       );
     }
     else{
+      //spacer on bottom of list
+      //NOTE: be after the above
+      int nextIndex = widget.sectionWidgets.length;
+      keys.add(UniqueKey());
+      widget.sectionWidgets.add(
+        AutoScrollTag(
+          key: keys.last,
+          controller: autoScrollController,
+          index: nextIndex,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.all(16),
+                child: Center(
+                  child: Text(widget.contactCount.toString() + " Contacts"),
+                ),
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width,
+                //make sure to top button isnt covered
+                //16 is padding
+                //48 is the size of the button
+                height: 16.0 + 48 + 16,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      //wrap items in sliver list
       bodyWidget = SliverList(
         delegate: SliverChildListDelegate(
           widget.sectionWidgets,
@@ -276,6 +281,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                           bodyWidget,
                         ],
                       ),
+                      /*
                       new ScrollBar(
                         statusBarHeight: statusBarHeight,
                         autoScrollController: autoScrollController,
@@ -284,6 +290,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                         showThumbTack: showThumbTack,
                         positions: positions,
                       ),
+                      */
                     ],
                   ),
                 );

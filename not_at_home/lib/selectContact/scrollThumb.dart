@@ -146,6 +146,9 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
     doMath();
 
     double circleSize = 75;
+    String thumbTackChar;
+    if(widget.sortedKeys.length == 0) thumbTackChar = " ";
+    else thumbTackChar = String.fromCharCode(widget.sortedKeys[index]);
 
     //build
     return Stack(
@@ -208,7 +211,7 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
                                   ),
                                   child: Center(
                                     child: Text(
-                                      String.fromCharCode(widget.sortedKeys[index]),
+                                      thumbTackChar,
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: circleSize/2,
