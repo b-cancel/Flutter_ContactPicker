@@ -101,7 +101,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
     positions = new List<double>();
     for(int i = 0; i < widget.sortedKeys.length; i++){
       positions.add(thisOffset);
-      thisOffset += 100;
+      thisOffset += 500;
     }
 
     //add wrappers to section widgets

@@ -119,47 +119,21 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
     //do math based on the barOffSet percent
     doMath();
 
-    /*
     //idk why i need to do this here instead of in init
     lastIndex = widget.positions.length - 1;
 
     //determine what index to go to
     int newIndex = 0;
-    /*
-    if(barOffset <= offsetAtSart) newIndex = 0;
-    else if(offsetAtEnd <= barOffset) newIndex = lastIndex;
-    else{
-      //we are between offsetAtStart AND offsetAtEnd
-      double adjustedOffset = barOffset;// - offsetAtSart;
-      //print("offset at end: " + offsetAtEnd.toString());
-      //print("last index: " + lastIndex.toString());
-      double ratio = lastIndex / offsetAtEnd; 
-      //print("ratio " + ratio.toString());
-      double roughIndex = adjustedOffset * ratio;
-      newIndex = roughIndex.round();
-      print("rough: " + roughIndex.toString());
-    }
-    */
-    //we are between offsetAtStart AND offsetAtEnd
-    double adjustedOffset = barOffset;// - offsetAtSart;
-    //print("offset at end: " + offsetAtEnd.toString());
-    //print("last index: " + lastIndex.toString());
-    double ratio = lastIndex / widget.programaticScrollBarHeight; 
+    double ratio = lastIndex / thumbScrollBarHeight;
     //print("ratio " + ratio.toString());
-    double roughIndex = adjustedOffset * ratio;
+    double roughIndex = thumbOffset * ratio;
     newIndex = roughIndex.round();
-    print("rough: " + roughIndex.toString());
-    print("refined: " + newIndex.toString());
 
     //only trigger new index thing IF this scroll position changes our index
     if(newIndex != index){
       index = newIndex;
-      print("---------------------------------------------------------TO INDEX: " + index.toString());
+      widget.autoScrollController.jumpTo(widget.positions[index]);
     }
-    */
-
-    //TODO... jump to that location
-    //widget.autoScrollController.jumpTo(widget.positions.first);
     
     //set state to reflect all the changes
     setState(() {});
