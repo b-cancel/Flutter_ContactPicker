@@ -18,6 +18,7 @@ class DraggableScrollBar extends StatefulWidget {
     @required this.paddingAll,
     @required this.thumbColor,
     @required this.positions,
+    @required this.sortedKeys,
   });
 
   final double visualScrollBarHeight;
@@ -28,6 +29,7 @@ class DraggableScrollBar extends StatefulWidget {
   final double paddingAll;
   final Color thumbColor;
   final List<double> positions;
+  final List<int> sortedKeys;
 
   @override
   _DraggableScrollBarState createState() => new _DraggableScrollBarState();
@@ -143,6 +145,8 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
   Widget build(BuildContext context) {
     doMath();
 
+    double circleSize = 75;
+
     //build
     return Stack(
       children: <Widget>[
@@ -168,17 +172,77 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
               width: 24,
               padding: EdgeInsets.only(top: thumbOffset),
               color: (scrollBarColors) ? Colors.yellow : Colors.transparent,
+              //the stack is needed to allow height to actual take effect
               child: Stack(
                 children: <Widget>[
-                  Container(
-                    width: 24,
-                    height: widget.scrollThumbHeight,
-                    decoration: new BoxDecoration(
-                      color: widget.thumbColor,
-                      borderRadius: new BorderRadius.all(
-                        Radius.circular(25.0),
+                  Stack(
+                    children: <Widget>[
+                      Container(
+                        width: 24,
+                        height: widget.scrollThumbHeight,
+                        decoration: new BoxDecoration(
+                          color: widget.thumbColor,
+                          borderRadius: new BorderRadius.all(
+                            Radius.circular(25.0),
+                          ),
+                        ),
+                        child: Transform.translate(
+                          offset: Offset(
+                            //the last one is extra
+                            -(circleSize/2) - (24/2) - 16, 
+                            0,
+                          ),
+                          child: Center(
+                            child: Container(
+                              child: OverflowBox(
+                                minWidth: circleSize,
+                                maxWidth: circleSize,
+                                maxHeight: circleSize,
+                                minHeight: circleSize,
+                                child: Container(
+                                  decoration: new BoxDecoration(
+                                    color: widget.thumbColor,
+                                    borderRadius: new BorderRadius.all(
+                                      Radius.circular(circleSize / 2),
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      String.fromCharCode(widget.sortedKeys[index]),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: circleSize/2,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      /*
+                      Transform.translate(
+                        offset: Offset(-100, 0),
+                        child: Container(
+                          width: 25,
+                          height: 25,
+                          color: Colors.red,
+                          /*
+                          child: OverflowBox(
+                            child: FloatingActionButton(
+                              backgroundColor: Colors.red,
+                              onPressed: (){
+                                
+                              },
+                              child: Container(),
+                            ),
+                          ),
+                          */
+                        ),
+                      ),
+                      */
+                    ],
                   ),
                 ],
               ),

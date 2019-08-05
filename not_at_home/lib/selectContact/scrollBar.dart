@@ -175,6 +175,7 @@ class ScrollBar extends StatelessWidget {
                         autoScrollController: autoScrollController,
                         paddingAll: paddingAll,
                         positions: positions,
+                        sortedKeys: sortedKeys,
                       ),
                       //-----Letters Overlay
                       IgnorePointer(
