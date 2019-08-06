@@ -118,7 +118,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     //contact listener
     contacts.addListener(()async{
       step++; //starts at 0
-      print("-------------CHAGNED " + step.toString());
       if(step == 1){ //got contacts without thumbnails
         //assign a color to each contact
         for(int i = 0; i < contacts.value.length; i++){

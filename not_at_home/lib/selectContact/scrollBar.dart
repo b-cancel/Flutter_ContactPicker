@@ -116,59 +116,10 @@ class ScrollBar extends StatelessWidget {
                           ),
                         ),
                       ),
-
-                      
-                      //-----Thumb tack shower
-                      //Required since our mini scroll bar takes you to a section
-                      //so it will be very dificult to get the scroll bar to align
-                      //with the scroll area that holds the contacts
-                      //so to keep things simple...
-                      //we simply hide the scroll bar IF we are not dragging it specifically
-                      GestureDetector(
-                        onPanDown: (tapDownDetails){
-                          showThumbTack.value = true;
-                        },
-                        onPanEnd: (tapUpDetails){
-                          showThumbTack.value = false;
-                        },
-                        onPanCancel: (){
-                          showThumbTack.value = false;
-                        },
-                        child: Container(
-                          height: scrollBarAreaHeight,
-                          color: scrollBarColors ? Colors.orange.withOpacity(0.5) : Colors.transparent,
-                        ),
-                      ),
-                      //-----thumb tack test
-                      /*
-                      AnimatedBuilder(
-                        animation: showThumbTack,
-                        builder: (context, child){
-                          return Positioned(
-                            left: 0,
-                            bottom: 0,
-                            child: IgnorePointer(
-                              child: Visibility(
-                                visible: showThumbTack.value,
-                                child: IgnorePointer(
-                                  child: Container(
-                                    width: 100,
-                                    height: 100,
-                                    color: Colors.green.withOpacity(0.5),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                      */
+                      //-----Scroll Bar Function
                       DraggableScrollBar(
                         thumbColor: Theme.of(context).accentColor.withOpacity(0.25),
                         visualScrollBarHeight: scrollBarVisualHeight,
-                        //alphaOverlayHeight 
-                        //OR scrollBarHeight - (paddingAll * 2) - (endsVertical * 2)
-                        //yields the least ammount of vertical slack
                         programaticScrollBarHeight: scrollBarAreaHeight,
                         alphaOverlayHeight: alphaOverlayHeight,
                         scrollThumbHeight: 4 * itemHeight,

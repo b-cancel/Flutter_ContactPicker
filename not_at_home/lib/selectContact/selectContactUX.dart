@@ -129,7 +129,9 @@ class _SelectContactUXState extends State<SelectContactUX> {
     //Generate the Widget shown in the contacts scroll area
     //Depending on whether or not there are contacts or they are being retreived
     Widget bodyWidget;
+    bool contactsVisible = true;
     if(widget.retreivingContacts || widget.sectionWidgets.length == 0){
+      contactsVisible = false;
       bodyWidget = SliverFillRemaining(
         child: Container(
           alignment: Alignment.center,
@@ -281,16 +283,14 @@ class _SelectContactUXState extends State<SelectContactUX> {
                           bodyWidget,
                         ],
                       ),
-                      /*
-                      new ScrollBar(
+                      (contactsVisible) ? new ScrollBar(
                         statusBarHeight: statusBarHeight,
                         autoScrollController: autoScrollController,
                         flexibleHeight: flexibleHeight, 
                         sortedKeys: widget.sortedKeys,
                         showThumbTack: showThumbTack,
                         positions: positions,
-                      ),
-                      */
+                      ) : Container(),
                     ],
                   ),
                 );
@@ -342,7 +342,7 @@ class TopAppBar extends StatelessWidget {
       floating: true, //show scroll bar as soon as user starts scrolling up
       //Snap is TRUE so that our flexible space result looks as best as it can
       //but NAW its FALSE cuz it snaps weird...
-      snap: true, //ONLY if floating is true
+      snap: false, //ONLY if floating is true
 
       //NOTE: title and leading not being used 
       //because they are simply above the flexible widget
@@ -471,7 +471,7 @@ class ScrollToTopButton extends StatelessWidget {
         child: AnimatedBuilder(
           animation: onTop,
           child: FloatingActionButton(
-            mini: true,
+            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.5),
             onPressed: (){
               //scrollToIndex -> too slow to find index
               //jumpTo -> happens instant but scrolling to top should have some animation
@@ -482,22 +482,30 @@ class ScrollToTopButton extends StatelessWidget {
               );
             },
             //slightly shift the combo of the two icons
-            child: Transform.translate(
-              offset: Offset(0,-4),
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    height: 12,
-                    child: Icon(Icons.minimize),
-                  ),
-                  Container(
-                    height: 12,
-                    child: Icon(
-                      Icons.keyboard_arrow_up,
-                      size: 28,
+            child: FittedBox(
+              fit: BoxFit.contain,
+              child: Transform.translate(
+                offset: Offset(0,-12), //-4),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Container(
+                      height: 12,
+                      child: Icon(
+                        Icons.minimize,
+                        color: Colors.white.withOpacity(0.5),
+                      ),
                     ),
-                  ),
-                ],
+                    Container(
+                      height: 12,
+                      child: Icon(
+                        Icons.keyboard_arrow_up,
+                        color: Colors.white.withOpacity(0.5),
+                        size: 28,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -507,7 +515,7 @@ class ScrollToTopButton extends StatelessWidget {
               transform: Matrix4.translation(
                 VECT.Vector3(
                   0, 
-                  (onTop.value) ? (16.0 + 48) : 0.0, 
+                  (onTop.value) ? (16.0 + 56) : 0.0, 
                   0,
                 ),
               ),
