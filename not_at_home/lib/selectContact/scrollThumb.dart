@@ -139,7 +139,12 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
     if(newIndex != index){
       index = newIndex;
       vibrate();
-      widget.autoScrollController.jumpTo(widget.positions[index]);
+      if(index == 0){
+        widget.autoScrollController.jumpTo(0);
+      }
+      else{
+        widget.autoScrollController.jumpTo(widget.positions[index]);
+      }
     }
     
     //set state to reflect all the changes

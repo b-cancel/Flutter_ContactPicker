@@ -8,6 +8,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 //2. AND it shows off the alpha overlay feature I made
 bool useDynamicTopPadding = false;
 
+//only use to debug
 bool scrollBarColors = false;
 
 class ScrollBar extends StatelessWidget {
@@ -19,7 +20,7 @@ class ScrollBar extends StatelessWidget {
     @required this.expandedHeight,
     @required this.sortedKeys,
     @required this.showThumbTack,
-    @required this.positions,
+    @required this.offsets,
   }) : super(key: key);
 
   final double statusBarHeight;
@@ -28,7 +29,7 @@ class ScrollBar extends StatelessWidget {
   final double expandedHeight;
   final List<int> sortedKeys;
   final ValueNotifier<bool> showThumbTack;
-  final List<double> positions;
+  final List<double> offsets;
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +50,9 @@ class ScrollBar extends StatelessWidget {
         //TODO... maybe instead have the largest flexible height
         //portrait mode and landscape mode should have seperate largest flexible heights
         double appBarHeight = (useDynamicTopPadding) ? flexibleHeight.value : expandedHeight;  
-        double stickyHeaderVertical = 24.0 + 16;
-        double extraPaddingTop = 32;
-        double extraPaddingBottom = 16;
+        double stickyHeaderVertical = 40;
+        double extraPaddingTop = 0; //32;
+        double extraPaddingBottom = 0; //16;
 
         //calculate scroll bar height
         //INCLUDES extra padding to make gesture detector stuff easy
@@ -131,7 +132,7 @@ class ScrollBar extends StatelessWidget {
                         scrollThumbHeight: 4 * itemHeight,
                         autoScrollController: autoScrollController,
                         paddingAll: paddingAll,
-                        positions: positions,
+                        positions: offsets,
                         sortedKeys: sortedKeys,
                       ),
                       //-----Letters Overlay

@@ -23,9 +23,10 @@ class SelectContactUX extends StatefulWidget {
   SelectContactUX({
     this.retreivingContacts: false,
     @required this.contactCount,
-    @required this.sortedLetters,
+    @required this.sortedLetterCodes,
     //@required this.positions, //the positions of each section
     @required this.sectionWidgets,
+    @required this.offsets,
     @required this.backFromNewContact,
     @required this.onSelect,
     @required this.userPrompt,
@@ -33,9 +34,10 @@ class SelectContactUX extends StatefulWidget {
 
   final bool retreivingContacts;
   final int contactCount;
-  final List<int> sortedLetters;
+  final List<int> sortedLetterCodes;
   //final List<double> positions; //the positions of each section
   final List<Widget> sectionWidgets;
+  final List<double> offsets;
   final ValueNotifier<bool> backFromNewContact;
   final Function onSelect;
   final List<String> userPrompt;
@@ -62,9 +64,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
   //status bar height to be used throughout
   double statusBarHeight;
   double toolBarHeight;
-
-  //TODO... use actual values
-  List<double> positions;
 
   //init
   @override
@@ -95,14 +94,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
   //build
   @override
   Widget build(BuildContext context) {
-    //put in dummy positions
-    double thisOffset = 0;
-    positions = new List<double>();
-    for(int i = 0; i < widget.sortedLetters.length; i++){
-      positions.add(thisOffset);
-      thisOffset += 500;
-    }
-
     //Styling of the User Question Prompt
     TextStyle questionStyle = TextStyle(
       fontWeight: FontWeight.bold,
@@ -174,6 +165,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                 //variables prepped
                 bool isPortrait = (orientation == Orientation.portrait);
                 double expandedHeight = MediaQuery.of(context).size.height;
+                print("expandedHeight: " + expandedHeight.toString());
 
                 //is portrait can have more of the screen taken up
                 expandedHeight /= (isPortrait) ? 3 : 5;
@@ -264,9 +256,9 @@ class _SelectContactUXState extends State<SelectContactUX> {
                         autoScrollController: autoScrollController,
                         flexibleHeight: flexibleHeight, 
                         expandedHeight: expandedHeight,
-                        sortedKeys: widget.sortedLetters,
+                        sortedKeys: widget.sortedLetterCodes,
                         showThumbTack: showThumbTack,
-                        positions: positions,
+                        offsets: widget.offsets,
                       ) : Container(),
                     ],
                   ),
@@ -319,7 +311,7 @@ class TopAppBar extends StatelessWidget {
       floating: true, //show scroll bar as soon as user starts scrolling up
       //Snap is TRUE so that our flexible space result looks as best as it can
       //but NAW its FALSE cuz it snaps weird...
-      snap: false, //ONLY if floating is true
+      snap: true, //ONLY if floating is true
 
       //NOTE: title and leading not being used 
       //because they are simply above the flexible widget
@@ -451,14 +443,10 @@ class ScrollToTopButton extends StatelessWidget {
             backgroundColor: Theme.of(context).primaryColor.withOpacity(0.5),
             onPressed: (){
               vibrate();
-              
               //scrollToIndex -> too slow to find index
               //jumpTo -> happens instant but scrolling to top should have some animation
-              autoScrollController.animateTo(
-                autoScrollController.position.minScrollExtent,
-                duration: Duration(milliseconds: 200), 
-                curve: Curves.easeOut,
-              );
+              //NOTE: I ended up going with jump since animate was not fully opening the prompt
+              autoScrollController.jumpTo(0);
             },
             //slightly shift the combo of the two icons
             child: FittedBox(
