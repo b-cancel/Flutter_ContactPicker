@@ -24,9 +24,8 @@ class SelectContactUX extends StatefulWidget {
     this.retreivingContacts: false,
     @required this.contactCount,
     @required this.sortedLetterCodes,
-    //@required this.positions, //the positions of each section
+    @required this.letterToListItems,
     @required this.sectionWidgets,
-    @required this.offsets,
     @required this.backFromNewContact,
     @required this.onSelect,
     @required this.userPrompt,
@@ -35,9 +34,8 @@ class SelectContactUX extends StatefulWidget {
   final bool retreivingContacts;
   final int contactCount;
   final List<int> sortedLetterCodes;
-  //final List<double> positions; //the positions of each section
+  final Map<int, List<Widget>> letterToListItems;
   final List<Widget> sectionWidgets;
-  final List<double> offsets;
   final ValueNotifier<bool> backFromNewContact;
   final Function onSelect;
   final List<String> userPrompt;
@@ -254,11 +252,11 @@ class _SelectContactUXState extends State<SelectContactUX> {
                       (contactsVisible) ? new ScrollBar(
                         statusBarHeight: statusBarHeight,
                         autoScrollController: autoScrollController,
-                        flexibleHeight: flexibleHeight, 
+                        flexibleHeight: flexibleHeight, //(useDynamicTopPadding) ? flexibleHeight : new ValueNotifier(0), 
                         expandedHeight: expandedHeight,
-                        sortedKeys: widget.sortedLetterCodes,
+                        sortedLetterCodes: widget.sortedLetterCodes,
                         showThumbTack: showThumbTack,
-                        offsets: widget.offsets,
+                        letterToListItems: widget.letterToListItems,
                       ) : Container(),
                     ],
                   ),
@@ -311,7 +309,7 @@ class TopAppBar extends StatelessWidget {
       floating: true, //show scroll bar as soon as user starts scrolling up
       //Snap is TRUE so that our flexible space result looks as best as it can
       //but NAW its FALSE cuz it snaps weird...
-      snap: true, //ONLY if floating is true
+      snap: false, //ONLY if floating is true
 
       //NOTE: title and leading not being used 
       //because they are simply above the flexible widget

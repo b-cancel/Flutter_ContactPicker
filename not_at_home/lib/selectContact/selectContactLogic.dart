@@ -319,6 +319,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     sortedLetterCodes.sort();
 
     //iterate through all letters
+    //and compile the sections with their headers
     List<Widget> sectionWidgets = new List<Widget>();
     for(int i = 0; i < sortedLetterCodes.length; i++){
       List<Widget> widgetsWithDividers = new List<Widget>();
@@ -389,72 +390,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       );
     }
 
-    //put in positions
-    int itemCountSoFar = 0;
-    int spacerCountSoFar = 0;
-    List<double> offsets = new List<double>();
-    //NOTE: SADLY because of how strange slivers can be sometimes
-    //the offset of 0 does not always open up the sliver all the way
-    //this means its dangerous to assume that it is ALWAYS closing it
-    //if we do this we might shift lower than we have to
-    //the label will show that we are in the correct section
-    //but above the label there might be some of the desired items
-    //and that isn't going to bode well for the user experience
-    //JUST KIDDING if we snap the sliver into place we CAN GUARANTEE this
-    for(int i = 0; i < sortedLetterCodes.length; i++){
-      double thisItemsOffset = calculateOffset(
-        0, //820.5714285714286, 
-        //for header in index 3... there are 3 headers above.. [0,1,2]
-        //then also include yourself
-        i + 1, //closedHeaders
-        itemCountSoFar, //items above
-        spacerCountSoFar, //spacers above
-      );
-      
-      //add the offset
-      offsets.add(thisItemsOffset);
-
-      //add ourselves
-      int ourItemCount = letterToListItems[sortedLetterCodes[i]].length;
-      itemCountSoFar += ourItemCount;
-      spacerCountSoFar += (ourItemCount - 1);
-
-      /*
-      if(i == 1){ // ?
-        double thisItemsOffset = calculateOffset(
-          0, //820.5714285714286, 
-          1, 
-          1, 
-          0, //0,
-        );
-        
-        offsets.add(thisItemsOffset);
-      }
-      else if(i == 2){ // A
-        double thisItemsOffset = calculateOffset(
-          0, //820.5714285714286, 
-          2, 
-          3, 
-          0, //1,
-        );
-        
-        offsets.add(thisItemsOffset);
-      }
-      else if(i == 3){ // B
-        double thisItemsOffset = calculateOffset(
-          0, //820.5714285714286, 
-          3, 
-          40, 
-          0, //39,
-        );
-        
-        offsets.add(thisItemsOffset);
-      }
-      else offsets.add(thisOffset);
-      thisOffset += 500;
-      */
-    }
-
     //pass the widgets
     return WillPopScope(
       //IF first page I should be able to close the app
@@ -464,7 +399,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         retreivingContacts: retreivingContacts,
         contactCount: contacts.value.length,
         sortedLetterCodes: sortedLetterCodes,
-        offsets: offsets,
+        letterToListItems: letterToListItems,
         sectionWidgets: sectionWidgets,
         backFromNewContact: backFromNewContactPage,
         onSelect: onSelect,
@@ -472,18 +407,4 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       ),
     );
   }
-}
-
-double calculateOffset(
-  double expandedHeight, 
-  int headerCount, 
-  int itemsAbove, 
-  int spacersAbove,
-){
-  //assume that each header after overflow on top
-  //grow to their max size of 80
-  double headers = 80.0 * headerCount;
-  double items = 70.0 * itemsAbove;
-  double spacers = 2.0 * spacersAbove;
-  return expandedHeight + headers + items + spacers;
 }

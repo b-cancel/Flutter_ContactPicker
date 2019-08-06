@@ -72,6 +72,11 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
     //handle show hide slider stuff
     showSlider = new ValueNotifier(false);
 
+    //init async
+    initAsync();
+  }
+
+  void initAsync()async{
     //whenever this changes we need to set state
     showSlider.addListener((){
       setState(() {
@@ -162,86 +167,78 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
     else thumbTackChar = String.fromCharCode(widget.sortedKeys[index]);
 
     //build
-    return Visibility(
-      visible: showSlider.value,
-      maintainAnimation: true,
-      maintainInteractivity: true,
-      maintainSemantics: true,
-      maintainSize: true,
-      maintainState: true,
-      child: Stack(
-        children: <Widget>[
-          Center(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              //NOT true on dragDown or dragStart
-              onVerticalDragUpdate: _onVerticalDragUpdate,
-              onVerticalDragCancel: (){
-                showSlider.value = false;
-              },
-              onVerticalDragEnd: (dragEndDetails){
-                showSlider.value = false;
-              },
+    return Stack(
+      children: <Widget>[
+        Center(
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            //NOT true on dragDown or dragStart
+            onVerticalDragUpdate: _onVerticalDragUpdate,
+            onVerticalDragCancel: (){
+              showSlider.value = false;
+            },
+            onVerticalDragEnd: (dragEndDetails){
+              showSlider.value = false;
+            },
+            child: Container(
+              color: (scrollBarColors) ? Colors.green.withOpacity(0.5) : Colors.transparent,
+              height: widget.programaticScrollBarHeight,
               child: Container(
-                color: (scrollBarColors) ? Colors.green.withOpacity(0.5) : Colors.transparent,
-                height: widget.programaticScrollBarHeight,
-                child: Container(
-                  color: (scrollBarColors) ? Colors.red.withOpacity(0.5) : Colors.transparent,
-                  alignment: Alignment.topCenter,
-                  margin: EdgeInsets.only(top: barOffset),
-                  child: Container(),
-                ),
+                color: (scrollBarColors) ? Colors.red.withOpacity(0.5) : Colors.transparent,
+                alignment: Alignment.topCenter,
+                margin: EdgeInsets.only(top: barOffset),
+                child: Container(),
               ),
             ),
           ),
-          IgnorePointer(
-            child: Center(
-              child: Container(
-                height: widget.visualScrollBarHeight,
-                width: 24,
-                padding: EdgeInsets.only(top: thumbOffset),
-                color: (scrollBarColors) ? Colors.yellow : Colors.transparent,
-                //the stack is needed to allow height to actual take effect
-                child: Stack(
-                  children: <Widget>[
-                    Stack(
-                      children: <Widget>[
-                        Container(
-                          width: 24,
-                          height: widget.scrollThumbHeight,
-                          decoration: new BoxDecoration(
-                            color: widget.thumbColor,
-                            borderRadius: new BorderRadius.all(
-                              Radius.circular(25.0),
-                            ),
+        ),
+        IgnorePointer(
+          child: Center(
+            child: Container(
+              height: widget.visualScrollBarHeight,
+              width: 24,
+              padding: EdgeInsets.only(top: thumbOffset),
+              color: (scrollBarColors) ? Colors.yellow : Colors.transparent,
+              //the stack is needed to allow height to actual take effect
+              child: Stack(
+                children: <Widget>[
+                  Stack(
+                    children: <Widget>[
+                      Container(
+                        width: 24,
+                        height: widget.scrollThumbHeight,
+                        decoration: new BoxDecoration(
+                          color: widget.thumbColor,
+                          borderRadius: new BorderRadius.all(
+                            Radius.circular(25.0),
                           ),
-                          child: Transform.translate(
-                            offset: Offset(
-                              //the last one is extra
-                              -(circleSize/2) - (24/2) - 16, 
-                              0,
-                            ),
-                            child: Center(
-                              child: Container(
-                                child: OverflowBox(
-                                  minWidth: circleSize,
-                                  maxWidth: circleSize,
-                                  maxHeight: circleSize,
-                                  minHeight: circleSize,
-                                  child: Container(
-                                    decoration: new BoxDecoration(
-                                      color: widget.thumbColor,
-                                      borderRadius: new BorderRadius.all(
-                                        Radius.circular(circleSize / 2),
-                                      ),
+                        ),
+                        child: Transform.translate(
+                          offset: Offset(
+                            //the last one is extra
+                            -(circleSize/2) - (24/2) - 16, 
+                            0,
+                          ),
+                          child: Center(
+                            child: Container(
+                              child: OverflowBox(
+                                minWidth: circleSize,
+                                maxWidth: circleSize,
+                                maxHeight: circleSize,
+                                minHeight: circleSize,
+                                child: Container(
+                                  decoration: new BoxDecoration(
+                                    color: widget.thumbColor,
+                                    borderRadius: new BorderRadius.all(
+                                      Radius.circular(circleSize / 2),
                                     ),
-                                    child: Center(
-                                      child: Text(
-                                        thumbTackChar,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: circleSize/2,
-                                        ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      thumbTackChar,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: circleSize/2,
                                       ),
                                     ),
                                   ),
@@ -250,15 +247,15 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

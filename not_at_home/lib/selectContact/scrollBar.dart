@@ -18,24 +18,26 @@ class ScrollBar extends StatelessWidget {
     @required this.autoScrollController,
     @required this.flexibleHeight,
     @required this.expandedHeight,
-    @required this.sortedKeys,
+    @required this.sortedLetterCodes,
     @required this.showThumbTack,
-    @required this.offsets,
+    @required this.letterToListItems,
   }) : super(key: key);
 
   final double statusBarHeight;
   final AutoScrollController autoScrollController;
   final ValueNotifier<double> flexibleHeight;
   final double expandedHeight;
-  final List<int> sortedKeys;
+  final List<int> sortedLetterCodes;
   final ValueNotifier<bool> showThumbTack;
-  final List<double> offsets;
+  final Map<int, List<Widget>> letterToListItems;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: flexibleHeight,
       builder: (BuildContext context, Widget child) {
+        print("flexible height changed");
+
         //a couple of manually set vars
         double itemHeight = 16;
         double spacingVertical = 2;
@@ -80,12 +82,57 @@ class ScrollBar extends StatelessWidget {
         double alphaOverlayHeight = scrollBarAreaHeight - (paddingAll * 2) - (endsVertical * 2);
         alphaOverlayHeight = noNegative(alphaOverlayHeight);
 
+        //other vars for position
+        double maxScroll = autoScrollController.position.maxScrollExtent;
+        maxScroll -= MediaQuery.of(context).size.height;
+
+        //generate the positions
+        int itemCountSoFar = 0;
+        int spacerCountSoFar = 0;
+        List<double> offsets = new List<double>();
+        //NOTE: SADLY because of how strange slivers can be sometimes
+        //the offset of 0 does not always open up the sliver all the way
+        //this means its dangerous to assume that it is ALWAYS closing it
+        //if we do this we might shift lower than we have to
+        //the label will show that we are in the correct section
+        //but above the label there might be some of the desired items
+        //and that isn't going to bode well for the user experience
+        //JUST KIDDING if we snap the sliver into place we CAN GUARANTEE this
+        for(int i = 0; i < sortedLetterCodes.length; i++){
+          double thisItemsOffset = calculateOffset(
+            flexibleHeight.value, //820.5714285714286, 
+            //for header in index 3... there are 3 headers above.. [0,1,2]
+            //then also include yourself
+            i + 1, //closedHeaders
+            itemCountSoFar, //items above
+            spacerCountSoFar, //spacers above
+          );
+
+          //make sure we haven't passed the limit (otherwise weird bounce)
+          //print('max scroll ' + maxScroll.toString() + " VS " + thisItemsOffset.toString());
+          //thisItemsOffset = (thisItemsOffset > maxScroll) ? maxScroll : thisItemsOffset;
+
+          //TODO... testing (for last 3 itmes)
+          if(i >= (sortedLetterCodes.length - 3)){
+            //thisItemsOffset = maxsc
+          }
+          
+          //add the offset
+          offsets.add(thisItemsOffset);
+
+          //add ourselves
+          int ourItemCount = letterToListItems[sortedLetterCodes[i]].length;
+          itemCountSoFar += ourItemCount;
+          spacerCountSoFar += (ourItemCount - 1);
+        }
+
         //build
         return Positioned(
           right: 0,
           top: 0,
           bottom: 0,
           child: Container(
+            height: totalHeight -32,
             color: scrollBarColors ? Colors.red : Colors.transparent,
             padding: EdgeInsets.only(
               //avoids flexible app bar height
@@ -136,7 +183,7 @@ class ScrollBar extends StatelessWidget {
                         autoScrollController: autoScrollController,
                         paddingAll: paddingAll,
                         positions: offsets,
-                        sortedKeys: sortedKeys,
+                        sortedKeys: sortedLetterCodes,
                       ),
                       //-----Letters Overlay
                       IgnorePointer(
@@ -150,7 +197,7 @@ class ScrollBar extends StatelessWidget {
                                   scrollBarHeight: alphaOverlayHeight,
                                   itemHeight: itemHeight,
                                   spacingVertical: spacingVertical,
-                                  items: sortedKeys,
+                                  items: sortedLetterCodes,
                                 ),
                               ),
                           ),
@@ -171,4 +218,18 @@ class ScrollBar extends StatelessWidget {
 
 double noNegative(double number){
   return (number < 0) ? 0 : number;
+}
+
+double calculateOffset(
+  double expandedHeight, 
+  int headerCount, 
+  int itemsAbove, 
+  int spacersAbove,
+){
+  //assume that each header after overflow on top
+  //grow to their max size of 80
+  double headers = 80.0 * headerCount;
+  double items = 70.0 * itemsAbove;
+  double spacers = 2.0 * spacersAbove;
+  return expandedHeight + headers + items + spacers;
 }
