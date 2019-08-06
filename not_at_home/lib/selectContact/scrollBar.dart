@@ -3,6 +3,11 @@ import 'package:not_at_home/selectContact/alphaScrollBarOverlay.dart';
 import 'package:not_at_home/selectContact/scrollThumb.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
+//the scroll has issues with this but 
+//1. it looks nice in screen caps
+//2. AND it shows off the alpha overlay feature I made
+bool useDynamicTopPadding = false;
+
 bool scrollBarColors = false;
 
 class ScrollBar extends StatelessWidget {
@@ -11,6 +16,7 @@ class ScrollBar extends StatelessWidget {
     @required this.statusBarHeight,
     @required this.autoScrollController,
     @required this.flexibleHeight,
+    @required this.expandedHeight,
     @required this.sortedKeys,
     @required this.showThumbTack,
     @required this.positions,
@@ -19,6 +25,7 @@ class ScrollBar extends StatelessWidget {
   final double statusBarHeight;
   final AutoScrollController autoScrollController;
   final ValueNotifier<double> flexibleHeight;
+  final double expandedHeight;
   final List<int> sortedKeys;
   final ValueNotifier<bool> showThumbTack;
   final List<double> positions;
@@ -33,7 +40,6 @@ class ScrollBar extends StatelessWidget {
         double spacingVertical = 2;
         //NOTE: endsVertical MUST NOT have any spacing since our spacing is MIN spacing
         double endsVertical = itemHeight;
-        print("vertical " + endsVertical.toString());
         
         //NOTE: height is singular
         //vertical is double
@@ -42,7 +48,7 @@ class ScrollBar extends StatelessWidget {
         double totalHeight = MediaQuery.of(context).size.height;
         //TODO... maybe instead have the largest flexible height
         //portrait mode and landscape mode should have seperate largest flexible heights
-        double appBarHeight = flexibleHeight.value; 
+        double appBarHeight = (useDynamicTopPadding) ? flexibleHeight.value : expandedHeight;  
         double stickyHeaderVertical = 24.0 + 16;
         double extraPaddingTop = 32;
         double extraPaddingBottom = 16;
@@ -76,7 +82,7 @@ class ScrollBar extends StatelessWidget {
           top: 0,
           bottom: 0,
           child: Container(
-            color: scrollBarColors ? Colors.black : Colors.transparent,
+            color: scrollBarColors ? Colors.red : Colors.transparent,
             padding: EdgeInsets.only(
               //avoids flexible app bar height
               top: appBarHeight,

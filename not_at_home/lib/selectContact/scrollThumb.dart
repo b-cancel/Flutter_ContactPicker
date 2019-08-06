@@ -113,6 +113,8 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
+    showSlider.value = true;
+
     //travel to our fingers position
     double barOffset = details.localPosition.dy;
     //clamp the values
@@ -167,12 +169,7 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
           Center(
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
-              onVerticalDragDown: (dragDownDetails){
-                showSlider.value = true;
-              },
-              onVerticalDragStart: (dragStartDetails){
-                showSlider.value = true;
-              },
+              //NOT true on dragDown or dragStart
               onVerticalDragUpdate: _onVerticalDragUpdate,
               onVerticalDragCancel: (){
                 showSlider.value = false;

@@ -23,7 +23,7 @@ class SelectContactUX extends StatefulWidget {
   SelectContactUX({
     this.retreivingContacts: false,
     @required this.contactCount,
-    @required this.sortedKeys,
+    @required this.sortedLetters,
     //@required this.positions, //the positions of each section
     @required this.sectionWidgets,
     @required this.backFromNewContact,
@@ -33,7 +33,7 @@ class SelectContactUX extends StatefulWidget {
 
   final bool retreivingContacts;
   final int contactCount;
-  final List<int> sortedKeys;
+  final List<int> sortedLetters;
   //final List<double> positions; //the positions of each section
   final List<Widget> sectionWidgets;
   final ValueNotifier<bool> backFromNewContact;
@@ -45,8 +45,6 @@ class SelectContactUX extends StatefulWidget {
 }
 
 class _SelectContactUXState extends State<SelectContactUX> {
-  List<UniqueKey> keys = new List<UniqueKey>();
-
   //assume the flexible is open at the start
   final ValueNotifier<bool> flexibleClosed = new ValueNotifier(true);
   //TODO... use largest not smallest
@@ -100,27 +98,10 @@ class _SelectContactUXState extends State<SelectContactUX> {
     //put in dummy positions
     double thisOffset = 0;
     positions = new List<double>();
-    for(int i = 0; i < widget.sortedKeys.length; i++){
+    for(int i = 0; i < widget.sortedLetters.length; i++){
       positions.add(thisOffset);
       thisOffset += 500;
     }
-
-    //add wrappers to section widgets
-    //1. add autotag on the outside
-    for(int i = 0; i < widget.sectionWidgets.length; i++){
-      Widget section = widget.sectionWidgets[i];
-      keys.add(UniqueKey());
-
-      widget.sectionWidgets[i] = AutoScrollTag(
-        key: keys.last,
-        controller: autoScrollController,
-        index: i,
-        child: section,
-      );
-    }
-
-    print("---------------widgets: " + widget.sectionWidgets.length.toString() + "---------------");
-    print("---------------retreiving: " + widget.retreivingContacts.toString() + "---------------");
 
     //Styling of the User Question Prompt
     TextStyle questionStyle = TextStyle(
@@ -150,30 +131,24 @@ class _SelectContactUXState extends State<SelectContactUX> {
       //spacer on bottom of list
       //NOTE: be after the above
       int nextIndex = widget.sectionWidgets.length;
-      keys.add(UniqueKey());
       widget.sectionWidgets.add(
-        AutoScrollTag(
-          key: keys.last,
-          controller: autoScrollController,
-          index: nextIndex,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.all(16),
-                child: Center(
-                  child: Text(widget.contactCount.toString() + " Contacts"),
-                ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(16),
+              child: Center(
+                child: Text(widget.contactCount.toString() + " Contacts"),
               ),
-              Container(
-                width: MediaQuery.of(context).size.width,
-                //make sure to top button isnt covered
-                //16 is padding
-                //48 is the size of the button
-                height: 16.0 + 48 + 16,
-              ),
-            ],
-          ),
+            ),
+            Container(
+              width: MediaQuery.of(context).size.width,
+              //make sure to top button isnt covered
+              //16 is padding
+              //48 is the size of the button
+              height: 16.0 + 48 + 16,
+            ),
+          ],
         ),
       );
 
@@ -272,7 +247,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                           new TopAppBar(
                             toolBarHeight: toolBarHeight,
                             expandedHeight: expandedHeight, 
-                            flexibleHeight: flexibleHeight, 
+                            flexibleHeight: flexibleHeight,
                             flexibleClosed: flexibleClosed, 
                             extraPadding: extraPadding, 
                             orientationPrompt: orientationPrompt, 
@@ -288,7 +263,8 @@ class _SelectContactUXState extends State<SelectContactUX> {
                         statusBarHeight: statusBarHeight,
                         autoScrollController: autoScrollController,
                         flexibleHeight: flexibleHeight, 
-                        sortedKeys: widget.sortedKeys,
+                        expandedHeight: expandedHeight,
+                        sortedKeys: widget.sortedLetters,
                         showThumbTack: showThumbTack,
                         positions: positions,
                       ) : Container(),

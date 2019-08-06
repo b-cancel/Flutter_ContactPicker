@@ -1,6 +1,7 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:not_at_home/helper.dart';
 import 'package:not_at_home/permission.dart';
 import 'package:not_at_home/request.dart';
@@ -8,6 +9,12 @@ import 'package:not_at_home/selectContact/selectContactUX.dart';
 import 'package:permission/permission.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 import 'contactTile.dart';
+
+//contact deletion is NOT functional
+//as in... DOES NOT delete the contact...
+//but still work on the UI side
+//TODO... make this functional
+bool contactDeletionUI = true;
 
 /*
 the onSelect function is set depending on whether or not we are on the first page
@@ -57,6 +64,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   int step = 0;
   ValueNotifier<List<Contact>> contacts = ValueNotifier<List<Contact>>(new List<Contact>());
   List<Color> colorsForContacts = new List<Color>();
+  List<UniqueKey> keys = new List<UniqueKey>();
 
   //set based on whether or not a contact to update was passed
   bool firstPage;
@@ -122,6 +130,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         //assign a color to each contact
         for(int i = 0; i < contacts.value.length; i++){
           colorsForContacts.add(theColors[rnd.nextInt(theColors.length)]);
+          keys.add(UniqueKey());
         }
 
         //get the contacts (WITH THUMBNAILS)
@@ -241,7 +250,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
 
   bool rebuild(bool isRetreiving){
     if(mounted){
-      print("mounted");
       setState(() {
         retreivingContacts = isRetreiving;
       });
@@ -253,8 +261,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //build
   @override
   Widget build(BuildContext context) {
-    print("contacts: " + contacts.value.length.toString());
-
     //for each contact letter assemble a list of widget
     Map<int, List<Widget>> letterToListItems = new Map<int,List<Widget>>();
     for(int i = 0; i < contacts.value.length; i++){
@@ -264,14 +270,48 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         letterToListItems[letterCode] = new List<Widget>();
       }
 
-      //add to the list
-      letterToListItems[letterCode].add(
-        ContactListTile(
-          thisContact: contacts.value[i],
-          thisColor: colorsForContacts[i],
-          onSelect: onSelect,
-        ),
+      //make contact list tile
+      Widget tile = ContactListTile(
+        thisContact: contacts.value[i],
+        thisColor: colorsForContacts[i],
+        onSelect: onSelect,
       );
+
+      //add contact delete UI if desired
+      //current not functional
+      if(contactDeletionUI){
+        tile = Dismissible(
+          key: keys[i],
+          direction: DismissDirection.startToEnd,
+          onDismissed: (direction) async{
+            //remove it from the all the lists (contacts, colors, keys)
+            contacts.value.removeAt(i);
+            colorsForContacts.removeAt(i);
+            keys.removeAt(i);
+
+            //have those changes reflected on rebuild
+            setState(() {
+              
+            });
+
+            //delete the contact
+            //await ContactsService.deleteContact(contacts.value[i]); 
+          },
+          child: tile,
+          background: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            color: Colors.red,
+            alignment: Alignment.centerLeft,
+            child: Icon(
+              FontAwesomeIcons.trash,
+              color: Colors.black,
+            ),
+          ),
+        );
+      }
+
+      //add to the list
+      letterToListItems[letterCode].add(tile);
     }
 
     //sort keys
@@ -341,8 +381,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       );
     }
 
-    print("section widgets: " + sectionWidgets.length.toString());
-
     //pass the widgets
     return WillPopScope(
       //IF first page I should be able to close the app
@@ -351,7 +389,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       child: SelectContactUX(
         retreivingContacts: retreivingContacts,
         contactCount: contacts.value.length,
-        sortedKeys: sortedKeys,
+        sortedLetters: sortedKeys,
         sectionWidgets: sectionWidgets,
         backFromNewContact: backFromNewContactPage,
         onSelect: onSelect,
