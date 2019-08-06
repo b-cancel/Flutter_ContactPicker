@@ -171,9 +171,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
                 //make sure that even in landscape we have min height
                 expandedHeight = (expandedHeight < (16 + 24)) ? 40 : expandedHeight;
 
-                //TODO... remove
-                expandedHeight = 0;
-
                 //determine how much extra padding we need
                 double extraPadding = (isPortrait) ? 16 : 8;
 
@@ -330,12 +327,7 @@ class TopAppBar extends StatelessWidget {
 
           //build
           return FlexibleSpaceBar(
-            //TODO... remove
             background: Container(
-              height: 0,
-            ),
-            
-            /*Container(
               color: Theme.of(context).primaryColorDark,
               width: MediaQuery.of(context).size.width,
               padding: EdgeInsets.all(extraPadding),
@@ -348,7 +340,6 @@ class TopAppBar extends StatelessWidget {
                 ),
               ),
             ),
-            */
             //this does not seem to make any difference
             //but it MIGHT so ill keep it
             //it changes FlexibleSpaceBarSettings
