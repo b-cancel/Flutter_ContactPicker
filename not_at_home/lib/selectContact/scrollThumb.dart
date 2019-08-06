@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:not_at_home/selectContact/scrollBar.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'dart:math' as math;
+import 'package:vibration/vibration.dart';
+
+import '../vibrate.dart';
 
 //Mostly taken from this article
 //https://medium.com/flutter-community/creating-draggable-scrollbar-in-flutter-a0ae8cf3143b
@@ -134,6 +136,7 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
     //only trigger new index thing IF this scroll position changes our index
     if(newIndex != index){
       index = newIndex;
+      vibrate();
       widget.autoScrollController.jumpTo(widget.positions[index]);
     }
     
@@ -141,6 +144,7 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
     setState(() {});
   }
 
+  //build
   @override
   Widget build(BuildContext context) {
     doMath();

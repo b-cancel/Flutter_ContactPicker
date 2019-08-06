@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:not_at_home/selectContact/scrollBar.dart';
+import 'package:not_at_home/vibrate.dart';
 import 'package:page_transition/page_transition.dart';
 
 import 'package:vector_math/vector_math_64.dart' as VECT;
@@ -473,6 +474,8 @@ class ScrollToTopButton extends StatelessWidget {
           child: FloatingActionButton(
             backgroundColor: Theme.of(context).primaryColor.withOpacity(0.5),
             onPressed: (){
+              vibrate();
+              
               //scrollToIndex -> too slow to find index
               //jumpTo -> happens instant but scrolling to top should have some animation
               autoScrollController.animateTo(

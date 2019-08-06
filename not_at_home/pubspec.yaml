@@ -34,6 +34,7 @@ dependencies:
   #scrolled way to slow (animateTo or jumpTo) worked better
   scroll_to_index: any 
   contact_picker: ^0.0.2
+  vibration: ^1.2.1
   #draggable_scrollbar: ^0.0.4
   #map_view: ^0.0.14
   #indexed_list_view: ^0.0.5 #would work great IF it didn't require an infinitely scrolling list
