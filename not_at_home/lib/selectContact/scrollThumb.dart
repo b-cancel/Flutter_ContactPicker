@@ -72,11 +72,6 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
     //handle show hide slider stuff
     showSlider = new ValueNotifier(false);
 
-    //init async
-    initAsync();
-  }
-
-  void initAsync()async{
     //whenever this changes we need to set state
     showSlider.addListener((){
       setState(() {
@@ -180,14 +175,17 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
             onVerticalDragEnd: (dragEndDetails){
               showSlider.value = false;
             },
-            child: Container(
-              color: (scrollBarColors) ? Colors.green.withOpacity(0.5) : Colors.transparent,
-              height: widget.programaticScrollBarHeight,
+            child: Opacity(
+              opacity: (showSlider.value) ? 1 : 0,
               child: Container(
-                color: (scrollBarColors) ? Colors.red.withOpacity(0.5) : Colors.transparent,
-                alignment: Alignment.topCenter,
-                margin: EdgeInsets.only(top: barOffset),
-                child: Container(),
+                color: (scrollBarColors) ? Colors.green.withOpacity(0.5) : Colors.transparent,
+                height: widget.programaticScrollBarHeight,
+                child: Container(
+                  color: (scrollBarColors) ? Colors.red.withOpacity(0.5) : Colors.transparent,
+                  alignment: Alignment.topCenter,
+                  margin: EdgeInsets.only(top: barOffset),
+                  child: Container(),
+                ),
               ),
             ),
           ),
@@ -204,41 +202,44 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
                 children: <Widget>[
                   Stack(
                     children: <Widget>[
-                      Container(
-                        width: 24,
-                        height: widget.scrollThumbHeight,
-                        decoration: new BoxDecoration(
-                          color: widget.thumbColor,
-                          borderRadius: new BorderRadius.all(
-                            Radius.circular(25.0),
+                      Opacity(
+                        opacity: (showSlider.value) ? 1 : 0,
+                        child: Container(
+                          width: 24,
+                          height: widget.scrollThumbHeight,
+                          decoration: new BoxDecoration(
+                            color: widget.thumbColor,
+                            borderRadius: new BorderRadius.all(
+                              Radius.circular(25.0),
+                            ),
                           ),
-                        ),
-                        child: Transform.translate(
-                          offset: Offset(
-                            //the last one is extra
-                            -(circleSize/2) - (24/2) - 16, 
-                            0,
-                          ),
-                          child: Center(
-                            child: Container(
-                              child: OverflowBox(
-                                minWidth: circleSize,
-                                maxWidth: circleSize,
-                                maxHeight: circleSize,
-                                minHeight: circleSize,
-                                child: Container(
-                                  decoration: new BoxDecoration(
-                                    color: widget.thumbColor,
-                                    borderRadius: new BorderRadius.all(
-                                      Radius.circular(circleSize / 2),
+                          child: Transform.translate(
+                            offset: Offset(
+                              //the last one is extra
+                              -(circleSize/2) - (24/2) - 16, 
+                              0,
+                            ),
+                            child: Center(
+                              child: Container(
+                                child: OverflowBox(
+                                  minWidth: circleSize,
+                                  maxWidth: circleSize,
+                                  maxHeight: circleSize,
+                                  minHeight: circleSize,
+                                  child: Container(
+                                    decoration: new BoxDecoration(
+                                      color: widget.thumbColor,
+                                      borderRadius: new BorderRadius.all(
+                                        Radius.circular(circleSize / 2),
+                                      ),
                                     ),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      thumbTackChar,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: circleSize/2,
+                                    child: Center(
+                                      child: Text(
+                                        thumbTackChar,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: circleSize/2,
+                                        ),
                                       ),
                                     ),
                                   ),

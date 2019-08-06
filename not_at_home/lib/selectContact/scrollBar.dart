@@ -104,8 +104,8 @@ class ScrollBar extends StatelessWidget {
             //for header in index 3... there are 3 headers above.. [0,1,2]
             //then also include yourself
             i + 1, //closedHeaders
-            itemCountSoFar, //items above
-            spacerCountSoFar, //spacers above
+            itemCountSoFar - 1, //items above
+            spacerCountSoFar - 1, //spacers above
           );
 
           //make sure we haven't passed the limit (otherwise weird bounce)
