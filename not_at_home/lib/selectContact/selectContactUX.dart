@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:not_at_home/selectContact/scrollBar.dart';
 import 'package:not_at_home/vibrate.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:sticky_headers/sticky_headers/widget.dart';
 
 import 'package:vector_math/vector_math_64.dart' as VECT;
 import 'package:not_at_home/newContact.dart';
@@ -142,11 +143,27 @@ class _SelectContactUXState extends State<SelectContactUX> {
       );
 
       //wrap items in sliver list
-      bodyWidget = SliverList(
+      bodyWidget = Column(
+        children: widget.sectionWidgets,
+      );
+      
+      /*Container(
+        height: 100,
+        width: MediaQuery.of(context).size.width,
+        color: Colors.green,
+        
+        /*Column(
+          children: widget.sectionWidgets,
+        ),*/
+      );*/
+      
+      /*
+      SliverList(
         delegate: SliverChildListDelegate(
           widget.sectionWidgets,
         ),
       );
+      */
     }
 
     //status bar height grabber (MUST NOT BE IN) init
@@ -228,27 +245,69 @@ class _SelectContactUXState extends State<SelectContactUX> {
 
                 //build
                 return Container(
-                  color: Theme.of(context).primaryColor,
+                  color: Colors.red, //.of(context).primaryColor,
+                  height: MediaQuery.of(context).size.height,
                   child: Stack(
                     children: <Widget>[
-                      CustomScrollView(
-                        controller: autoScrollController,
-                        slivers: <Widget>[
-                          new TopAppBar(
-                            toolBarHeight: toolBarHeight,
-                            expandedHeight: expandedHeight, 
-                            flexibleHeight: flexibleHeight,
-                            flexibleClosed: flexibleClosed, 
-                            extraPadding: extraPadding, 
-                            orientationPrompt: orientationPrompt, 
-                            backFromNewContact: widget.backFromNewContact,
-                            onSelect: widget.onSelect,
-                          ),
-                          //IF no contacts OR retreiving contacts -> fill remaining
-                          //ELSE -> list of widgets
-                          bodyWidget,
-                        ],
+                      Positioned.fill(
+                        child: CustomScrollView(
+                          controller: autoScrollController,
+                          slivers: <Widget>[
+                            SliverList(
+                              delegate: SliverChildListDelegate([
+                                NewTopAppBar(
+                                  orientationPrompt: orientationPrompt,
+                                  backFromNewContact: widget.backFromNewContact,
+                                  onSelect: widget.onSelect,
+                                  body: contactsVisible ? bodyWidget : Container(),
+                                ),
+                              ]),
+                            ),
+                            
+                            /*
+                            SliverList(
+                              delegate: SliverChildListDelegate([
+                                Container(
+                                  height: 100,
+                                  width: MediaQuery.of(context).size.width,
+                                  color: Colors.blue,
+                                ),
+                                /*
+                                StickyHeaderBuilder(
+                                  builder: (context, stuckAmount) {
+                                    return body;
+                                  },
+                                ),
+                                */
+                              ]),
+                            ),
+                            */
+                            contactsVisible 
+                            ? SliverToBoxAdapter(
+                              child: Container(),
+                            ) 
+                            : bodyWidget,
+                            
+
+                            /*
+                            new TopAppBar(
+                              toolBarHeight: toolBarHeight,
+                              expandedHeight: expandedHeight, 
+                              flexibleHeight: flexibleHeight,
+                              flexibleClosed: flexibleClosed, 
+                              extraPadding: extraPadding, 
+                              orientationPrompt: orientationPrompt, 
+                              backFromNewContact: widget.backFromNewContact,
+                              onSelect: widget.onSelect,
+                            ),
+                            */
+                            //IF no contacts OR retreiving contacts -> fill remaining
+                            //ELSE -> list of widgets
+                            //bodyWidget,
+                          ],
+                        ),
                       ),
+                      /*
                       (contactsVisible) ? new ScrollBar(
                         statusBarHeight: statusBarHeight,
                         autoScrollController: autoScrollController,
@@ -258,6 +317,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                         showThumbTack: showThumbTack,
                         letterToListItems: widget.letterToListItems,
                       ) : Container(),
+                      */
                     ],
                   ),
                 );
@@ -270,6 +330,105 @@ class _SelectContactUXState extends State<SelectContactUX> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class NewTopAppBar extends StatelessWidget {
+  NewTopAppBar({
+    @required this.orientationPrompt,
+    @required this.onSelect,
+    @required this.backFromNewContact,
+    @required this.body,
+  });
+
+  final Widget orientationPrompt;
+  final Function onSelect;
+  final ValueNotifier<bool> backFromNewContact;
+  final Widget body;
+
+  @override
+  Widget build(BuildContext context) {
+    double toolBarHeight = 40;
+
+    Widget banner = Container(
+      color: Theme.of(context).primaryColorDark,
+      width: MediaQuery.of(context).size.width,
+      padding: EdgeInsets.all(16), //TODO... maybe pass var
+      child: Container(
+        child: orientationPrompt,
+      ),
+    );
+
+    Widget toolBar = Container(
+      color: Theme.of(context).primaryColorDark,
+      width: MediaQuery.of(context).size.width,
+      height: toolBarHeight,
+      child: DefaultTextStyle(
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.all(8),
+                child: Text("Select Contact"),
+              ),
+            ),
+            Material(
+              color: Theme.of(context).primaryColorDark,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  InkWell(
+                    onTap: (){
+                      backFromNewContact.value = true;
+                      Navigator.push(
+                        context, PageTransition(
+                          type: PageTransitionType.rightToLeft,
+                          child: NewContact(
+                            onSelect: onSelect,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      height: toolBarHeight,
+                      width: 16.0 + 24 + 16,
+                      child: Icon(Icons.add),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: (){
+                      print("SEARCH");
+                    },
+                    child: Container(
+                      height: toolBarHeight,
+                      width: 16.0 + 24 + 16,
+                      child: Icon(Icons.search),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    return SliverList(
+      delegate: SliverChildListDelegate([
+        banner,
+        StickyHeaderBuilder(
+          builder: (context, stuckAmount) {
+            return toolBar;
+          },
+          content: body,
+        ),
+      ]),
     );
   }
 }
