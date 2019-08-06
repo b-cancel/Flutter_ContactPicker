@@ -68,14 +68,17 @@ class ScrollBar extends StatelessWidget {
         //BUT because we are within a widget using safe area
         //we need to remove statusBarHeight
         scrollBarAreaHeight -= statusBarHeight;
+        scrollBarAreaHeight = noNegative(scrollBarAreaHeight);
 
         //--------------------------------------------------
         double paddingAll = 16;
 
         double scrollBarVisualHeight = scrollBarAreaHeight - (paddingAll * 2);
+        scrollBarVisualHeight = noNegative(scrollBarVisualHeight);
 
         //based on this scrollBarHeight we can calculate the size of our alpha overlay
         double alphaOverlayHeight = scrollBarAreaHeight - (paddingAll * 2) - (endsVertical * 2);
+        alphaOverlayHeight = noNegative(alphaOverlayHeight);
 
         //build
         return Positioned(
@@ -164,4 +167,8 @@ class ScrollBar extends StatelessWidget {
       },
     );
   }
+}
+
+double noNegative(double number){
+  return (number < 0) ? 0 : number;
 }
