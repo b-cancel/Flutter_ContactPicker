@@ -261,11 +261,11 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //build
   @override
   Widget build(BuildContext context) {
-    //for each contact letter assemble a list of widget
+    //for each letter assemble a list of widget
     Map<int, List<Widget>> letterToListItems = new Map<int,List<Widget>>();
     for(int i = 0; i < contacts.value.length; i++){
       //create the new list if we have to
-      int letterCode = contacts.value[i].givenName?.toUpperCase()?.codeUnitAt(0) ?? 63;
+      int letterCode = contacts.value[i].givenName?.toUpperCase()?.codeUnitAt(0) ?? 63; //63 = ?
       if(letterToListItems.containsKey(letterCode) == false){
         letterToListItems[letterCode] = new List<Widget>();
       }
@@ -279,7 +279,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
 
       //add contact delete UI if desired
       //current not functional
-      if(contactDeletionUI){
+      if(contactDeletionUI){ //TODO... parametrize this
         tile = Dismissible(
           key: keys[i],
           direction: DismissDirection.startToEnd,
@@ -290,6 +290,14 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
             keys.removeAt(i);
 
             //have those changes reflected on rebuild
+            //NOTE: you may be tempted to just merge the contact with its spacer
+            //and then let the automatic deletion occur... BUT
+            //take this scenario
+            //item 1 | [spacer | item 2] | [spacer | item 3]
+            //delete item 1
+            //[spacer | item 2] | [spacer | item 3]
+            //NOTE: how the spacer is not deleted
+            //TODO... in all edge cases where we don't have to rebuild manually... DONT
             setState(() {
               
             });

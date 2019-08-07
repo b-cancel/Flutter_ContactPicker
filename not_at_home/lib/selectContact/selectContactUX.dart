@@ -93,6 +93,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
   //build
   @override
   Widget build(BuildContext context) {
+    /*
     //Styling of the User Question Prompt
     TextStyle questionStyle = TextStyle(
       fontWeight: FontWeight.bold,
@@ -168,12 +169,139 @@ class _SelectContactUXState extends State<SelectContactUX> {
 
     //status bar height grabber (MUST NOT BE IN) init
     statusBarHeight = MediaQuery.of(context).padding.top;
+    */
+
+    Widget widgetList = Column(
+      children: widget.sectionWidgets,
+    );
+
+    double toolBarSize = 50;
+
+    Widget toolBar = Container(
+      width: MediaQuery.of(context).size.width,
+      height: toolBarSize,
+      color: Colors.red.withOpacity(1),
+      child: Text("tool bar"),
+    );
+
+    Widget banner = Container(
+      width: MediaQuery.of(context).size.width,
+      height: 100,
+      color: Colors.blue,
+      child: Text("banner"),
+    );
+
+    //TODO... testing stuff
+    bool noContacts = false;
 
     //build widgets
-    return Scaffold(
-      backgroundColor: Theme.of(context).primaryColorDark,
-      body: SafeArea(
-        child: Stack(
+    if(noContacts){
+      return Scaffold(
+        backgroundColor: Colors.green,
+        body: SafeArea(
+          child: CustomScrollView(
+            controller: autoScrollController,
+            slivers: <Widget>[
+              SliverToBoxAdapter(
+                child: banner,
+              ),
+              SliverToBoxAdapter(
+                child: toolBar,
+              ),
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Text("filled"),
+                ),
+              ),
+            ]
+          ),
+        ),
+      );
+    }
+    else{
+      Widget aSection = StickyHeaderBuilder(
+        builder: (context, stuckAmount) {
+          stuckAmount = stuckAmount.clamp(0.0, 1.0);
+          return Container(
+            color: Colors.green,
+            padding: EdgeInsets.only(top: toolBarSize * (1.0 - stuckAmount)),
+            child: Container(
+              color: Colors.pink,
+              width: MediaQuery.of(context).size.width,
+              height: 50,
+            ),
+          );
+        },
+        content: Container(
+          color: Colors.yellow,
+          width: MediaQuery.of(context).size.width,
+          height: 500,
+        ),
+      );
+
+      return Scaffold(
+        backgroundColor: Theme.of(context).primaryColorDark,
+        body: SafeArea(
+          child: CustomScrollView(
+            controller: autoScrollController,
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildListDelegate([
+                  banner,
+                  StickyHeaderBuilder(
+                    builder: (context, stuckAmount) {
+                      return toolBar;
+                    },
+                    content: Container(
+                      child: Column(
+                        children: [
+                          aSection,
+                          aSection,
+                          aSection,
+                        ]
+                      ),
+                    ),
+                    
+                    /*Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: 1000,
+                      color: Colors.green,
+                    ),*/
+                    
+                    //widgetList,
+                  ),
+                ]),
+              ),
+              /*
+              banner,
+              StickyHeaderBuilder(
+                builder: (context, stuckAmount) {
+                  return toolBar;
+                },
+                content: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: 100,
+                  color: Colors.blue,
+                ),
+              ),
+              */
+              /*
+              SliverList(
+                delegate: SliverChildListDelegate([
+                  widgetList,
+                ]),
+              ),
+              */
+            ]
+          ),
+        ),
+      );
+    }
+    
+        
+        
+        /*Stack(
           children: <Widget>[
             OrientationBuilder(
               builder: (context, orientation){
@@ -329,8 +457,8 @@ class _SelectContactUXState extends State<SelectContactUX> {
             ),
           ],
         ),
-      ),
-    );
+        */
+
   }
 }
 
