@@ -9,8 +9,6 @@ import 'package:not_at_home/newContact.dart';
 
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-import 'package:flutter_sticky_header/flutter_sticky_header.dart' as sticky2;
-
 //add search bar
 //https://blog.usejournal.com/flutter-search-in-listview-1ffa40956685
 
@@ -196,132 +194,12 @@ class _SelectContactUXState extends State<SelectContactUX> {
     //TODO... testing stuff
     bool noContacts = false;
 
-    //ASSUME NO CONTACTS
-    Widget aSection = sticky2.SliverStickyHeader(
-      header: Container(
-        color: Colors.green,
-        child: Container(
-          color: Colors.pink,
-          width: MediaQuery.of(context).size.width,
-          height: 50,
-        ),
-      ),
-      sliver: new SliverList(
-        delegate: new SliverChildListDelegate([
-          Container(
-            color: Colors.yellow,
-            width: MediaQuery.of(context).size.width,
-            height: 500,
-          ),
-        ]),
-      ),
-    );
-
-    return Scaffold(
-      backgroundColor: Theme.of(context).primaryColorDark,
-      body: SafeArea(
-        child: CustomScrollView(
-          controller: autoScrollController,
-          slivers: <Widget>[
-            sticky2.SliverStickyHeader(
-              header: toolBar,
-              sliver: new SliverList(
-                delegate: new SliverChildListDelegate([
-                  Container(
-                    child: NestedScrollView(
-                      headerSliverBuilder: (context, boo){
-                        return [
-                          Container(
-                            color: Colors.indigo,
-                            height: 250,
-                            width: MediaQuery.of(context).size.width,
-                          )
-                        ];
-                      },
-                      body: Container(
-                        color: Colors.grey,
-                        height: 500,
-                        width: MediaQuery.of(context).size.width,
-                      ),
-                    ),
-                  )
-                  /*
-                  aSection,
-                  aSection,
-                  aSection,
-                  */
-                ]),
-                
-                /*new SliverChildBuilderDelegate(
-                  (context, i) => new ListTile(
-                        leading: new CircleAvatar(
-                          child: new Text('0'),
-                        ),
-                        title: new Text('List tile #$i'),
-                      ),
-                  childCount: 4,
-                ),
-                */
-              ),
-            ),
-            /*
-            sticky2.SliverStickyHeader(
-              header: toolBar,
-              sliver: toolBar,
-              
-              
-              /*new SliverList(
-                delegate: new SliverChildListDelegate([
-                  SliverToBoxAdapter(
-                    child: Container(
-                      child: Column(
-                        children: [
-                          Text("adsf"),
-                          /*
-                          aSection,
-                          aSection,
-                          aSection,
-                          */
-                        ]
-                      ),
-                    ),
-                  ),
-                ]),
-              ),
-              */
-              
-              
-              
-              /*new SliverList(
-                delegate: new SliverChildListDelegate([
-                  SliverToBoxAdapter(
-                    child: 
-                  ),
-                ]),
-              ),*/
-            ),
-            */
-            /*
-            SliverList(
-              delegate: SliverChildListDelegate([
-                banner,
-                
-              ]),
-            ),
-            */
-          ]
-        ),
-      ),
-    );
-    /*
-    */
-
-    /*
     //build widgets
     if(noContacts){
       return Scaffold(
         backgroundColor: Colors.green,
         body: CustomScrollView(
+          
           controller: autoScrollController,
           slivers: <Widget>[
             SliverToBoxAdapter(
@@ -343,6 +221,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
     else{
       Widget aSection = StickyHeaderBuilder(
         builder: (context, stuckAmount) {
+          print("stuck " + stuckAmount.toString());
           stuckAmount = stuckAmount.clamp(0.0, 1.0);
           return Container(
             color: Colors.green,
@@ -365,6 +244,19 @@ class _SelectContactUXState extends State<SelectContactUX> {
         backgroundColor: Theme.of(context).primaryColorDark,
         body: SafeArea(
           child: CustomScrollView(
+            //---
+            //primary: false,
+            /*
+            AlwaysScrollableScrollPhysics 
+            BouncingScrollPhysics //no work
+            ClampingScrollPhysics //no work
+            FixedExtentScrollPhysics //no work
+            //---NeverScrollableScrollPhysics //literally supposed to not work
+            //---PageScrollPhysics //not what we want
+            */
+            physics: const AlwaysScrollableScrollPhysics(),
+            //shrinkWrap: true,
+            //---
             controller: autoScrollController,
             slivers: <Widget>[
               SliverList(
@@ -419,7 +311,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
         ),
       );
     }
-    */
     
         
         
