@@ -30,7 +30,10 @@ dependencies:
   contacts_service: ^0.3.0
   font_awesome_flutter: ^8.4.0
   image: ^2.1.4 #
+
   sticky_headers: "^0.1.8"
+  #flutter_sticky_header: ^0.4.0 #I could not get nesting to work here
+
   #scrolled way to slow (animateTo or jumpTo) worked better
   scroll_to_index: any 
   contact_picker: ^0.0.2
