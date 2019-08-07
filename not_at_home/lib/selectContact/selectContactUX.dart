@@ -8,6 +8,8 @@ import 'package:not_at_home/newContact.dart';
 
 import 'package:scroll_to_index/scroll_to_index.dart';
 
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+
 //add search bar
 //https://blog.usejournal.com/flutter-search-in-listview-1ffa40956685
 
@@ -19,13 +21,13 @@ await controller.scrollToIndex(verseID, preferPosition: AutoScrollPosition.begin
 controller.highlight(verseID);
 */
 
-class SelectContactUX extends StatefulWidget {
+class SelectContactUX extends StatelessWidget {
   SelectContactUX({
     this.retreivingContacts: false,
     @required this.contactCount,
     @required this.sortedLetterCodes,
     @required this.letterToListItems,
-    @required this.sectionWidgets,
+    @required this.sliverSections,
     @required this.backFromNewContact,
     @required this.onSelect,
     @required this.userPrompt,
@@ -35,16 +37,11 @@ class SelectContactUX extends StatefulWidget {
   final int contactCount;
   final List<int> sortedLetterCodes;
   final Map<int, List<Widget>> letterToListItems;
-  final List<Widget> sectionWidgets;
+  final List<Widget> sliverSections;
   final ValueNotifier<bool> backFromNewContact;
   final Function onSelect;
   final List<String> userPrompt;
 
-  @override
-  _SelectContactUXState createState() => _SelectContactUXState();
-}
-
-class _SelectContactUXState extends State<SelectContactUX> {
   //assume the flexible is open at the start
   final ValueNotifier<bool> flexibleClosed = new ValueNotifier(true);
   //TODO... use largest not smallest
@@ -56,6 +53,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
   //determines whether or not to show the scrolling thumb tack
   final ValueNotifier<bool> showThumbTack = new ValueNotifier(false);
 
+  /*
   //the scroll conroller
   AutoScrollController autoScrollController;
 
@@ -88,29 +86,101 @@ class _SelectContactUXState extends State<SelectContactUX> {
     autoScrollController.dispose();
     super.dispose();
   }
+  */
 
   //build
   @override
   Widget build(BuildContext context) {
+    print("retreiving: " + retreivingContacts.toString());
+    print("len: " + sliverSections.length.toString());
+    Widget body;
+    if(retreivingContacts || sliverSections.length == 0){
+      print("-------------------NOTHING");
+
+      body = Container(
+        color: Colors.red,
+        width: MediaQuery.of(context).size.width,
+        height: 250,
+        child: Text("NOTHING"),
+      );
+    }
+    else{
+      print("---------------------SOMETHING");
+
+      body = Container(
+        color: Colors.green,
+        width: MediaQuery.of(context).size.width,
+        child: CustomScrollView(
+          //controller: autoScrollController,
+          //IF no contacts OR retreiving contacts -> fill remaining
+          //ELSE -> list of widgets
+          slivers: sliverSections,
+          /*[
+            sliverSections.expand(),
+            /*
+            SliverToBoxAdapter(
+              child: Container(
+                color: Colors.pink,
+                width: MediaQuery.of(context).size.width,
+                height: 200,
+              ),
+            )
+            */
+          ],
+          */
+        ),
+        /*
+        child: SafeArea(
+          child: CustomScrollView(
+            //controller: autoScrollController,
+            //IF no contacts OR retreiving contacts -> fill remaining
+            //ELSE -> list of widgets
+            slivers: sliverWidgets,
+          ),
+        ),
+        */
+      );
+    }
+
+    return Scaffold(
+      body: body,
+    );
+
+    /*
     //Styling of the User Question Prompt
     TextStyle questionStyle = TextStyle(
       fontWeight: FontWeight.bold,
     );
 
+    int len = sliverWidgets.length;
+    //sliverWidgets.clear();
+    print("sections: " + len.toString());
+
     //Generate the Widget shown in the contacts scroll area
     //Depending on whether or not there are contacts or they are being retreived
-    Widget bodyWidget;
     bool contactsVisible = true;
-    if(widget.retreivingContacts || widget.sectionWidgets.length == 0){
+    if(retreivingContacts || len == 0){
       contactsVisible = false;
-      bodyWidget = SliverFillRemaining(
-        child: Container(
-          alignment: Alignment.center,
-          padding: EdgeInsets.all(16),
-          child: Text(
-            (widget.retreivingContacts) ? "Retreiving Contacts" : "No Contacts Found",
-            style: TextStyle(
-              fontSize: 18,
+    }
+    */
+    /*
+    if(retreivingContacts || sliverWidgets.length == 0){
+      contactsVisible = false;
+      sliverWidgets.add(
+        SliverFillRemaining(
+          child: InkWell(
+            onTap: (){
+              
+            },
+            child: Container(
+              alignment: Alignment.center,
+              padding: EdgeInsets.all(16),
+              child: Text(
+                (retreivingContacts) ? "Retreiving Contacts" : "No Contacts Found",
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              ),
             ),
           ),
         ),
@@ -119,44 +189,72 @@ class _SelectContactUXState extends State<SelectContactUX> {
     else{
       //spacer on bottom of list
       //NOTE: be after the above
-      int nextIndex = widget.sectionWidgets.length;
-      widget.sectionWidgets.add(
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.all(16),
-              child: Center(
-                child: Text(widget.contactCount.toString() + " Contacts"),
+      int nextIndex = sliverWidgets.length;
+      /*
+      widget.sliverWidgets.add(
+        SliverToBoxAdapter(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.all(16),
+                child: Center(
+                  child: Text(widget.contactCount.toString() + " Contacts"),
+                ),
               ),
-            ),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              //make sure to top button isnt covered
-              //16 is padding
-              //48 is the size of the button
-              height: 16.0 + 48 + 16,
-            ),
-          ],
+              Container(
+                width: MediaQuery.of(context).size.width,
+                //make sure to top button isnt covered
+                //16 is padding
+                //48 is the size of the button
+                height: 16.0 + 48 + 16,
+              ),
+            ],
+          ),
         ),
       );
+      */
+    }   
+    */
 
-      //wrap items in sliver list
-      bodyWidget = SliverList(
-        delegate: SliverChildListDelegate(
-          widget.sectionWidgets,
+    /*
+    print("showing contacts: " + contactsVisible.toString());             
+
+    //status bar height grabber (MUST NOT BE IN) init
+    double statusBarHeight = MediaQuery.of(context).padding.top;
+
+    if(contactsVisible == false){
+      sliverWidgets.clear();
+
+      sliverWidgets.add(
+        SliverFillRemaining(
+          child: Container(
+            alignment: Alignment.center,
+            padding: EdgeInsets.all(16),
+            child: Text(
+              (contactsVisible) ? len.toString() : "",
+              style: TextStyle(
+                fontSize: 18,
+              ),
+            ),
+          ),
         ),
       );
     }
-
-    //status bar height grabber (MUST NOT BE IN) init
-    statusBarHeight = MediaQuery.of(context).padding.top;
+    */
 
     //build widgets
-    return Scaffold(
+    /*return Scaffold(
       backgroundColor: Theme.of(context).primaryColorDark,
       body: SafeArea(
-        child: Stack(
+        child: CustomScrollView(
+          //controller: autoScrollController,
+          //IF no contacts OR retreiving contacts -> fill remaining
+          //ELSE -> list of widgets
+          slivers: sliverWidgets,
+        ),
+        
+        /*Stack(
           children: <Widget>[
             OrientationBuilder(
               builder: (context, orientation){
@@ -226,6 +324,26 @@ class _SelectContactUXState extends State<SelectContactUX> {
                   child: orientationPrompt,
                 );
 
+                /*
+                List<Widget> finalSliverWidgets = new List<Widget>();
+                finalSliverWidgets = new List.from([
+                  Banner(
+                    padding: extraPadding,
+                    prompt: orientationPrompt,
+                  ),
+                  TopAppBar(
+                    toolBarHeight: toolBarHeight,
+                    expandedHeight: expandedHeight, 
+                    flexibleHeight: flexibleHeight,
+                    flexibleClosed: flexibleClosed, 
+                    extraPadding: extraPadding, 
+                    orientationPrompt: orientationPrompt, 
+                    backFromNewContact: widget.backFromNewContact,
+                    onSelect: widget.onSelect,
+                  ),
+                ])..addAll(widget.sliverWidgets);
+                */
+
                 //build
                 return Container(
                   color: Theme.of(context).primaryColor,
@@ -233,30 +351,9 @@ class _SelectContactUXState extends State<SelectContactUX> {
                     children: <Widget>[
                       CustomScrollView(
                         controller: autoScrollController,
-                        slivers: <Widget>[
-                          /*
-                          Banner(
-                            padding: extraPadding,
-                            prompt: orientationPrompt,
-                          ),
-                          */
-                          TopAppBar(
-                            toolBarHeight: toolBarHeight,
-                            expandedHeight: expandedHeight, 
-                            flexibleHeight: flexibleHeight,
-                            flexibleClosed: flexibleClosed, 
-                            extraPadding: extraPadding, 
-                            orientationPrompt: orientationPrompt, 
-                            backFromNewContact: widget.backFromNewContact,
-                            onSelect: widget.onSelect,
-                          ),
-                          //IF no contacts OR retreiving contacts -> fill remaining
-                          //ELSE -> list of widgets
-                          SliverFillRemaining(
-                            child: Text("adssdafsd"),
-                          )
-                          //bodyWidget,
-                        ],
+                        //IF no contacts OR retreiving contacts -> fill remaining
+                        //ELSE -> list of widgets
+                        slivers: widget.sliverWidgets,
                       ),
                       (contactsVisible) ? new ScrollBar(
                         statusBarHeight: statusBarHeight,
@@ -278,8 +375,10 @@ class _SelectContactUXState extends State<SelectContactUX> {
             ),
           ],
         ),
+        */
       ),
     );
+    */
   }
 }
 
@@ -294,17 +393,19 @@ class Banner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Theme.of(context).primaryColorDark,
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.all(padding),
-      child: prompt,
+    return SliverToBoxAdapter(
+      child: Container(
+        color: Theme.of(context).primaryColorDark,
+        width: MediaQuery.of(context).size.width,
+        padding: EdgeInsets.all(padding),
+        child: prompt,
+      ),
     );
   }
 }
 
-class TopAppBar extends StatelessWidget {
-  const TopAppBar({
+class ToolBar extends StatelessWidget {
+  const ToolBar({
     Key key,
     @required this.toolBarHeight,
     @required this.expandedHeight,

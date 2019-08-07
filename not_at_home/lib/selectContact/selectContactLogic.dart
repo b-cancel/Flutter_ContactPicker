@@ -258,10 +258,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     else return false;    
   }
 
-  //build
-  @override
-  Widget build(BuildContext context) {
-    //for each letter assemble a list of widget
+  Map<int, List<Widget>> createMap_letterToWidgetList(){
     Map<int, List<Widget>> letterToListItems = new Map<int,List<Widget>>();
     for(int i = 0; i < contacts.value.length; i++){
       //create the new list if we have to
@@ -321,14 +318,14 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       //add to the list
       letterToListItems[letterCode].add(tile);
     }
+    return letterToListItems;
+  }
 
-    //sort keys
-    List<int> sortedLetterCodes = letterToListItems.keys.toList();
-    sortedLetterCodes.sort();
-
-    //iterate through all letters
-    //and compile the sections with their headers
-    List<Widget> sectionWidgets = new List<Widget>();
+  List<Widget> createList_SliverSections(
+    List<int> sortedLetterCodes,
+    Map<int, List<Widget>> letterToListItems,
+  ){
+    List<Widget> sliverSections = new List<Widget>();
     for(int i = 0; i < sortedLetterCodes.length; i++){
       List<Widget> widgetsWithDividers = new List<Widget>();
       int key = sortedLetterCodes[i];
@@ -355,7 +352,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       }
 
       //add all these items into the section
-      sectionWidgets.add(
+      sliverSections.add(
         SliverStickyHeader(
           header: Container(
             color: Theme.of(context).primaryColor,
@@ -393,6 +390,25 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         ),
       );
     }
+    return sliverSections;
+  }
+
+  //build
+  @override
+  Widget build(BuildContext context) {
+    //for each letter assemble a list of widget
+    Map<int, List<Widget>> letterToListItems = createMap_letterToWidgetList();
+
+    //sort keys
+    List<int> sortedLetterCodes = letterToListItems.keys.toList();
+    sortedLetterCodes.sort();
+
+    //iterate through all letters
+    //and compile the sections with their headers
+    List<Widget> sliverSections = createList_SliverSections(
+      sortedLetterCodes,
+      letterToListItems,
+    );
 
     //pass the widgets
     return WillPopScope(
@@ -404,7 +420,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         contactCount: contacts.value.length,
         sortedLetterCodes: sortedLetterCodes,
         letterToListItems: letterToListItems,
-        sectionWidgets: sectionWidgets,
+        sliverSections: sliverSections,
         backFromNewContact: backFromNewContactPage,
         onSelect: onSelect,
         userPrompt: widget.userPrompt,
