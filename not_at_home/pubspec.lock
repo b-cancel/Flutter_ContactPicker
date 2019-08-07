@@ -205,20 +205,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.9.3"
-  sticky_header_list:
-    dependency: "direct main"
-    description:
-      name: sticky_header_list
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.6"
-  sticky_headers:
-    dependency: "direct main"
-    description:
-      name: sticky_headers
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.8"
   stream_channel:
     dependency: transitive
     description:

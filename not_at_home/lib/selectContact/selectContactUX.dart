@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:not_at_home/selectContact/scrollBar.dart';
 import 'package:not_at_home/vibrate.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:sticky_headers/sticky_headers/widget.dart';
 
 import 'package:vector_math/vector_math_64.dart' as VECT;
 import 'package:not_at_home/newContact.dart';
@@ -93,7 +92,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
   //build
   @override
   Widget build(BuildContext context) {
-    /*
     //Styling of the User Question Prompt
     TextStyle questionStyle = TextStyle(
       fontWeight: FontWeight.bold,
@@ -144,176 +142,21 @@ class _SelectContactUXState extends State<SelectContactUX> {
       );
 
       //wrap items in sliver list
-      bodyWidget = Column(
-        children: widget.sectionWidgets,
-      );
-      
-      /*Container(
-        height: 100,
-        width: MediaQuery.of(context).size.width,
-        color: Colors.green,
-        
-        /*Column(
-          children: widget.sectionWidgets,
-        ),*/
-      );*/
-      
-      /*
-      SliverList(
+      bodyWidget = SliverList(
         delegate: SliverChildListDelegate(
           widget.sectionWidgets,
         ),
       );
-      */
     }
 
     //status bar height grabber (MUST NOT BE IN) init
     statusBarHeight = MediaQuery.of(context).padding.top;
-    */
-
-    Widget widgetList = Column(
-      children: widget.sectionWidgets,
-    );
-
-    double toolBarSize = 50;
-
-    Widget toolBar = Container(
-      width: MediaQuery.of(context).size.width,
-      height: toolBarSize,
-      color: Colors.red.withOpacity(1),
-      child: Text("tool bar"),
-    );
-
-    Widget banner = Container(
-      width: MediaQuery.of(context).size.width,
-      height: 100,
-      color: Colors.blue,
-      child: Text("banner"),
-    );
-
-    //TODO... testing stuff
-    bool noContacts = false;
 
     //build widgets
-    if(noContacts){
-      return Scaffold(
-        backgroundColor: Colors.green,
-        body: CustomScrollView(
-          
-          controller: autoScrollController,
-          slivers: <Widget>[
-            SliverToBoxAdapter(
-              child: banner,
-            ),
-            SliverToBoxAdapter(
-              child: toolBar,
-            ),
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(
-                child: Text("filled"),
-              ),
-            ),
-          ]
-        ),
-      );
-    }
-    else{
-      Widget aSection = StickyHeaderBuilder(
-        builder: (context, stuckAmount) {
-          stuckAmount = stuckAmount.clamp(0.0, 1.0);
-          return Container(
-            color: Colors.green,
-            padding: EdgeInsets.only(top: toolBarSize * (1.0 - stuckAmount)),
-            child: Container(
-              color: Colors.pink,
-              width: MediaQuery.of(context).size.width,
-              height: 50,
-            ),
-          );
-        },
-        content: Container(
-          color: Colors.yellow,
-          width: MediaQuery.of(context).size.width,
-          height: 500,
-        ),
-      );
-
-      return Scaffold(
-        backgroundColor: Theme.of(context).primaryColorDark,
-        body: SafeArea(
-          child: CustomScrollView(
-            //---
-            //primary: false,
-            /*
-            AlwaysScrollableScrollPhysics 
-            BouncingScrollPhysics //no work
-            ClampingScrollPhysics //no work
-            FixedExtentScrollPhysics //no work
-            NeverScrollableScrollPhysics //literally supposed to not work
-            PageScrollPhysics //not what we want
-            */
-            physics: const AlwaysScrollableScrollPhysics(),
-            //shrinkWrap: true,
-            //---
-            controller: autoScrollController,
-            slivers: <Widget>[
-              SliverList(
-                delegate: SliverChildListDelegate([
-                  banner,
-                  StickyHeaderBuilder(
-                    builder: (context, stuckAmount) {
-                      return toolBar;
-                    },
-                    content: Container(
-                      child: Column(
-                        children: [
-                          aSection,
-                          aSection,
-                          aSection,
-                        ]
-                      ),
-                    ),
-                    
-                    /*Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: 1000,
-                      color: Colors.green,
-                    ),*/
-                    
-                    //widgetList,
-                  ),
-                ]),
-              ),
-              /*
-              banner,
-              StickyHeaderBuilder(
-                builder: (context, stuckAmount) {
-                  return toolBar;
-                },
-                content: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 100,
-                  color: Colors.blue,
-                ),
-              ),
-              */
-              /*
-              SliverList(
-                delegate: SliverChildListDelegate([
-                  widgetList,
-                ]),
-              ),
-              */
-            ]
-          ),
-        ),
-      );
-    }
-    
-        
-        
-        /*Stack(
+    return Scaffold(
+      backgroundColor: Theme.of(context).primaryColorDark,
+      body: SafeArea(
+        child: Stack(
           children: <Widget>[
             OrientationBuilder(
               builder: (context, orientation){
@@ -385,69 +228,36 @@ class _SelectContactUXState extends State<SelectContactUX> {
 
                 //build
                 return Container(
-                  color: Colors.red, //.of(context).primaryColor,
-                  height: MediaQuery.of(context).size.height,
+                  color: Theme.of(context).primaryColor,
                   child: Stack(
                     children: <Widget>[
-                      Positioned.fill(
-                        child: CustomScrollView(
-                          controller: autoScrollController,
-                          slivers: <Widget>[
-                            SliverList(
-                              delegate: SliverChildListDelegate([
-                                NewTopAppBar(
-                                  orientationPrompt: orientationPrompt,
-                                  backFromNewContact: widget.backFromNewContact,
-                                  onSelect: widget.onSelect,
-                                  body: contactsVisible ? bodyWidget : Container(),
-                                ),
-                              ]),
-                            ),
-                            
-                            /*
-                            SliverList(
-                              delegate: SliverChildListDelegate([
-                                Container(
-                                  height: 100,
-                                  width: MediaQuery.of(context).size.width,
-                                  color: Colors.blue,
-                                ),
-                                /*
-                                StickyHeaderBuilder(
-                                  builder: (context, stuckAmount) {
-                                    return body;
-                                  },
-                                ),
-                                */
-                              ]),
-                            ),
-                            */
-                            contactsVisible 
-                            ? SliverToBoxAdapter(
-                              child: Container(),
-                            ) 
-                            : bodyWidget,
-                            
-
-                            /*
-                            new TopAppBar(
-                              toolBarHeight: toolBarHeight,
-                              expandedHeight: expandedHeight, 
-                              flexibleHeight: flexibleHeight,
-                              flexibleClosed: flexibleClosed, 
-                              extraPadding: extraPadding, 
-                              orientationPrompt: orientationPrompt, 
-                              backFromNewContact: widget.backFromNewContact,
-                              onSelect: widget.onSelect,
-                            ),
-                            */
-                            //IF no contacts OR retreiving contacts -> fill remaining
-                            //ELSE -> list of widgets
-                            //bodyWidget,
-                          ],
-                        ),
+                      CustomScrollView(
+                        controller: autoScrollController,
+                        slivers: <Widget>[
+                          /*
+                          Banner(
+                            padding: extraPadding,
+                            prompt: orientationPrompt,
+                          ),
+                          */
+                          TopAppBar(
+                            toolBarHeight: toolBarHeight,
+                            expandedHeight: expandedHeight, 
+                            flexibleHeight: flexibleHeight,
+                            flexibleClosed: flexibleClosed, 
+                            extraPadding: extraPadding, 
+                            orientationPrompt: orientationPrompt, 
+                            backFromNewContact: widget.backFromNewContact,
+                            onSelect: widget.onSelect,
+                          ),
+                          //IF no contacts OR retreiving contacts -> fill remaining
+                          //ELSE -> list of widgets
+                          SliverFillRemaining(
+                            child: Text("adssdafsd"),
+                          )
+                          //bodyWidget,
+                        ],
                       ),
-                      /*
                       (contactsVisible) ? new ScrollBar(
                         statusBarHeight: statusBarHeight,
                         autoScrollController: autoScrollController,
@@ -457,7 +267,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
                         showThumbTack: showThumbTack,
                         letterToListItems: widget.letterToListItems,
                       ) : Container(),
-                      */
                     ],
                   ),
                 );
@@ -469,106 +278,27 @@ class _SelectContactUXState extends State<SelectContactUX> {
             ),
           ],
         ),
-        */
-
+      ),
+    );
   }
 }
 
-class NewTopAppBar extends StatelessWidget {
-  NewTopAppBar({
-    @required this.orientationPrompt,
-    @required this.onSelect,
-    @required this.backFromNewContact,
-    @required this.body,
+class Banner extends StatelessWidget {
+  Banner({
+    @required this.padding,
+    @required this.prompt,
   });
 
-  final Widget orientationPrompt;
-  final Function onSelect;
-  final ValueNotifier<bool> backFromNewContact;
-  final Widget body;
+  final double padding;
+  final Widget prompt;
 
   @override
   Widget build(BuildContext context) {
-    double toolBarHeight = 40;
-
-    Widget banner = Container(
+    return Container(
       color: Theme.of(context).primaryColorDark,
       width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.all(16), //TODO... maybe pass var
-      child: Container(
-        child: orientationPrompt,
-      ),
-    );
-
-    Widget toolBar = Container(
-      color: Theme.of(context).primaryColorDark,
-      width: MediaQuery.of(context).size.width,
-      height: toolBarHeight,
-      child: DefaultTextStyle(
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.all(8),
-                child: Text("Select Contact"),
-              ),
-            ),
-            Material(
-              color: Theme.of(context).primaryColorDark,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  InkWell(
-                    onTap: (){
-                      backFromNewContact.value = true;
-                      Navigator.push(
-                        context, PageTransition(
-                          type: PageTransitionType.rightToLeft,
-                          child: NewContact(
-                            onSelect: onSelect,
-                          ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      height: toolBarHeight,
-                      width: 16.0 + 24 + 16,
-                      child: Icon(Icons.add),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: (){
-                      print("SEARCH");
-                    },
-                    child: Container(
-                      height: toolBarHeight,
-                      width: 16.0 + 24 + 16,
-                      child: Icon(Icons.search),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    return SliverList(
-      delegate: SliverChildListDelegate([
-        banner,
-        StickyHeaderBuilder(
-          builder: (context, stuckAmount) {
-            return toolBar;
-          },
-          content: body,
-        ),
-      ]),
+      padding: EdgeInsets.all(padding),
+      child: prompt,
     );
   }
 }
@@ -598,56 +328,9 @@ class TopAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
-      //true so that we get the safe area added on top
-      primary: true,
-
-      //Pinned MUST be True for ease of use
-      pinned: true, //show the user then can search regardless of where they are on the list
-      //Floating MUST be true so for ease of use
-      //but NAW its false because any user that is going to search or add a contact will do so at the start
-      floating: true, //show scroll bar as soon as user starts scrolling up
-      //Snap is TRUE so that our flexible space result looks as best as it can
-      //but NAW its FALSE cuz it snaps weird...
-      snap: false, //ONLY if floating is true
-
-      //NOTE: title and leading not being used 
-      //because they are simply above the flexible widget
-      //but it hides after the flexible widget gets closed
-      
-      //Lets the user know what they are select a contact for
-      expandedHeight: expandedHeight,
-      flexibleSpace: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          //determine whether the space bar is open or closed
-          WidgetsBinding.instance.addPostFrameCallback((_){
-            flexibleHeight.value = constraints.biggest.height;
-            flexibleClosed.value = (flexibleHeight.value == toolBarHeight);
-          });
-
-          //build
-          return FlexibleSpaceBar(
-            background: Container(
-              color: Theme.of(context).primaryColorDark,
-              width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.all(extraPadding),
-              child: Padding(
-                padding: EdgeInsets.only(
-                  bottom: toolBarHeight,
-                ),
-                child: Container(
-                  child: orientationPrompt,
-                ),
-              ),
-            ),
-            //this does not seem to make any difference
-            //but it MIGHT so ill keep it
-            //it changes FlexibleSpaceBarSettings
-            collapseMode: CollapseMode.parallax,
-          );
-        }
-      ),
-
-      //Lets the user know they can search
+      pinned: true, //avoid strange padding
+      floating: true, //avoid strange padding
+      expandedHeight: 0, //avoid strange padding
       bottom: PreferredSize(
         preferredSize: Size(
           MediaQuery.of(context).size.width,

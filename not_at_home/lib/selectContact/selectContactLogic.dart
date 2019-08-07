@@ -7,8 +7,8 @@ import 'package:not_at_home/permission.dart';
 import 'package:not_at_home/request.dart';
 import 'package:not_at_home/selectContact/selectContactUX.dart';
 import 'package:permission/permission.dart';
-import 'package:sticky_headers/sticky_headers.dart';
 import 'contactTile.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 //contact deletion is NOT functional
 //as in... DOES NOT delete the contact...
@@ -356,43 +356,39 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
 
       //add all these items into the section
       sectionWidgets.add(
-        //top: 16 -> (16 + 40)
-        //height: 16
-        //bottom: 8
-        //40 -> 80
-        StickyHeaderBuilder(
-          builder: (context, stuckAmount) {
-            stuckAmount = stuckAmount.clamp(0.0, 1.0);
-            return Container(
-              color: Theme.of(context).primaryColor,
-              //TODO... perhaps change these valus to no hard coded
-              padding: new EdgeInsets.only(
-                left: 32,
-                right: 16,
-                top: (16.0 + (40 * (1-stuckAmount))).clamp(16.0, 56.0), //16,
-                bottom: 8,
-              ),
-              alignment: Alignment.bottomLeft,
-              child: Container(
-                height: 16,
-                alignment: Alignment.centerLeft,
-                child: new Text(
-                  String.fromCharCode(key),
-                  style: TextStyle(
-                    fontSize: 12,
-                  ),
+        SliverStickyHeader(
+          header: Container(
+            color: Theme.of(context).primaryColor,
+            padding: new EdgeInsets.only(
+              left: 32,
+              right: 16,
+              top: 16,
+              bottom: 8,
+            ),
+            alignment: Alignment.bottomLeft,
+            child: Container(
+              height: 16,
+              alignment: Alignment.centerLeft,
+              child: new Text(
+                String.fromCharCode(key),
+                style: TextStyle(
+                  fontSize: 12,
                 ),
               ),
-            );
-          },
-          content: Card(
-            margin: EdgeInsets.all(0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25.0),
             ),
-            child: Column(
-              children: widgetsWithDividers,
-            ),
+          ),
+          sliver: new SliverList(
+            delegate: new SliverChildListDelegate([
+              Card(
+                margin: EdgeInsets.all(0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                ),
+                child: Column(
+                  children: widgetsWithDividers,
+                ),
+              ),
+            ]),
           ),
         ),
       );

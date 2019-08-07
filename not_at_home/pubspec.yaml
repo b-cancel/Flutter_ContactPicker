@@ -20,37 +20,44 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^0.1.2
-
-  provider: ^2.0.1
+  #TRANSITIONS
   page_transition: ^1.1.4
-  image_picker: ^0.6.0+16 #
+
+  #CONTACT
   contacts_service: ^0.3.0
+  contact_picker: ^0.0.2
+
+  #ICONS
+  cupertino_icons: ^0.1.2
   font_awesome_flutter: ^8.4.0
-  image: ^2.1.4 #
 
-  sticky_headers: "^0.1.8"
-  #I could not get nesting to work here
+  #IMAGE
+  provider: ^2.0.1
+  image_picker: ^0.6.0+16 
+  image: ^2.1.4
+
+  #PERMISSIONS
+  permission: ^0.1.2
+  #Works but isn't properly requesting a contact
+  #permission_handler: ^3.2.0 #don't upgrade beyond this
+  #Doesn't work at all
+  #simple_permissions: ^0.1.9
+
+  #STICKY HEADERS
   flutter_sticky_header: ^0.4.0 
-  #basically a list view, does not nest
-  sticky_header_list: ^1.0.6 
-  #not needed inside customScrollView cuz it already contains it ofcourse making it not possible to nest
+  #Contains a customScrollView so does not let me add banner
   #sticky_infinite_list: ^1.2.2 
-
+  #Added weird bounce to sticky header with the SliverAppBar
+  #sticky_headers: "^0.1.8"
+  #Basically a List View (good alt)
+  #sticky_header_list: ^1.0.6 
+  
+  #OTHER
   #scrolled way to slow (animateTo or jumpTo) worked better
   scroll_to_index: any 
-  contact_picker: ^0.0.2
   vibration: ^1.2.1
-  #draggable_scrollbar: ^0.0.4
   #map_view: ^0.0.14
   #indexed_list_view: ^0.0.5 #would work great IF it didn't require an infinitely scrolling list
-  #---permission plugins
-  #permission_handler: ^3.2.0 #don't upgrade beyond this (works but not fully)
-  permission: ^0.1.2 #works not tested
-  #simple_permissions: ^0.1.9 #still doesn't work
-  
 
   # share 
   # https://pub.dev/packages/share
