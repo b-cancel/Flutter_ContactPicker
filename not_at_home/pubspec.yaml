@@ -32,7 +32,12 @@ dependencies:
   image: ^2.1.4 #
 
   sticky_headers: "^0.1.8"
-  #flutter_sticky_header: ^0.4.0 #I could not get nesting to work here
+  #I could not get nesting to work here
+  flutter_sticky_header: ^0.4.0 
+  #basically a list view, does not nest
+  sticky_header_list: ^1.0.6 
+  #not needed inside customScrollView cuz it already contains it ofcourse making it not possible to nest
+  #sticky_infinite_list: ^1.2.2 
 
   #scrolled way to slow (animateTo or jumpTo) worked better
   scroll_to_index: any 

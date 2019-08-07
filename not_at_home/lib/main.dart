@@ -1,4 +1,105 @@
-import 'package:contacts_service/contacts_service.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+
+//-----Start App
+void main() => runApp(MyApp());
+
+//-----Entry Point
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StatelessLink();
+  }
+}
+
+//-----Statless Link Required Between Entry Point And App
+class StatelessLink extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Nested Picker Link',
+      home: Test(),
+    );
+  }
+}
+
+//-----Test Widget
+class Test extends StatefulWidget {
+  @override
+  _TestState createState() => _TestState();
+}
+
+class _TestState extends State<Test> {
+  @override
+  Widget build(BuildContext context) {
+    double toolBarSize = 50;
+
+    Widget toolBar = Container(
+      width: MediaQuery.of(context).size.width,
+      height: toolBarSize,
+      color: Colors.blue,
+      child: Text("tool bar"),
+    );
+
+    Widget banner = Container(
+      width: MediaQuery.of(context).size.width,
+      height: 300,
+      color: Colors.orange,
+      child: Text("banner"),
+    );
+
+    Widget aSection = SliverStickyHeader(
+      header: Container(
+        color: Colors.pink,
+        width: MediaQuery.of(context).size.width,
+        height: 35,
+        child: Text("section"),
+      ),
+      sliver: new SliverList(
+        delegate: new SliverChildListDelegate([
+          Container(
+            color: Colors.yellow,
+            width: MediaQuery.of(context).size.width,
+            height: 500,
+          ),
+        ]),
+      ),
+    );
+
+    return Scaffold(
+      backgroundColor: Colors.green,
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverToBoxAdapter(
+              child: banner,
+            ),
+            SliverAppBar(
+              pinned: true, //avoid strange padding
+              floating: true, //avoid strange padding
+              expandedHeight: 0, //avoid strange padding
+              bottom: PreferredSize(
+                preferredSize: Size(
+                  MediaQuery.of(context).size.width,
+                  toolBarSize,
+                ),
+                child: toolBar,
+              ),
+            ),
+            aSection,
+            aSection,
+            aSection,
+          ]
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+/*import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:not_at_home/request.dart';
 import 'selectContact/selectContactLogic.dart';
@@ -98,3 +199,4 @@ class _InitRouterState extends State<InitRouter> {
     return Container();
   }
 }
+*/

@@ -221,7 +221,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
     else{
       Widget aSection = StickyHeaderBuilder(
         builder: (context, stuckAmount) {
-          print("stuck " + stuckAmount.toString());
           stuckAmount = stuckAmount.clamp(0.0, 1.0);
           return Container(
             color: Colors.green,
@@ -251,8 +250,8 @@ class _SelectContactUXState extends State<SelectContactUX> {
             BouncingScrollPhysics //no work
             ClampingScrollPhysics //no work
             FixedExtentScrollPhysics //no work
-            //---NeverScrollableScrollPhysics //literally supposed to not work
-            //---PageScrollPhysics //not what we want
+            NeverScrollableScrollPhysics //literally supposed to not work
+            PageScrollPhysics //not what we want
             */
             physics: const AlwaysScrollableScrollPhysics(),
             //shrinkWrap: true,
