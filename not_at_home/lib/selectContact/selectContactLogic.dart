@@ -268,17 +268,11 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       }
 
       //make contact list tile
-      Widget tile = Container(
-        width: MediaQuery.of(context).size.width,
-        height: 100,
-        color: (letterToListItems[letterCode].length % 2==0) ? Colors.purple : Colors.green,
-      );
-      
-      /*ContactListTile(
+      Widget tile = ContactListTile(
         thisContact: contacts.value[i],
         thisColor: colorsForContacts[i],
         onSelect: onSelect,
-      );*/
+      );
 
       //add contact delete UI if desired
       //current not functional

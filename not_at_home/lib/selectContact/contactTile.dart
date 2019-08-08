@@ -22,8 +22,8 @@ class ContactListTile extends StatelessWidget {
 
     //process name
     String name = thisContact.givenName ?? "UnKnown";
-    name = scrambler(name, 3/4); //SCRAMBLE
-
+    //name = scrambler(name, 3/4); //SCRAMBLE
+    
     //process the phone string
     String number;
     if(thisContact.phones.toList().length == 0){
@@ -33,47 +33,89 @@ class ContactListTile extends StatelessWidget {
       Item firstNumber = thisContact.phones.toList()[0];
       number = firstNumber.value.toString();
       
-      number = scrambler(number, 1, onlyNumbers: true); //SCRAMBLE
+      //number = scrambler(number, 1, onlyNumbers: true); //SCRAMBLE
       number += " | " + firstNumber.label.toString();
     }
 
+    //title: theme.textTheme.subhead;
+    //subtitle: theme.textTheme.body1 | theme.textTheme.caption.color
+    
+
     //return widget
-    return SizedBox(
-      height: 70,
-      child: ListTile(
-        onTap: (){
-          onSelect(context, thisContact);
-        },
-        leading: new Container(
-          width: 50,
-          height: 50,
-          decoration: new BoxDecoration(
-            color: thisColor,
-            shape: BoxShape.circle,
-          ),
-          child: (noImage) ? Icon(
-            Icons.person,
-            color: Theme.of(context).primaryColor,
-          )
-          : ClipOval(
-            child: FittedBox(
-              fit: BoxFit.cover,
-                child: Image.memory(
-                thisContact.avatar,
-              ),
-            )
-          )
+    return ListTile(
+      onTap: (){
+        onSelect(context, thisContact);
+      },
+      leading: new Container(
+        width: 50,
+        height: 50,
+        decoration: new BoxDecoration(
+          color: thisColor,
+          shape: BoxShape.circle,
         ),
-        title: Text(
-          name,
-          maxLines: 1,
-        ),
-        subtitle: Text(number),
-        //trailing: Icon(Icons.keyboard_arrow_right),
+        child: (noImage) ? Icon(
+          Icons.person,
+          color: Theme.of(context).primaryColor,
+        )
+        : ClipOval(
+          child: FittedBox(
+            fit: BoxFit.cover,
+              child: Image.memory(
+              thisContact.avatar,
+            ),
+          )
+        )
       ),
+      title: Text(
+        name,
+      ),
+      subtitle: Text(number),
     );
   }
 }
+
+/*
+Container(
+        height: 64,
+        padding: EdgeInsets.all(16),
+        child: Row(
+          children: <Widget>[
+            new Container(
+              width: 48,
+              height: 48,
+              decoration: new BoxDecoration(
+                color: thisColor,
+                shape: BoxShape.circle,
+              ),
+              child: (noImage) ? Icon(
+                Icons.person,
+                color: Theme.of(context).primaryColor,
+              )
+              : ClipOval(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                    child: Image.memory(
+                    thisContact.avatar,
+                  ),
+                )
+              )
+            ),
+            Column(
+              children: <Widget>[
+                Text(
+                  name,
+                  maxLines: 1,
+                ),
+                Text(
+                  number,
+                  maxLines: 1,
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+*/
 
 //NOTE: we never scramble the first letter
 String scrambler(String original, double scrambleFactor, {bool onlyNumbers: false}){
