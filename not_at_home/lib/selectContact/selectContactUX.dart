@@ -109,25 +109,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
       child: Text("banner"),
     );
 
-    //the header slivers
-    List<Widget> headerSlivers = [
-      SliverToBoxAdapter(
-          child: banner,
-        ),
-        SliverAppBar(
-          pinned: true, //avoid strange padding
-          floating: true, //avoid strange padding
-          expandedHeight: 0, //avoid strange padding
-          bottom: PreferredSize(
-            preferredSize: Size(
-              MediaQuery.of(context).size.width,
-              toolBarHeight,
-            ),
-            child: toolBar,
-          ),
-        ),
-    ];
-
     //the body slivers
     List<Widget> bodySlivers = new List<Widget>();
 
@@ -183,17 +164,13 @@ class _SelectContactUXState extends State<SelectContactUX> {
       );
     } 
 
-    //all slivers
-    List<Widget> allSlivers = new List.from(headerSlivers)..addAll(bodySlivers);
-
     //TODO... idk if I even need this now
     double statusBarHeight = MediaQuery.of(context).padding.top;
 
     //build
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColorDark,
       body: Container(
-        color: Theme.of(context).primaryColor,
+        color: Theme.of(context).primaryColorDark,
         child: SafeArea(
           child: Stack(
             children: <Widget>[
@@ -264,30 +241,50 @@ class _SelectContactUXState extends State<SelectContactUX> {
                     child: orientationPrompt,
                   );
 
-                  //build
-                  return Stack(
-                    children: <Widget>[
-                      CustomScrollView(
-                        controller: autoScrollController,
-                        //HEADER
-                        //-banner
-                        //-toolbar
+                  //the header slivers
+                  List<Widget> headerSlivers = [
+                    Banner(
+                      padding: 16,
+                      prompt: orientationPrompt,
+                    ),
+                    ToolBar(
+                      toolBarHeight: toolBarHeight,
+                      orientationPrompt: orientationPrompt,
+                      backFromNewContact: widget.backFromNewContact,
+                      onSelect: widget.onSelect,
+                    ),
+                  ];
 
-                        //BODY
-                        //-IF no contacts OR retreiving contacts -> fill remaining
-                        //-ELSE -> list of widgets
-                        slivers: allSlivers,
-                      ),
-                      (contactsVisible) ? new ScrollBar(
-                        statusBarHeight: statusBarHeight,
-                        autoScrollController: autoScrollController,
-                        flexibleHeight: flexibleHeight, //(useDynamicTopPadding) ? flexibleHeight : new ValueNotifier(0), 
-                        expandedHeight: expandedHeight,
-                        sortedLetterCodes: widget.sortedLetterCodes,
-                        showThumbTack: showThumbTack,
-                        letterToListItems: widget.letterToListItems,
-                      ) : Container(),
-                    ],
+                  //all slivers
+                  List<Widget> allSlivers = new List.from(headerSlivers)..addAll(bodySlivers);
+
+                  //build
+                  return Container(
+                    color: Theme.of(context).primaryColor,
+                    child: Stack(
+                      children: <Widget>[
+                        CustomScrollView(
+                          controller: autoScrollController,
+                          //HEADER
+                          //-banner
+                          //-toolbar
+
+                          //BODY
+                          //-IF no contacts OR retreiving contacts -> fill remaining
+                          //-ELSE -> list of widgets
+                          slivers: allSlivers,
+                        ),
+                        (contactsVisible) ? new ScrollBar(
+                          statusBarHeight: statusBarHeight,
+                          autoScrollController: autoScrollController,
+                          flexibleHeight: flexibleHeight, //(useDynamicTopPadding) ? flexibleHeight : new ValueNotifier(0), 
+                          expandedHeight: expandedHeight,
+                          sortedLetterCodes: widget.sortedLetterCodes,
+                          showThumbTack: showThumbTack,
+                          letterToListItems: widget.letterToListItems,
+                        ) : Container(),
+                      ],
+                    ),
                   );
                 },
               ),
@@ -300,20 +297,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
         ),
       ),
     );
-
-    /*
-    CustomScrollView(
-      controller: autoScrollController,
-      //HEADER
-      //-banner
-      //-toolbar
-
-      //BODY
-      //-IF no contacts OR retreiving contacts -> fill remaining
-      //-ELSE -> list of widgets
-      slivers: allSlivers,
-    ),
-    */ 
   }
 }
 
@@ -343,20 +326,12 @@ class ToolBar extends StatelessWidget {
   const ToolBar({
     Key key,
     @required this.toolBarHeight,
-    @required this.expandedHeight,
-    @required this.flexibleHeight,
-    @required this.flexibleClosed,
-    @required this.extraPadding,
     @required this.orientationPrompt,
     @required this.backFromNewContact,
     @required this.onSelect,
   }) : super(key: key);
 
   final double toolBarHeight;
-  final double expandedHeight;
-  final ValueNotifier<double> flexibleHeight;
-  final ValueNotifier<bool> flexibleClosed;
-  final double extraPadding;
   final Widget orientationPrompt;
   final ValueNotifier<bool> backFromNewContact;
   final Function onSelect;
