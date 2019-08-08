@@ -21,7 +21,7 @@ await controller.scrollToIndex(verseID, preferPosition: AutoScrollPosition.begin
 controller.highlight(verseID);
 */
 
-class SelectContactUX extends StatelessWidget {
+class SelectContactUX extends StatefulWidget {
   SelectContactUX({
     this.retreivingContacts: false,
     @required this.contactCount,
@@ -42,55 +42,97 @@ class SelectContactUX extends StatelessWidget {
   final Function onSelect;
   final List<String> userPrompt;
 
-  //assume the flexible is open at the start
+  @override
+  _SelectContactUXState createState() => _SelectContactUXState();
+}
+
+class _SelectContactUXState extends State<SelectContactUX> {
   final ValueNotifier<bool> flexibleClosed = new ValueNotifier(true);
-  //TODO... use largest not smallest
+
   final ValueNotifier<double> flexibleHeight = new ValueNotifier(40); 
 
-  //starts off on top
   final ValueNotifier<bool> onTop = new ValueNotifier(true);
 
-  //determines whether or not to show the scrolling thumb tack
   final ValueNotifier<bool> showThumbTack = new ValueNotifier(false);
 
-  /*
-  //the scroll conroller
-  AutoScrollController autoScrollController;
-
-  //status bar height to be used throughout
-  double statusBarHeight;
-  double toolBarHeight;
-
-  //init
-  @override
-  void initState() {
-    //auto scroll controller
-    autoScrollController = new AutoScrollController();
-    autoScrollController.addListener((){
-      ScrollPosition position = autoScrollController.position;
-      //&& !position.outOfRange
-      if (autoScrollController.offset <= position.minScrollExtent) {
-        onTop.value = true;
-      }
-      else onTop.value = false;
-    });
-    toolBarHeight = 40;
-
-    //super
-    super.initState();
-  }
-
-  //dispose
-  @override
-  void dispose() {
-    autoScrollController.dispose();
-    super.dispose();
-  }
-  */
-
-  //build
   @override
   Widget build(BuildContext context) {
+    double toolBarSize = 50;
+
+    //the toolbar
+    Widget toolBar = Container(
+      width: MediaQuery.of(context).size.width,
+      height: toolBarSize,
+      color: Colors.blue,
+      child: Text("tool bar"),
+    );
+
+    //the banner
+    Widget banner = Container(
+      width: MediaQuery.of(context).size.width,
+      height: 300,
+      color: Colors.orange,
+      child: Text("banner"),
+    );
+
+    //the header slivers
+    List<Widget> headerSlivers = [
+      SliverToBoxAdapter(
+          child: banner,
+        ),
+        SliverAppBar(
+          pinned: true, //avoid strange padding
+          floating: true, //avoid strange padding
+          expandedHeight: 0, //avoid strange padding
+          bottom: PreferredSize(
+            preferredSize: Size(
+              MediaQuery.of(context).size.width,
+              toolBarSize,
+            ),
+            child: toolBar,
+          ),
+        ),
+    ];
+
+    //the body slivers
+    List<Widget> bodySlivers = new List<Widget>();
+
+    //Generate the Widget shown in the contacts scroll area
+    //Depending on whether or not there are contacts or they are being retreived
+    bool contactsVisible = true;
+    if(widget.retreivingContacts || widget.sliverSections.length == 0){
+      contactsVisible = false;
+      bodySlivers.add(
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Container(
+            alignment: Alignment.center,
+            padding: EdgeInsets.all(16),
+            child: Text(
+              (widget.retreivingContacts) ? "Retreiving Contacts" : "No Contacts Found",
+              style: TextStyle(
+                fontSize: 18,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    else bodySlivers = widget.sliverSections;
+
+    //all slivers
+    List<Widget> allSlivers = new List.from(headerSlivers)..addAll(bodySlivers);
+
+    //build
+    return Scaffold(
+      backgroundColor: Colors.green,
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: allSlivers,
+        ),
+      ),
+    );
+    /*
     print("retreiving: " + retreivingContacts.toString());
     print("len: " + sliverSections.length.toString());
     Widget body;
@@ -145,6 +187,7 @@ class SelectContactUX extends StatelessWidget {
     return Scaffold(
       body: body,
     );
+    */
 
     /*
     //Styling of the User Question Prompt

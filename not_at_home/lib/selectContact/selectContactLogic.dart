@@ -382,6 +382,13 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
                   borderRadius: BorderRadius.circular(25.0),
                 ),
                 child: Column(
+                  /*
+                  children: <Widget>[
+                    Text("1"),
+                    Text("2"),
+                    Text("3"),
+                  ],
+                  */
                   children: widgetsWithDividers,
                 ),
               ),
@@ -409,6 +416,31 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       sortedLetterCodes,
       letterToListItems,
     );
+
+    //---start test
+    Widget aSection = SliverStickyHeader(
+      header: Container(
+        color: Colors.pink,
+        width: MediaQuery.of(context).size.width,
+        height: 35,
+        child: Text("section"),
+      ),
+      sliver: new SliverList(
+        delegate: new SliverChildListDelegate([
+          Container(
+            color: Colors.yellow,
+            width: MediaQuery.of(context).size.width,
+            height: 500,
+          ),
+        ]),
+      ),
+    );
+
+    List<Widget> sections = new List<Widget>();
+    sections.add(aSection);
+    sections.add(aSection);
+    sections.add(aSection);
+    //---end test
 
     //pass the widgets
     return WillPopScope(
