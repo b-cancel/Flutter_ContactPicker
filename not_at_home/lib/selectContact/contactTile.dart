@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 
-bool scramblerOn = false;
+bool scramblerOn = true;
 
 class ContactListTile extends StatelessWidget {
   const ContactListTile({
@@ -25,7 +25,7 @@ class ContactListTile extends StatelessWidget {
     //process name
     String name = thisContact.givenName ?? "UnKnown";
     if(scramblerOn){
-      //name = scrambler(name, 3/4); //SCRAMBLE
+      name = scrambler(name, 3/4); //SCRAMBLE
     }
     
     //process the phone string
@@ -76,37 +76,36 @@ class ContactListTile extends StatelessWidget {
   }
 }
 
+//randomizer for below
+Random random = new Random();
+
 //NOTE: we never scramble the first letter
 String scrambler(String original, double scrambleFactor, {bool onlyNumbers: false}){
   //otherwise substring stuff will break things
   if(original.length > 2){
     //setup
-    var rnd = new Random();
     int len = original.length;
     int valuesToScramble = (len * scrambleFactor).toInt();
 
     //scramble
     while(valuesToScramble > 0){
       //never scramble the first value (For section purposes)
-      int indexToReplace = rnd.nextInt(len-2) + 1;
+      int indexToReplace = random.nextInt(len-2) + 1; //TODO... check 1->(len-1)
 
       //scramble that index
       int replacementLetter;
-      if(onlyNumbers){
-        //IF we didn't land a number then don't replace it
-        String maybeNumber = original[indexToReplace];
-        //check if we landed a number we can replace
-        if(isNumeric(maybeNumber)){ //we can replace it
-          replacementLetter = rnd.nextInt(10) + 48;
+      if(onlyNumbers){ //only replace lower case letters
+        if(isNumeric(original[indexToReplace])){ //TODO... check 48->57
+          replacementLetter = random.nextInt(9) + 48;
         }
         else{ //we can't it isnt a number
           replacementLetter = -1;
         }
       }
       else{ //only replace lower case letters
-        if(isLowerCase(original[indexToReplace])){
-          replacementLetter = rnd.nextInt(26) + 97;
-        }
+        if(isLowerCase(original[indexToReplace])){ //TODO... check 97->122
+          replacementLetter = random.nextInt(25) + 97;
+        } //we can't it isn't lower case
         else replacementLetter = -1;
       }
 
@@ -116,10 +115,13 @@ String scrambler(String original, double scrambleFactor, {bool onlyNumbers: fals
         String left = original.substring(0, indexToReplace); 
         String right = original.substring(indexToReplace+1, len); 
         original = left + newChar + right;
-
-        //keep scrambling maybe
-        valuesToScramble--;
       }
+
+      //keep scrambling maybe
+      //if we dont have this here 
+      //then if the string doesn't have what we are looking for 
+      //the function has the chance of never finishing
+      valuesToScramble--;
     }
 
     //return
@@ -129,10 +131,12 @@ String scrambler(String original, double scrambleFactor, {bool onlyNumbers: fals
 }
 
 bool isNumeric(String s) {
-  if(s == null) {
-    return false;
+  if(s == null || s.length == 0) return false;
+  else{
+    int code = s.codeUnitAt(0);
+    if(48 <= code && code <= 57) return true;
+    else return false;
   }
-  return double.parse(s, (e) => null) != null;
 }
 
 bool isLowerCase(String str){
