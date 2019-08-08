@@ -258,7 +258,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     else return false;    
   }
 
-  Map<int, List<Widget>> createMap_letterToWidgetList(){
+  Map<int, List<Widget>> createLetterToWidgetListMap(){
     Map<int, List<Widget>> letterToListItems = new Map<int,List<Widget>>();
     for(int i = 0; i < contacts.value.length; i++){
       //create the new list if we have to
@@ -268,14 +268,21 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       }
 
       //make contact list tile
-      Widget tile = ContactListTile(
+      Widget tile = Container(
+        width: MediaQuery.of(context).size.width,
+        height: 100,
+        color: (letterToListItems[letterCode].length % 2==0) ? Colors.purple : Colors.green,
+      );
+      
+      /*ContactListTile(
         thisContact: contacts.value[i],
         thisColor: colorsForContacts[i],
         onSelect: onSelect,
-      );
+      );*/
 
       //add contact delete UI if desired
       //current not functional
+      
       if(contactDeletionUI){ //TODO... parametrize this
         tile = Dismissible(
           key: keys[i],
@@ -321,7 +328,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     return letterToListItems;
   }
 
-  List<Widget> createList_SliverSections(
+  List<Widget> createSliverSectionsList(
     List<int> sortedLetterCodes,
     Map<int, List<Widget>> letterToListItems,
   ){
@@ -336,8 +343,8 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         //add divider above all items except first
         if(item > 0){
           widgetsWithDividers.add(
-            Padding(
-              //TODO... perhaps change these valus to no hard coded
+            Container(
+              width: MediaQuery.of(context).size.width,
               padding: EdgeInsets.only(left: 80, right: 24), 
               child: Container(
                 color: Theme.of(context).dividerColor,
@@ -382,13 +389,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
                   borderRadius: BorderRadius.circular(25.0),
                 ),
                 child: Column(
-                  /*
-                  children: <Widget>[
-                    Text("1"),
-                    Text("2"),
-                    Text("3"),
-                  ],
-                  */
                   children: widgetsWithDividers,
                 ),
               ),
@@ -404,7 +404,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   @override
   Widget build(BuildContext context) {
     //for each letter assemble a list of widget
-    Map<int, List<Widget>> letterToListItems = createMap_letterToWidgetList();
+    Map<int, List<Widget>> letterToListItems = createLetterToWidgetListMap();
 
     //sort keys
     List<int> sortedLetterCodes = letterToListItems.keys.toList();
@@ -412,35 +412,10 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
 
     //iterate through all letters
     //and compile the sections with their headers
-    List<Widget> sliverSections = createList_SliverSections(
+    List<Widget> sliverSections = createSliverSectionsList(
       sortedLetterCodes,
       letterToListItems,
     );
-
-    //---start test
-    Widget aSection = SliverStickyHeader(
-      header: Container(
-        color: Colors.pink,
-        width: MediaQuery.of(context).size.width,
-        height: 35,
-        child: Text("section"),
-      ),
-      sliver: new SliverList(
-        delegate: new SliverChildListDelegate([
-          Container(
-            color: Colors.yellow,
-            width: MediaQuery.of(context).size.width,
-            height: 500,
-          ),
-        ]),
-      ),
-    );
-
-    List<Widget> sections = new List<Widget>();
-    sections.add(aSection);
-    sections.add(aSection);
-    sections.add(aSection);
-    //---end test
 
     //pass the widgets
     return WillPopScope(

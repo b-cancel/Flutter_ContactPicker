@@ -97,6 +97,8 @@ class _SelectContactUXState extends State<SelectContactUX> {
     //the body slivers
     List<Widget> bodySlivers = new List<Widget>();
 
+    print("-------------------------" + widget.sliverSections.length.toString());
+
     //Generate the Widget shown in the contacts scroll area
     //Depending on whether or not there are contacts or they are being retreived
     bool contactsVisible = true;
