@@ -47,12 +47,10 @@ class SelectContactUX extends StatefulWidget {
 }
 
 class _SelectContactUXState extends State<SelectContactUX> {
-  final ValueNotifier<bool> flexibleClosed = new ValueNotifier(true);
+  final ValueNotifier<double> bannerHeight = new ValueNotifier(40); 
 
-  final ValueNotifier<double> flexibleHeight = new ValueNotifier(40); 
-
+  //show hid stuff on conditions
   final ValueNotifier<bool> onTop = new ValueNotifier(true);
-
   final ValueNotifier<bool> showThumbTack = new ValueNotifier(false);
 
   //the scroll conroller
@@ -178,13 +176,13 @@ class _SelectContactUXState extends State<SelectContactUX> {
                 builder: (context, orientation){
                   //variables prepped
                   bool isPortrait = (orientation == Orientation.portrait);
-                  double expandedHeight = MediaQuery.of(context).size.height;
+                  double expandedBannerHeight = MediaQuery.of(context).size.height;
 
                   //is portrait can have more of the screen taken up
-                  expandedHeight /= (isPortrait) ? 3 : 5;
+                  expandedBannerHeight /= (isPortrait) ? 3 : 5;
 
                   //make sure that even in landscape we have min height
-                  expandedHeight = (expandedHeight < (16 + 24)) ? 40 : expandedHeight;
+                  expandedBannerHeight = (expandedBannerHeight < (16 + 24)) ? 40 : expandedBannerHeight;
 
                   //determine how much extra padding we need
                   double extraPadding = (isPortrait) ? 16 : 8;
@@ -275,13 +273,16 @@ class _SelectContactUXState extends State<SelectContactUX> {
                           slivers: allSlivers,
                         ),
                         (contactsVisible) ? new ScrollBar(
-                          statusBarHeight: statusBarHeight,
                           autoScrollController: autoScrollController,
-                          flexibleHeight: flexibleHeight, //(useDynamicTopPadding) ? flexibleHeight : new ValueNotifier(0), 
-                          expandedHeight: expandedHeight,
+                          //heights
+                          statusBarHeight: statusBarHeight,
+                          bannerHeight: bannerHeight,
+                          expandedBannerHeight: expandedBannerHeight,
+                          //show widgets
                           sortedLetterCodes: widget.sortedLetterCodes,
-                          showThumbTack: showThumbTack,
                           letterToListItems: widget.letterToListItems,
+                          //show/hide thumb tack
+                          showThumbTack: showThumbTack,
                         ) : Container(),
                       ],
                     ),

@@ -16,8 +16,8 @@ class ScrollBar extends StatelessWidget {
     Key key,
     @required this.statusBarHeight,
     @required this.autoScrollController,
-    @required this.flexibleHeight,
-    @required this.expandedHeight,
+    @required this.bannerHeight,
+    @required this.expandedBannerHeight,
     @required this.sortedLetterCodes,
     @required this.showThumbTack,
     @required this.letterToListItems,
@@ -25,8 +25,8 @@ class ScrollBar extends StatelessWidget {
 
   final double statusBarHeight;
   final AutoScrollController autoScrollController;
-  final ValueNotifier<double> flexibleHeight;
-  final double expandedHeight;
+  final ValueNotifier<double> bannerHeight;
+  final double expandedBannerHeight;
   final List<int> sortedLetterCodes;
   final ValueNotifier<bool> showThumbTack;
   final Map<int, List<Widget>> letterToListItems;
@@ -34,7 +34,7 @@ class ScrollBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: flexibleHeight,
+      animation: bannerHeight,
       builder: (BuildContext context, Widget child) {
         print("flexible height changed");
 
@@ -51,7 +51,7 @@ class ScrollBar extends StatelessWidget {
         double totalHeight = MediaQuery.of(context).size.height;
         //TODO... maybe instead have the largest flexible height
         //portrait mode and landscape mode should have seperate largest flexible heights
-        double appBarHeight = (useDynamicTopPadding) ? flexibleHeight.value : expandedHeight;  
+        double appBarHeight = (useDynamicTopPadding) ? bannerHeight.value : expandedBannerHeight;  
         double stickyHeaderVertical = 40;
         double extraPaddingTop = 0; //32;
         double extraPaddingBottom = 0; //16;
@@ -100,7 +100,7 @@ class ScrollBar extends StatelessWidget {
         //JUST KIDDING if we snap the sliver into place we CAN GUARANTEE this
         for(int i = 0; i < sortedLetterCodes.length; i++){
           double thisItemsOffset = calculateOffset(
-            flexibleHeight.value, //820.5714285714286, 
+            bannerHeight.value, //820.5714285714286, 
             //for header in index 3... there are 3 headers above.. [0,1,2]
             //then also include yourself
             i + 1, //closedHeaders
