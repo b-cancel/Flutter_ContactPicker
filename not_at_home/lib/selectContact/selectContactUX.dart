@@ -55,14 +55,48 @@ class _SelectContactUXState extends State<SelectContactUX> {
 
   final ValueNotifier<bool> showThumbTack = new ValueNotifier(false);
 
+  //the scroll conroller
+  AutoScrollController autoScrollController;
+
+  //status bar height to be used throughout
+  double statusBarHeight;
+  double toolBarHeight;
+
+  //init
+  @override
+  void initState() {
+    //auto scroll controller
+    autoScrollController = new AutoScrollController();
+    autoScrollController.addListener((){
+      ScrollPosition position = autoScrollController.position;
+      //&& !position.outOfRange
+      if (autoScrollController.offset <= position.minScrollExtent) {
+        onTop.value = true;
+      }
+      else onTop.value = false;
+    });
+    toolBarHeight = 40;
+    //super
+    super.initState();
+  }
+  //dispose
+  @override
+  void dispose() {
+    autoScrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    double toolBarSize = 50;
+    //Styling of the User Question Prompt
+    TextStyle questionStyle = TextStyle(
+      fontWeight: FontWeight.bold,
+    );
 
     //the toolbar
     Widget toolBar = Container(
       width: MediaQuery.of(context).size.width,
-      height: toolBarSize,
+      height: toolBarHeight,
       color: Colors.blue,
       child: Text("tool bar"),
     );
@@ -87,7 +121,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
           bottom: PreferredSize(
             preferredSize: Size(
               MediaQuery.of(context).size.width,
-              toolBarSize,
+              toolBarHeight,
             ),
             child: toolBar,
           ),
@@ -97,16 +131,16 @@ class _SelectContactUXState extends State<SelectContactUX> {
     //the body slivers
     List<Widget> bodySlivers = new List<Widget>();
 
-    print("-------------------------" + widget.sliverSections.length.toString());
-
     //Generate the Widget shown in the contacts scroll area
     //Depending on whether or not there are contacts or they are being retreived
     bool contactsVisible = true;
     if(widget.retreivingContacts || widget.sliverSections.length == 0){
       contactsVisible = false;
+
+      //add sliver to fill screen
       bodySlivers.add(
         SliverFillRemaining(
-          hasScrollBody: false,
+          hasScrollBody: false, //makes it the proper size
           child: Container(
             alignment: Alignment.center,
             padding: EdgeInsets.all(16),
@@ -120,123 +154,12 @@ class _SelectContactUXState extends State<SelectContactUX> {
         ),
       );
     }
-    else bodySlivers = widget.sliverSections;
-
-    //all slivers
-    List<Widget> allSlivers = new List.from(headerSlivers)..addAll(bodySlivers);
-
-    //build
-    return Scaffold(
-      backgroundColor: Colors.green,
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: allSlivers,
-        ),
-      ),
-    );
-    /*
-    print("retreiving: " + retreivingContacts.toString());
-    print("len: " + sliverSections.length.toString());
-    Widget body;
-    if(retreivingContacts || sliverSections.length == 0){
-      print("-------------------NOTHING");
-
-      body = Container(
-        color: Colors.red,
-        width: MediaQuery.of(context).size.width,
-        height: 250,
-        child: Text("NOTHING"),
-      );
-    }
     else{
-      print("---------------------SOMETHING");
+      //add all sections to body
+      bodySlivers = widget.sliverSections;
 
-      body = Container(
-        color: Colors.green,
-        width: MediaQuery.of(context).size.width,
-        child: CustomScrollView(
-          //controller: autoScrollController,
-          //IF no contacts OR retreiving contacts -> fill remaining
-          //ELSE -> list of widgets
-          slivers: sliverSections,
-          /*[
-            sliverSections.expand(),
-            /*
-            SliverToBoxAdapter(
-              child: Container(
-                color: Colors.pink,
-                width: MediaQuery.of(context).size.width,
-                height: 200,
-              ),
-            )
-            */
-          ],
-          */
-        ),
-        /*
-        child: SafeArea(
-          child: CustomScrollView(
-            //controller: autoScrollController,
-            //IF no contacts OR retreiving contacts -> fill remaining
-            //ELSE -> list of widgets
-            slivers: sliverWidgets,
-          ),
-        ),
-        */
-      );
-    }
-
-    return Scaffold(
-      body: body,
-    );
-    */
-
-    /*
-    //Styling of the User Question Prompt
-    TextStyle questionStyle = TextStyle(
-      fontWeight: FontWeight.bold,
-    );
-
-    int len = sliverWidgets.length;
-    //sliverWidgets.clear();
-    print("sections: " + len.toString());
-
-    //Generate the Widget shown in the contacts scroll area
-    //Depending on whether or not there are contacts or they are being retreived
-    bool contactsVisible = true;
-    if(retreivingContacts || len == 0){
-      contactsVisible = false;
-    }
-    */
-    /*
-    if(retreivingContacts || sliverWidgets.length == 0){
-      contactsVisible = false;
-      sliverWidgets.add(
-        SliverFillRemaining(
-          child: InkWell(
-            onTap: (){
-              
-            },
-            child: Container(
-              alignment: Alignment.center,
-              padding: EdgeInsets.all(16),
-              child: Text(
-                (retreivingContacts) ? "Retreiving Contacts" : "No Contacts Found",
-                style: TextStyle(
-                  fontSize: 18,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    else{
-      //spacer on bottom of list
-      //NOTE: be after the above
-      int nextIndex = sliverWidgets.length;
-      /*
-      widget.sliverWidgets.add(
+      //add the bottom sliver that gives you section information
+      bodySlivers.add(
         SliverToBoxAdapter(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -258,147 +181,102 @@ class _SelectContactUXState extends State<SelectContactUX> {
           ),
         ),
       );
-      */
-    }   
-    */
+    } 
 
-    /*
-    print("showing contacts: " + contactsVisible.toString());             
+    //all slivers
+    List<Widget> allSlivers = new List.from(headerSlivers)..addAll(bodySlivers);
 
-    //status bar height grabber (MUST NOT BE IN) init
+    //TODO... idk if I even need this now
     double statusBarHeight = MediaQuery.of(context).padding.top;
 
-    if(contactsVisible == false){
-      sliverWidgets.clear();
-
-      sliverWidgets.add(
-        SliverFillRemaining(
-          child: Container(
-            alignment: Alignment.center,
-            padding: EdgeInsets.all(16),
-            child: Text(
-              (contactsVisible) ? len.toString() : "",
-              style: TextStyle(
-                fontSize: 18,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    */
-
-    //build widgets
-    /*return Scaffold(
+    //build
+    return Scaffold(
       backgroundColor: Theme.of(context).primaryColorDark,
-      body: SafeArea(
-        child: CustomScrollView(
-          //controller: autoScrollController,
-          //IF no contacts OR retreiving contacts -> fill remaining
-          //ELSE -> list of widgets
-          slivers: sliverWidgets,
-        ),
-        
-        /*Stack(
-          children: <Widget>[
-            OrientationBuilder(
-              builder: (context, orientation){
-                //variables prepped
-                bool isPortrait = (orientation == Orientation.portrait);
-                double expandedHeight = MediaQuery.of(context).size.height;
-                print("expandedHeight: " + expandedHeight.toString());
+      body: Container(
+        color: Theme.of(context).primaryColor,
+        child: SafeArea(
+          child: Stack(
+            children: <Widget>[
+              OrientationBuilder(
+                builder: (context, orientation){
+                  //variables prepped
+                  bool isPortrait = (orientation == Orientation.portrait);
+                  double expandedHeight = MediaQuery.of(context).size.height;
 
-                //is portrait can have more of the screen taken up
-                expandedHeight /= (isPortrait) ? 3 : 5;
+                  //is portrait can have more of the screen taken up
+                  expandedHeight /= (isPortrait) ? 3 : 5;
 
-                //make sure that even in landscape we have min height
-                expandedHeight = (expandedHeight < (16 + 24)) ? 40 : expandedHeight;
+                  //make sure that even in landscape we have min height
+                  expandedHeight = (expandedHeight < (16 + 24)) ? 40 : expandedHeight;
 
-                //determine how much extra padding we need
-                double extraPadding = (isPortrait) ? 16 : 8;
+                  //determine how much extra padding we need
+                  double extraPadding = (isPortrait) ? 16 : 8;
 
-                //generate the prompt
-                Widget orientationPrompt;
+                  //generate the prompt
+                  Widget orientationPrompt;
 
-                if(isPortrait){
-                  //generate the multi lined string
-                  List<TextSpan> textSpans = new List<TextSpan>();
-                  for(int i = 0; i < widget.userPrompt.length; i++){
-                    //add a spacer before each textspan that is not the first
-                    if(i != 0){
+                  if(isPortrait){
+                    //generate the multi lined string
+                    List<TextSpan> textSpans = new List<TextSpan>();
+                    for(int i = 0; i < widget.userPrompt.length; i++){
+                      //add a spacer before each textspan that is not the first
+                      if(i != 0){
+                        textSpans.add(
+                          TextSpan(text: "\n"),
+                        );
+                      }
+
+                      //add the actual textSpan
                       textSpans.add(
-                        TextSpan(text: "\n"),
+                        TextSpan(
+                          text: widget.userPrompt[i],
+                          style: questionStyle,
+                        ),
                       );
-                    }
+                    } 
 
-                    //add the actual textSpan
-                    textSpans.add(
-                      TextSpan(
-                        text: widget.userPrompt[i],
-                        style: questionStyle,
+                    //create the widget
+                    orientationPrompt = RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        children: textSpans,
                       ),
                     );
-                  } 
+                  }
+                  else{
+                    //generate the single lined string
+                    String generateString = "";
+                    for(int i = 0; i < widget.userPrompt.length; i++){
+                      if(i == 0) generateString += widget.userPrompt[i];
+                      else generateString += (" " + widget.userPrompt[i]);
+                    }
 
-                  //create the widget
-                  orientationPrompt = RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      children: textSpans,
-                    ),
-                  );
-                }
-                else{
-                  //generate the single lined string
-                  String generateString = "";
-                  for(int i = 0; i < widget.userPrompt.length; i++){
-                    if(i == 0) generateString += widget.userPrompt[i];
-                    else generateString += (" " + widget.userPrompt[i]);
+                    //create the widget
+                    orientationPrompt = Text(
+                      generateString,
+                      style: questionStyle,
+                    );
                   }
 
-                  //create the widget
-                  orientationPrompt = Text(
-                    generateString,
-                    style: questionStyle,
+                  //add the fitted box to the widget
+                  orientationPrompt = FittedBox(
+                    fit: BoxFit.contain,
+                    child: orientationPrompt,
                   );
-                }
 
-                //add the fitted box to the widget
-                orientationPrompt = FittedBox(
-                  fit: BoxFit.contain,
-                  child: orientationPrompt,
-                );
-
-                /*
-                List<Widget> finalSliverWidgets = new List<Widget>();
-                finalSliverWidgets = new List.from([
-                  Banner(
-                    padding: extraPadding,
-                    prompt: orientationPrompt,
-                  ),
-                  TopAppBar(
-                    toolBarHeight: toolBarHeight,
-                    expandedHeight: expandedHeight, 
-                    flexibleHeight: flexibleHeight,
-                    flexibleClosed: flexibleClosed, 
-                    extraPadding: extraPadding, 
-                    orientationPrompt: orientationPrompt, 
-                    backFromNewContact: widget.backFromNewContact,
-                    onSelect: widget.onSelect,
-                  ),
-                ])..addAll(widget.sliverWidgets);
-                */
-
-                //build
-                return Container(
-                  color: Theme.of(context).primaryColor,
-                  child: Stack(
+                  //build
+                  return Stack(
                     children: <Widget>[
                       CustomScrollView(
                         controller: autoScrollController,
-                        //IF no contacts OR retreiving contacts -> fill remaining
-                        //ELSE -> list of widgets
-                        slivers: widget.sliverWidgets,
+                        //HEADER
+                        //-banner
+                        //-toolbar
+
+                        //BODY
+                        //-IF no contacts OR retreiving contacts -> fill remaining
+                        //-ELSE -> list of widgets
+                        slivers: allSlivers,
                       ),
                       (contactsVisible) ? new ScrollBar(
                         statusBarHeight: statusBarHeight,
@@ -410,20 +288,32 @@ class _SelectContactUXState extends State<SelectContactUX> {
                         letterToListItems: widget.letterToListItems,
                       ) : Container(),
                     ],
-                  ),
-                );
-              },
-            ),
-            ScrollToTopButton(
+                  );
+                },
+              ),
+              ScrollToTopButton(
                 onTop: onTop, 
                 autoScrollController: autoScrollController,
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
-        */
       ),
     );
-    */
+
+    /*
+    CustomScrollView(
+      controller: autoScrollController,
+      //HEADER
+      //-banner
+      //-toolbar
+
+      //BODY
+      //-IF no contacts OR retreiving contacts -> fill remaining
+      //-ELSE -> list of widgets
+      slivers: allSlivers,
+    ),
+    */ 
   }
 }
 
