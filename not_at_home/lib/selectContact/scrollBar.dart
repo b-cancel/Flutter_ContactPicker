@@ -6,7 +6,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 //the scroll has issues with this but 
 //1. it looks nice in screen caps
 //2. AND it shows off the alpha overlay feature I made
-bool useDynamicTopPadding = false;
+bool useDynamicTopPadding = true;
 
 //only use to debug
 bool scrollBarColors = false;
@@ -33,11 +33,11 @@ class ScrollBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("NEW SCROLL BAR");
+
     return AnimatedBuilder(
       animation: bannerHeight,
       builder: (BuildContext context, Widget child) {
-        print("flexible height changed");
-
         //a couple of manually set vars
         double itemHeight = 16;
         double spacingVertical = 2;
@@ -52,15 +52,15 @@ class ScrollBar extends StatelessWidget {
         //TODO... maybe instead have the largest flexible height
         //portrait mode and landscape mode should have seperate largest flexible heights
         double appBarHeight = (useDynamicTopPadding) ? bannerHeight.value : expandedBannerHeight;  
-        double stickyHeaderVertical = 40;
-        double extraPaddingTop = 0; //32;
-        double extraPaddingBottom = 0; //16;
+        double paddingVertical = 16;
+        double extraPaddingTop = 40 * 2.0; //TODO... size of toolbar AND sticky header
+        double extraPaddingBottom = 0; 
 
         //calculate scroll bar height
         //INCLUDES extra padding to make gesture detector stuff easy
         //SHOULD INCLUDE the area that turns white that has a child of stack
         double scrollBarAreaHeight = totalHeight - appBarHeight; //minus black
-        scrollBarAreaHeight -= (stickyHeaderVertical * 2); //minus 2 grey
+        scrollBarAreaHeight -= (paddingVertical * 2); //minus 2 grey
         scrollBarAreaHeight -= extraPaddingTop;
         scrollBarAreaHeight -= extraPaddingBottom;
         //NOT -> minus 2 white
@@ -132,7 +132,7 @@ class ScrollBar extends StatelessWidget {
           top: 0,
           bottom: 0,
           child: Container(
-            height: totalHeight -32,
+            height: totalHeight,
             color: scrollBarColors ? Colors.red : Colors.transparent,
             padding: EdgeInsets.only(
               //avoids flexible app bar height
@@ -140,15 +140,14 @@ class ScrollBar extends StatelessWidget {
             ),
             child: Container(
               color: scrollBarColors ? Colors.grey : Colors.transparent,
-              padding: EdgeInsets.symmetric(
-                //avoids sticky header bar
-                vertical: stickyHeaderVertical,
+              padding: EdgeInsets.only(
+                top: extraPaddingTop,
+                bottom: extraPaddingBottom,
               ),
               child: Container(
                 color: scrollBarColors ? Colors.black : Colors.transparent,
-                padding: EdgeInsets.only(
-                  top: extraPaddingTop,
-                  bottom: extraPaddingBottom,
+                padding: EdgeInsets.symmetric(
+                  vertical: paddingVertical,
                 ),
                 child: Container(
                   color: scrollBarColors ? Colors.white : Colors.transparent,
@@ -164,7 +163,7 @@ class ScrollBar extends StatelessWidget {
                           child: Container(
                             height: scrollBarVisualHeight,
                             decoration: new BoxDecoration(
-                              color: Theme.of(context).primaryColor.withOpacity(0.5),
+                              color: Theme.of(context).primaryColorDark.withOpacity(0.5),
                               borderRadius: new BorderRadius.all(
                                 Radius.circular(25.0),
                               ),

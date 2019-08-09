@@ -8,8 +8,6 @@ import 'package:not_at_home/newContact.dart';
 
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-import 'package:flutter_sticky_header/flutter_sticky_header.dart';
-
 //add search bar
 //https://blog.usejournal.com/flutter-search-in-listview-1ffa40956685
 
@@ -47,7 +45,8 @@ class SelectContactUX extends StatefulWidget {
 }
 
 class _SelectContactUXState extends State<SelectContactUX> {
-  final ValueNotifier<double> bannerHeight = new ValueNotifier(40); 
+  double expandedBannerHeight = 0;
+  final ValueNotifier<double> bannerHeight = new ValueNotifier(0); 
 
   //show hid stuff on conditions
   final ValueNotifier<bool> onTop = new ValueNotifier(true);
@@ -56,9 +55,8 @@ class _SelectContactUXState extends State<SelectContactUX> {
   //the scroll conroller
   AutoScrollController autoScrollController;
 
-  //status bar height to be used throughout
-  double statusBarHeight;
-  double toolBarHeight;
+  //NOTE: this is the absolute max height of this bar, else overflow occurs
+  double toolBarHeight = 40;
 
   //init
   @override
@@ -67,16 +65,32 @@ class _SelectContactUXState extends State<SelectContactUX> {
     autoScrollController = new AutoScrollController();
     autoScrollController.addListener((){
       ScrollPosition position = autoScrollController.position;
-      //&& !position.outOfRange
-      if (autoScrollController.offset <= position.minScrollExtent) {
+      double currentOffset = autoScrollController.offset;
+
+      //Determine whether we are on the top of the scroll area
+      if (currentOffset <= position.minScrollExtent) {
         onTop.value = true;
       }
       else onTop.value = false;
+
+      //Determine whether to update the bannerHeight
+      updateBanner();
     });
-    toolBarHeight = 40;
+
     //super
     super.initState();
   }
+
+  updateBanner(){
+    bool attached = autoScrollController.hasClients;
+    double currentOffset = attached ? autoScrollController.offset : 0;
+    if(currentOffset <= expandedBannerHeight){
+      double visiblePortionOfBanner = currentOffset - expandedBannerHeight;
+      bannerHeight.value = visiblePortionOfBanner.abs();
+    }
+    else bannerHeight.value = 0;
+  }
+
   //dispose
   @override
   void dispose() {
@@ -89,22 +103,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
     //Styling of the User Question Prompt
     TextStyle questionStyle = TextStyle(
       fontWeight: FontWeight.bold,
-    );
-
-    //the toolbar
-    Widget toolBar = Container(
-      width: MediaQuery.of(context).size.width,
-      height: toolBarHeight,
-      color: Colors.blue,
-      child: Text("tool bar"),
-    );
-
-    //the banner
-    Widget banner = Container(
-      width: MediaQuery.of(context).size.width,
-      height: 300,
-      color: Colors.orange,
-      child: Text("banner"),
     );
 
     //the body slivers
@@ -162,9 +160,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
       );
     } 
 
-    //TODO... idk if I even need this now
-    double statusBarHeight = MediaQuery.of(context).padding.top;
-
     //build
     return Scaffold(
       body: Container(
@@ -174,9 +169,12 @@ class _SelectContactUXState extends State<SelectContactUX> {
             children: <Widget>[
               OrientationBuilder(
                 builder: (context, orientation){
+                  //updateBanner();
+                  print("oreientation CHAGNEs");
+
                   //variables prepped
                   bool isPortrait = (orientation == Orientation.portrait);
-                  double expandedBannerHeight = MediaQuery.of(context).size.height;
+                  expandedBannerHeight = MediaQuery.of(context).size.height;
 
                   //is portrait can have more of the screen taken up
                   expandedBannerHeight /= (isPortrait) ? 3 : 5;
@@ -184,8 +182,8 @@ class _SelectContactUXState extends State<SelectContactUX> {
                   //make sure that even in landscape we have min height
                   expandedBannerHeight = (expandedBannerHeight < (16 + 24)) ? 40 : expandedBannerHeight;
 
-                  //determine how much extra padding we need
-                  double extraPadding = (isPortrait) ? 16 : 8;
+                  //update banner with expanded banner height
+                  updateBanner();
 
                   //generate the prompt
                   Widget orientationPrompt;
@@ -242,6 +240,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                   //the header slivers
                   List<Widget> headerSlivers = [
                     Banner(
+                      height: expandedBannerHeight,
                       padding: 16,
                       prompt: orientationPrompt,
                     ),
@@ -253,8 +252,15 @@ class _SelectContactUXState extends State<SelectContactUX> {
                     ),
                   ];
 
+                  //changes with orientation
+                  double statusBarHeight = MediaQuery.of(context).padding.top;
+
                   //all slivers
                   List<Widget> allSlivers = new List.from(headerSlivers)..addAll(bodySlivers);
+
+                  //TODO... debug this thinga magig
+                  print("banner height: " + bannerHeight.value.toString());
+                  print("expaned banner height: " + expandedBannerHeight.toString());
 
                   //build
                   return Container(
@@ -303,10 +309,12 @@ class _SelectContactUXState extends State<SelectContactUX> {
 
 class Banner extends StatelessWidget {
   Banner({
+    @required this.height,
     @required this.padding,
     @required this.prompt,
   });
 
+  final double height;
   final double padding;
   final Widget prompt;
 
@@ -315,6 +323,7 @@ class Banner extends StatelessWidget {
     return SliverToBoxAdapter(
       child: Container(
         color: Theme.of(context).primaryColorDark,
+        height: height,
         width: MediaQuery.of(context).size.width,
         padding: EdgeInsets.all(padding),
         child: prompt,
@@ -432,7 +441,7 @@ class ScrollToTopButton extends StatelessWidget {
         child: AnimatedBuilder(
           animation: onTop,
           child: FloatingActionButton(
-            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.5),
+            backgroundColor: Theme.of(context).primaryColorDark.withOpacity(0.5),
             onPressed: (){
               vibrate();
               //scrollToIndex -> too slow to find index
