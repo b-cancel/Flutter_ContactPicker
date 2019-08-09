@@ -127,87 +127,72 @@ class ScrollBar extends StatelessWidget {
           itemCountSoFar += ourItemCount;
           spacerCountSoFar += (ourItemCount - 1);
         }
+        
+        //calc padding
+        EdgeInsets scrollBarPadding = EdgeInsets.only(
+          top: appBarHeight + paddingVertical + extraPaddingTop,
+          bottom: paddingVertical + extraPaddingBottom,
+        );
 
         //build
         return Positioned(
           right: 0,
           top: 0,
           bottom: 0,
-          child: Container(
-            height: totalHeight,
-            color: scrollBarColors ? Colors.red : Colors.transparent,
-            padding: EdgeInsets.only(
-              //avoids flexible app bar height
-              top: appBarHeight,
-            ),
+          child:  Padding(
+            padding: scrollBarPadding,
             child: Container(
-              color: scrollBarColors ? Colors.grey : Colors.transparent,
-              padding: EdgeInsets.only(
-                top: extraPaddingTop,
-                bottom: extraPaddingBottom,
-              ),
-              child: Container(
-                color: scrollBarColors ? Colors.black : Colors.transparent,
-                padding: EdgeInsets.symmetric(
-                  vertical: paddingVertical,
-                ),
-                child: Container(
-                  color: scrollBarColors ? Colors.white : Colors.transparent,
-                  height: scrollBarAreaHeight,
-                  width: 24 + (paddingAll * 2),
-                  //-------------------------CUSTOM START-------------------------
-                  child: Stack(
-                    children: <Widget>[
-                      //-----Scroll Bar Base
-                      Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: paddingAll),
-                          child: Container(
-                            height: scrollBarVisualHeight,
-                            decoration: new BoxDecoration(
-                              color: Theme.of(context).primaryColorDark.withOpacity(0.5),
-                              borderRadius: new BorderRadius.all(
-                                Radius.circular(25.0),
-                              ),
-                            ),
-                            child: Container(),
+              height: scrollBarAreaHeight,
+              width: 24 + (paddingAll * 2),
+              child: Stack(
+                children: <Widget>[
+                  //-----Scroll Bar Base
+                  Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: paddingAll),
+                      child: Container(
+                        height: scrollBarVisualHeight,
+                        decoration: new BoxDecoration(
+                          color: Theme.of(context).primaryColorDark.withOpacity(0.5),
+                          borderRadius: new BorderRadius.all(
+                            Radius.circular(25.0),
                           ),
                         ),
+                        child: Container(),
                       ),
-                      //-----Scroll Bar Function
-                      DraggableScrollBar(
-                        thumbColor: Theme.of(context).accentColor.withOpacity(0.25),
-                        visualScrollBarHeight: scrollBarVisualHeight,
-                        programaticScrollBarHeight: scrollBarAreaHeight,
-                        alphaOverlayHeight: alphaOverlayHeight,
-                        scrollThumbHeight: 4 * itemHeight,
-                        autoScrollController: autoScrollController,
-                        paddingAll: paddingAll,
-                        positions: offsets,
-                        sortedKeys: sortedLetterCodes,
-                      ),
-                      //-----Letters Overlay
-                      IgnorePointer(
-                        child: Center(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: paddingAll),
-                            child: Container(
-                                height: alphaOverlayHeight,
-                                color: scrollBarColors ? Colors.red.withOpacity(0.25) : Colors.transparent,
-                                child: AlphaScrollBarOverlay(
-                                  scrollBarHeight: alphaOverlayHeight,
-                                  itemHeight: itemHeight,
-                                  spacingVertical: spacingVertical,
-                                  items: sortedLetterCodes,
-                                ),
-                              ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                  //-------------------------CUSTOM END-------------------------
-                ),
+                  //-----Scroll Bar Function
+                  DraggableScrollBar(
+                    thumbColor: Theme.of(context).accentColor.withOpacity(0.25),
+                    visualScrollBarHeight: scrollBarVisualHeight,
+                    programaticScrollBarHeight: scrollBarAreaHeight,
+                    alphaOverlayHeight: alphaOverlayHeight,
+                    scrollThumbHeight: 4 * itemHeight,
+                    autoScrollController: autoScrollController,
+                    paddingAll: paddingAll,
+                    positions: offsets,
+                    sortedKeys: sortedLetterCodes,
+                  ),
+                  //-----Letters Overlay
+                  IgnorePointer(
+                    child: Center(
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: paddingAll),
+                        child: Container(
+                            height: alphaOverlayHeight,
+                            color: scrollBarColors ? Colors.red.withOpacity(0.25) : Colors.transparent,
+                            child: AlphaScrollBarOverlay(
+                              scrollBarHeight: alphaOverlayHeight,
+                              itemHeight: itemHeight,
+                              spacingVertical: spacingVertical,
+                              items: sortedLetterCodes,
+                            ),
+                          ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -219,18 +204,4 @@ class ScrollBar extends StatelessWidget {
 
 double noNegative(double number){
   return (number < 0) ? 0 : number;
-}
-
-double calculateOffset(
-  double expandedHeight, 
-  int headerCount, 
-  int itemsAbove, 
-  int spacersAbove,
-){
-  //assume that each header after overflow on top
-  //grow to their max size of 80
-  double headers = 40.0 * headerCount;
-  double items = 70.0 * itemsAbove;
-  double spacers = 2.0 * spacersAbove;
-  return expandedHeight + headers + items + spacers;
 }

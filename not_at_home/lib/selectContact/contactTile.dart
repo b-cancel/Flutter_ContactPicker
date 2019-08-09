@@ -72,8 +72,14 @@ class ContactListTile extends StatelessWidget {
         ),
         title: Text(
           name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
-        subtitle: Text(number),
+        subtitle: Text(
+          number,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
     );
   }

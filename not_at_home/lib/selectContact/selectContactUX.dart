@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:not_at_home/searchContact.dart';
 import 'package:not_at_home/selectContact/scrollBar.dart';
 import 'package:not_at_home/vibrate.dart';
 import 'package:page_transition/page_transition.dart';
@@ -7,6 +8,8 @@ import 'package:vector_math/vector_math_64.dart' as VECT;
 import 'package:not_at_home/newContact.dart';
 
 import 'package:scroll_to_index/scroll_to_index.dart';
+
+import 'dart:math' as math;
 
 //add search bar
 //https://blog.usejournal.com/flutter-search-in-listview-1ffa40956685
@@ -244,7 +247,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                     ToolBar(
                       toolBarHeight: toolBarHeight,
                       orientationPrompt: orientationPrompt,
-                      backFromNewContact: widget.backFromNewContact,
+                      backFromNewOrSearchContact: widget.backFromNewContact,
                       onSelect: widget.onSelect,
                     ),
                   ];
@@ -334,13 +337,13 @@ class ToolBar extends StatelessWidget {
     Key key,
     @required this.toolBarHeight,
     @required this.orientationPrompt,
-    @required this.backFromNewContact,
+    @required this.backFromNewOrSearchContact,
     @required this.onSelect,
   }) : super(key: key);
 
   final double toolBarHeight;
   final Widget orientationPrompt;
-  final ValueNotifier<bool> backFromNewContact;
+  final ValueNotifier<bool> backFromNewOrSearchContact;
   final Function onSelect;
 
   @override
@@ -378,7 +381,7 @@ class ToolBar extends StatelessWidget {
                     children: <Widget>[
                       InkWell(
                         onTap: (){
-                          backFromNewContact.value = true;
+                          backFromNewOrSearchContact.value = true;
                           Navigator.push(
                             context, PageTransition(
                               type: PageTransitionType.rightToLeft,
@@ -391,17 +394,57 @@ class ToolBar extends StatelessWidget {
                         child: Container(
                           height: toolBarHeight,
                           width: 16.0 + 24 + 16,
-                          child: Icon(Icons.add),
+                          child: 
+                          Hero(
+                            flightShuttleBuilder: (
+                              BuildContext flightContext,
+                              Animation<double> animation,
+                              HeroFlightDirection flightDirection,
+                              BuildContext fromHeroContext,
+                              BuildContext toHeroContext,
+                            ) {
+                              Hero theHero;
+
+                              Animation<double> newAnimation = 
+                              Tween<double>(begin: 0, end: (1/8)).animate(animation);
+
+                              if (flightDirection == HeroFlightDirection.pop) {
+                                newAnimation = ReverseAnimation(newAnimation);
+                                theHero = toHeroContext.widget;
+                              }
+                              else theHero = fromHeroContext.widget;
+
+                              //animation goes from 0 to 1
+                              return RotationTransition(
+                                turns: newAnimation,
+                                child: theHero,
+
+                              );
+                            },
+                            tag: 'addToCancel',
+                            child: Icon(Icons.add),
+                          ),
                         ),
                       ),
                       InkWell(
                         onTap: (){
-                          print("SEARCH");
+                          backFromNewOrSearchContact.value = true;
+                          Navigator.push(
+                            context, PageTransition(
+                              type: PageTransitionType.downToUp,
+                              child: SearchContact(
+                                onSelect: onSelect,
+                              ),
+                            ),
+                          );
                         },
                         child: Container(
                           height: toolBarHeight,
                           width: 16.0 + 24 + 16,
-                          child: Icon(Icons.search),
+                          child: Hero(
+                            tag: 'searchToBack',
+                            child: Icon(Icons.search),
+                          ),
                         ),
                       ),
                     ],
