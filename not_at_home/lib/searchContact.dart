@@ -17,52 +17,50 @@ class SearchContact extends StatelessWidget {
           color: Theme.of(context).primaryColorDark,
           child: Column(
             children: <Widget>[
-              Padding(
-                padding: EdgeInsets.all(8),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  width: MediaQuery.of(context).size.width,
-                  padding: EdgeInsets.all(12),
-                  child: Row(
-                    children: <Widget>[
-                      InkWell(
-                        onTap: (){
-                          Navigator.pop(context);
-                        },
-                        child: Padding(
-                          padding: EdgeInsets.only(right: 16.0),
-                          child: Hero(
-                            tag: 'searchToBack',
-                            child: Icon(Icons.keyboard_arrow_left),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                  color: Theme.of(context).primaryColor,
+                ),
+                width: MediaQuery.of(context).size.width,
+                padding: EdgeInsets.all(12),
+                child: Row(
+                  children: <Widget>[
+                    InkWell(
+                      onTap: (){
+                        Navigator.pop(context);
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.only(right: 16.0),
+                        child: Hero(
+                          tag: 'searchToBack',
+                          child: Icon(Icons.keyboard_arrow_left),
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 4.0),
+                        child: TextFormField(
+                          scrollPadding: EdgeInsets.all(0),
+                          textInputAction: TextInputAction.search,
+                          autofocus: true,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.all(0),
+                            border: InputBorder.none,
                           ),
+                          initialValue: "init",
                         ),
                       ),
-                      Flexible(
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 4.0),
-                          child: TextFormField(
-                            scrollPadding: EdgeInsets.all(0),
-                            textInputAction: TextInputAction.search,
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.all(0),
-                              border: InputBorder.none,
-                            ),
-                            initialValue: "init",
-                          ),
-                        ),
+                    ),
+                    Hero(
+                      tag: 'addToCancel',
+                      child: Transform.rotate(
+                        angle: - math.pi / 4,
+                        child: Icon(Icons.add),
                       ),
-                      Hero(
-                        tag: 'addToCancel',
-                        child: Transform.rotate(
-                          angle: - math.pi / 4,
-                          child: Icon(Icons.add),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
               Expanded(
@@ -70,7 +68,7 @@ class SearchContact extends StatelessWidget {
                   children: <Widget>[
                     Container(
                       color: Theme.of(context).primaryColorDark,
-                      padding: EdgeInsets.fromLTRB(32, 32, 32, 8),
+                      padding: EdgeInsets.fromLTRB(16, 32, 16, 8),
                       child: DefaultTextStyle(
                         style: TextStyle(
                           color: Colors.white,
