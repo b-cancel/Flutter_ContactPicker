@@ -44,34 +44,37 @@ class ContactListTile extends StatelessWidget {
     }
 
     //return widget
-    return ListTile(
-      onTap: (){
-        onSelect(context, thisContact);
-      },
-      leading: new Container(
-        width: 50,
-        height: 50,
-        decoration: new BoxDecoration(
-          color: thisColor,
-          shape: BoxShape.circle,
-        ),
-        child: (noImage) ? Icon(
-          Icons.person,
-          color: Theme.of(context).primaryColor,
-        )
-        : ClipOval(
-          child: FittedBox(
-            fit: BoxFit.cover,
-              child: Image.memory(
-              thisContact.avatar,
-            ),
+    return SizedBox(
+      height: 70,
+      child: ListTile(
+        onTap: (){
+          onSelect(context, thisContact);
+        },
+        leading: new Container(
+          width: 50,
+          height: 50,
+          decoration: new BoxDecoration(
+            color: thisColor,
+            shape: BoxShape.circle,
+          ),
+          child: (noImage) ? Icon(
+            Icons.person,
+            color: Theme.of(context).primaryColor,
           )
-        )
+          : ClipOval(
+            child: FittedBox(
+              fit: BoxFit.cover,
+                child: Image.memory(
+                thisContact.avatar,
+              ),
+            )
+          )
+        ),
+        title: Text(
+          name,
+        ),
+        subtitle: Text(number),
       ),
-      title: Text(
-        name,
-      ),
-      subtitle: Text(number),
     );
   }
 }

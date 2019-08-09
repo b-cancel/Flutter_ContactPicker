@@ -169,9 +169,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
             children: <Widget>[
               OrientationBuilder(
                 builder: (context, orientation){
-                  //updateBanner();
-                  print("oreientation CHAGNEs");
-
                   //variables prepped
                   bool isPortrait = (orientation == Orientation.portrait);
                   expandedBannerHeight = MediaQuery.of(context).size.height;

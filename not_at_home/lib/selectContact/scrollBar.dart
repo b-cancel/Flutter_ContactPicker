@@ -6,7 +6,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 //the scroll has issues with this but 
 //1. it looks nice in screen caps
 //2. AND it shows off the alpha overlay feature I made
-bool useDynamicTopPadding = true;
+bool useDynamicTopPadding = false;
 
 //only use to debug
 bool scrollBarColors = false;
@@ -99,14 +99,16 @@ class ScrollBar extends StatelessWidget {
         //and that isn't going to bode well for the user experience
         //JUST KIDDING if we snap the sliver into place we CAN GUARANTEE this
         for(int i = 0; i < sortedLetterCodes.length; i++){
-          double thisItemsOffset = calculateOffset(
-            bannerHeight.value, //820.5714285714286, 
-            //for header in index 3... there are 3 headers above.. [0,1,2]
-            //then also include yourself
-            i + 1, //closedHeaders
-            itemCountSoFar - 1, //items above
-            spacerCountSoFar - 1, //spacers above
-          );
+          double thisItemsOffset = 0;
+          double bannerAndToolbar = expandedBannerHeight + 40;
+          int headersBefore = i - 1;
+
+          if(i != 0){
+            thisItemsOffset = bannerAndToolbar 
+            + (itemCountSoFar * 70) 
+            + (spacerCountSoFar * 2)
+            + (headersBefore * 40);
+          }
 
           //make sure we haven't passed the limit (otherwise weird bounce)
           //print('max scroll ' + maxScroll.toString() + " VS " + thisItemsOffset.toString());
@@ -227,7 +229,7 @@ double calculateOffset(
 ){
   //assume that each header after overflow on top
   //grow to their max size of 80
-  double headers = 80.0 * headerCount;
+  double headers = 40.0 * headerCount;
   double items = 70.0 * itemsAbove;
   double spacers = 2.0 * spacersAbove;
   return expandedHeight + headers + items + spacers;
