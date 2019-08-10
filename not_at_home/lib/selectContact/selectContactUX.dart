@@ -212,7 +212,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
                           sortedLetterCodes: sortedLetterCodes,
                           letterToListItems: letterToListItems,
                         ),
-                        /*
                         new ScrollBar(
                           autoScrollController: autoScrollController,
                           //we listen to their changes to determine if we should show the bar
@@ -223,12 +222,11 @@ class _SelectContactUXState extends State<SelectContactUX> {
                           bannerHeight: bannerHeight,
                           expandedBannerHeight: expandedBannerHeight,
                           //show widgets
-                          sortedLetterCodes: new List<int>(), //widget.sortedLetterCodes,
-                          letterToListItems: new Map<int, List<Widget>>(), //widget.letterToListItems,
+                          sortedLetterCodes: sortedLetterCodes,
+                          letterToListItems: letterToListItems,
                           //show/hide thumb tack
                           showThumbTack: showThumbTack,
                         ),
-                        */
                       ],
                     ),
                   );
@@ -371,6 +369,7 @@ class ToolBar extends StatelessWidget {
                           Navigator.push(
                             context, PageTransition(
                               type: PageTransitionType.downToUp,
+                              duration: Duration(seconds: 5),
                               child: SearchContact(
                                 onSelect: onSelect,
                               ),

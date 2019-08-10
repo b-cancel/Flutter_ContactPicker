@@ -5,6 +5,41 @@ import 'package:vibration/vibration.dart';
 
 import '../vibrate.dart';
 
+/*
+//generate the positions
+      int itemCountSoFar = 0;
+      int spacerCountSoFar = 0;
+      List<double> offsets = new List<double>();
+      //NOTE: SADLY because of how strange slivers can be sometimes
+      //the offset of 0 does not always open up the sliver all the way
+      //this means its dangerous to assume that it is ALWAYS closing it
+      //if we do this we might shift lower than we have to
+      //the label will show that we are in the correct section
+      //but above the label there might be some of the desired items
+      //and that isn't going to bode well for the user experience
+      //JUST KIDDING if we snap the sliver into place we CAN GUARANTEE this
+      for(int i = 0; i < widget.sortedLetterCodes.length; i++){
+        double thisItemsOffset = 0;
+        double bannerAndToolbar = widget.expandedBannerHeight + 40;
+        int headersBefore = i - 1;
+
+        if(i != 0){
+          thisItemsOffset = bannerAndToolbar 
+          + (itemCountSoFar * 70) 
+          + (spacerCountSoFar * 2)
+          + (headersBefore * 40);
+        }
+        
+        //add the offset
+        offsets.add(thisItemsOffset);
+
+        //add ourselves
+        int ourItemCount = widget.letterToListItems[widget.sortedLetterCodes[i]].length;
+        itemCountSoFar += ourItemCount;
+        spacerCountSoFar += (ourItemCount - 1);
+      }
+*/
+
 //Mostly taken from this article
 //https://medium.com/flutter-community/creating-draggable-scrollbar-in-flutter-a0ae8cf3143b
 //Left off here

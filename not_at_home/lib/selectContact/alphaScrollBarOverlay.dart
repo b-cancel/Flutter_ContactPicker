@@ -42,18 +42,21 @@ but this is the best that is possible if you want the overlay to still be reflec
 //So since we are using overlay box as a child of every item guide
 //thing will be aligned as expected
 
+//NOTE: we are GUARANTEED to have letterCodes when passing that into this widget
+//and since we only retreive contacts ONCE we know we don't need to do this again
+//and therefore it can stay stateless
 class AlphaScrollBarOverlay extends StatelessWidget {
   AlphaScrollBarOverlay({
-    @required this.items,
     @required this.scrollBarHeight,
-    @required this.itemHeight,
     @required this.spacingVertical,
+    @required this.letterCodes,
+    @required this.itemHeight,
   });
 
   final double scrollBarHeight;
   final double spacingVertical;
   //TODO... convert this to a list of widgets
-  final List<int> items;
+  final List<int> letterCodes;
   //this should be the height of all the equally sized widgets in items
   final double itemHeight;
 
@@ -87,26 +90,26 @@ class AlphaScrollBarOverlay extends StatelessWidget {
       //if there is only space for one thing
       if(itemGuideCount == 1){
         //AND we have nothing to fill it with -> simply fill the space there is
-        if(items.length == 0) return Container(height: scrollBarHeight);
+        if(letterCodes.length == 0) return Container(height: scrollBarHeight);
         else{
           //AND we have anything to fill it with -> fill it with the first
           return new OnlyShowFirst(
             scrollBarHeight: scrollBarHeight, 
             itemHeight: itemHeight, 
-            items: items,
+            items: letterCodes,
           );
         }
       }
       else{
         //NOTE: we KNOW we have space for atleast 2 possible spots
 
-        if(items.length == 0) return Container(height: scrollBarHeight);
+        if(letterCodes.length == 0) return Container(height: scrollBarHeight);
         else{
-          if(items.length == 1){
+          if(letterCodes.length == 1){
             return new OnlyShowFirst(
               scrollBarHeight: scrollBarHeight, 
               itemHeight: itemHeight, 
-              items: items,
+              items: letterCodes,
             );
           }
           else{
@@ -118,7 +121,7 @@ class AlphaScrollBarOverlay extends StatelessWidget {
             //NOTE: works as long as we have ATLEAST ONE OF EACH
 
             //we ALWAYS include the first key 
-            int keyCount = items.length - 1;
+            int keyCount = letterCodes.length - 1;
             itemGuideCount -= 1;
 
             //we know we are using the first index
@@ -147,11 +150,11 @@ class AlphaScrollBarOverlay extends StatelessWidget {
               }
 
               //iterate through all the items and mark the ones we will be using as item guides
-              for(int i = groupSize; i < items.length && itemGuideCount > 0; i += groupSize){
+              for(int i = groupSize; i < letterCodes.length && itemGuideCount > 0; i += groupSize){
                 int addIndex;
-                bool nextWillExit = (i + groupSize) >= items.length;
+                bool nextWillExit = (i + groupSize) >= letterCodes.length;
                 if(itemGuideCount == 1 || nextWillExit){
-                  addIndex = items.length - 1;
+                  addIndex = letterCodes.length - 1;
                 }
                 else addIndex = i;
 
@@ -164,7 +167,7 @@ class AlphaScrollBarOverlay extends StatelessWidget {
             //generate widget list
             List<Widget> widgets = new List<Widget>();
             widgets.clear();
-            for(int i = 0; i < items.length; i++){
+            for(int i = 0; i < letterCodes.length; i++){
 
               //If we marked this as an itemGuide then make it so
               //else put a placer holder
@@ -180,7 +183,7 @@ class AlphaScrollBarOverlay extends StatelessWidget {
                     child: FittedBox(
                       fit: BoxFit.contain,
                       child: Text(
-                        String.fromCharCode(items[i]),
+                        String.fromCharCode(letterCodes[i]),
                         style: TextStyle(
                           color: Colors.white,
                         ),

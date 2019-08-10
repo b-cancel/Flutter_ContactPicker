@@ -12,6 +12,7 @@ bool useDynamicTopPadding = false;
 //only use to debug
 bool scrollBarColors = false;
 
+//scroll bar widgets
 class ScrollBar extends StatefulWidget {
   ScrollBar({
     @required this.autoScrollController,
@@ -38,8 +39,8 @@ class ScrollBar extends StatefulWidget {
   final ValueNotifier<double> bannerHeight;
   final double expandedBannerHeight;
   //show widget
-  final List<int> sortedLetterCodes;
-  final Map<int, List<Widget>> letterToListItems;
+  final ValueNotifier<List<int>> sortedLetterCodes;
+  final ValueNotifier<Map<int, List<Widget>>> letterToListItems;
   //show/hide thumb tack
   final ValueNotifier<bool> showThumbTack;
 
@@ -68,36 +69,51 @@ class _ScrollBarState extends State<ScrollBar> {
       updateContactsVisible();
     });
 
+    widget.sortedLetterCodes.addListener((){
+      updateContactsVisible();
+    });
+
+    widget.letterToListItems.addListener((){
+      updateContactsVisible();
+    });
+
     //if either var above changes this might change 
     //which should trigger a set state
     showContacts.addListener((){
-      setState(() {
-        
-      });
+      rebuild();
     });
 
     //init the super
     super.initState();
   }
 
+  //set state with mounted check first
   rebuild(){
     if(mounted){
-      setState(() {
+      WidgetsBinding.instance.addPostFrameCallback((_){
+        setState(() {
         
+        });
       });
     }
   }
 
+  //this MIGHT trigger a rebuild
   updateContactsVisible(){
-    if(widget.retreivingContacts.value || widget.contacts.value.length == 0){
+    if(
+      widget.retreivingContacts.value 
+      || widget.contacts.value.length == 0 
+      || widget.letterToListItems.value.length == 0
+      || widget.sortedLetterCodes.value.length == 0){
       showContacts.value = false;
     }
     else showContacts.value = true;
   }
 
+  //build
   @override
   Widget build(BuildContext context) {
-    if(showContacts.value) return Container();
+    if(showContacts.value == false) return Container();
     else{
       //a couple of manually set vars
       double itemHeight = 16;
@@ -146,39 +162,6 @@ class _ScrollBarState extends State<ScrollBar> {
       //other vars for position
       double maxScroll = widget.autoScrollController.position.maxScrollExtent;
       maxScroll -= MediaQuery.of(context).size.height;
-
-      //generate the positions
-      int itemCountSoFar = 0;
-      int spacerCountSoFar = 0;
-      List<double> offsets = new List<double>();
-      //NOTE: SADLY because of how strange slivers can be sometimes
-      //the offset of 0 does not always open up the sliver all the way
-      //this means its dangerous to assume that it is ALWAYS closing it
-      //if we do this we might shift lower than we have to
-      //the label will show that we are in the correct section
-      //but above the label there might be some of the desired items
-      //and that isn't going to bode well for the user experience
-      //JUST KIDDING if we snap the sliver into place we CAN GUARANTEE this
-      for(int i = 0; i < widget.sortedLetterCodes.length; i++){
-        double thisItemsOffset = 0;
-        double bannerAndToolbar = widget.expandedBannerHeight + 40;
-        int headersBefore = i - 1;
-
-        if(i != 0){
-          thisItemsOffset = bannerAndToolbar 
-          + (itemCountSoFar * 70) 
-          + (spacerCountSoFar * 2)
-          + (headersBefore * 40);
-        }
-        
-        //add the offset
-        offsets.add(thisItemsOffset);
-
-        //add ourselves
-        int ourItemCount = widget.letterToListItems[widget.sortedLetterCodes[i]].length;
-        itemCountSoFar += ourItemCount;
-        spacerCountSoFar += (ourItemCount - 1);
-      }
       
       //calc padding
       EdgeInsets scrollBarPadding = EdgeInsets.only(
@@ -215,6 +198,7 @@ class _ScrollBarState extends State<ScrollBar> {
                   ),
                 ),
                 //-----Scroll Bar Function
+                /*
                 DraggableScrollBar(
                   thumbColor: Theme.of(context).accentColor.withOpacity(0.25),
                   visualScrollBarHeight: scrollBarVisualHeight,
@@ -224,8 +208,9 @@ class _ScrollBarState extends State<ScrollBar> {
                   autoScrollController: widget.autoScrollController,
                   paddingAll: paddingAll,
                   positions: offsets,
-                  sortedKeys: widget.sortedLetterCodes,
+                  sortedKeys: widget.sortedLetterCodes.value,
                 ),
+                */
                 //-----Letters Overlay
                 IgnorePointer(
                   child: Center(
@@ -238,7 +223,7 @@ class _ScrollBarState extends State<ScrollBar> {
                             scrollBarHeight: alphaOverlayHeight,
                             itemHeight: itemHeight,
                             spacingVertical: spacingVertical,
-                            items: widget.sortedLetterCodes,
+                            letterCodes: widget.sortedLetterCodes.value,
                           ),
                         ),
                     ),
