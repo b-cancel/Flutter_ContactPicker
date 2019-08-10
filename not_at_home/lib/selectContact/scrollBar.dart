@@ -200,15 +200,17 @@ class _ScrollBarState extends State<ScrollBar> {
                 //-----Scroll Bar Function
                 /*
                 DraggableScrollBar(
-                  thumbColor: Theme.of(context).accentColor.withOpacity(0.25),
+                  autoScrollController: widget.autoScrollController,
+                  //set once and done
                   visualScrollBarHeight: scrollBarVisualHeight,
                   programaticScrollBarHeight: scrollBarAreaHeight,
                   alphaOverlayHeight: alphaOverlayHeight,
                   scrollThumbHeight: 4 * itemHeight,
-                  autoScrollController: widget.autoScrollController,
                   paddingAll: paddingAll,
-                  positions: offsets,
-                  sortedKeys: widget.sortedLetterCodes.value,
+                  thumbColor: Theme.of(context).accentColor.withOpacity(0.25),
+                  //value notifiers
+                  sortedLetterCodes: widget.sortedLetterCodes,
+                  letterToListItems: widget.letterToListItems,
                 ),
                 */
                 //-----Letters Overlay

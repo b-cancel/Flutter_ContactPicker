@@ -45,28 +45,33 @@ import '../vibrate.dart';
 //Left off here
 //Search "As we see on screen capture when list is scrolled scrollthumb is not moving"
 
+/*
 class DraggableScrollBar extends StatefulWidget {
   DraggableScrollBar({
+    @required this.autoScrollController,
+    //set once and done
     @required this.visualScrollBarHeight,
     @required this.programaticScrollBarHeight,
     @required this.alphaOverlayHeight,
     @required this.scrollThumbHeight,
-    @required this.autoScrollController,
     @required this.paddingAll,
     @required this.thumbColor,
-    @required this.positions,
-    @required this.sortedKeys,
+    //value notifiers
+    @required this.sortedLetterCodes,
+    @required this.letterToListItems,
   });
 
+  final AutoScrollController autoScrollController;
+  //set once and done
   final double visualScrollBarHeight;
   final double programaticScrollBarHeight;
   final double alphaOverlayHeight;
   final double scrollThumbHeight;
-  final AutoScrollController autoScrollController;
   final double paddingAll;
   final Color thumbColor;
-  final List<double> positions;
-  final List<int> sortedKeys;
+  //value notifiers
+  final ValueNotifier<List<int>> sortedLetterCodes;
+  final ValueNotifier<Map<int, List<Widget>>> letterToListItems;
 
   @override
   _DraggableScrollBarState createState() => new _DraggableScrollBarState();
@@ -295,3 +300,4 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
     );
   }
 }
+*/
