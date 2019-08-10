@@ -15,20 +15,20 @@ import 'dart:math' as math;
 
 class SelectContactUX extends StatefulWidget {
   SelectContactUX({
+    //value notifiers
     @required this.retreivingContacts,
     @required this.contacts,
-    @required this.colorsForContacts,
-
-    @required this.backFromNewContact,
+    @required this.backFromPageNOTpermissionPage,
+    //set once and done
     @required this.onSelect,
     @required this.userPrompt,
   });
 
+  //value notifiers
   final ValueNotifier<bool> retreivingContacts;
   final ValueNotifier<List<Contact>> contacts;
-  final List<Color> colorsForContacts;
-
-  final ValueNotifier<bool> backFromNewContact;
+  final ValueNotifier<bool> backFromPageNOTpermissionPage;
+  //set once and done
   final Function onSelect;
   final List<String> userPrompt;
 
@@ -51,8 +51,8 @@ class _SelectContactUXState extends State<SelectContactUX> {
   double toolBarHeight = 40;
 
   //stuff to update list and scrollbar
-  List<int> sortedLetterCodes = new List<int>(); //TODO... maybe value notifier
-  Map<int, List<Widget>> letterToListItems = new Map<int, List<Widget>>(); //TODO... maybe value notifier
+  ValueNotifier<List<int>> sortedLetterCodes = new ValueNotifier(new List<int>()); 
+  ValueNotifier<Map<int, List<Widget>>> letterToListItems = new ValueNotifier(new Map<int, List<Widget>>()); 
 
   //init
   @override
@@ -110,6 +110,8 @@ class _SelectContactUXState extends State<SelectContactUX> {
             children: <Widget>[
               OrientationBuilder(
                 builder: (context, orientation){
+                  print("-------------------------Building Because Of Orientation");
+
                   //variables prepped
                   bool isPortrait = (orientation == Orientation.portrait);
                   expandedBannerHeight = MediaQuery.of(context).size.height;
@@ -176,7 +178,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                     child: orientationPrompt,
                   );
 
-                  //changes with orientation
+                  //changes with orientation so it must be checked here
                   double statusBarHeight = MediaQuery.of(context).padding.top;
 
                   //the header slivers
@@ -189,60 +191,27 @@ class _SelectContactUXState extends State<SelectContactUX> {
                     ToolBar(
                       toolBarHeight: toolBarHeight,
                       orientationPrompt: orientationPrompt, //varies with orientation
-                      backFromNewOrSearchContact: widget.backFromNewContact,
+                      backFromPageNOTpermissionPage: widget.backFromPageNOTpermissionPage,
                       onSelect: widget.onSelect,
                     ),
                   ];
-
-                  //NOTE: orientation changes -> size of banner changes -> scroll area changes
-                  //-----
-                  //the contact list itself SHOULD reload
-                  //  - headerSlivers SHOULD update
-                  //  - bodySliver SHOULD NOT update (they are created once and done)
-                  //the scroll bar SHOULD reload and DOES
-                  //BUT IF these TWO change it should only change the scrollbar
-                  //  - sortedLetterCodes LIST
-                  //  - letter2ItemCount MAP
-
-                  headerSlivers.add(
-                    SliverToBoxAdapter(
-                      child: Container(
-                        height: 3500,
-                        width: MediaQuery.of(context).size.width,
-                        color: Colors.blue,
-                      ),
-                    ),
-                  );
 
                   //build
                   return Container(
                     color: Theme.of(context).primaryColor,
                     child: Stack(
                       children: <Widget>[
-                        CustomScrollView(
-                          controller: autoScrollController,
-                          //HEADER
-                          //-banner
-                          //-toolbar
-
-                          //BODY
-                          //-IF no contacts OR retreiving contacts -> fill remaining
-                          //-ELSE -> list of widgets
-                          slivers: headerSlivers,
-                        ),
-                        /*
                         ContactList(
+                          //set once ance done
                           autoScrollController: autoScrollController,
-                          //things already processed with orientation
+                          onSelect: widget.onSelect,
                           headerSlivers: headerSlivers,
-                          //contact stuff
+                          //value notifiers
                           retreivingContacts: widget.retreivingContacts,
                           contacts: widget.contacts,
-                          colorsForContacts: widget.colorsForContacts,
-                          //other contacts stuff that also updates scrollbar
-
+                          sortedLetterCodes: sortedLetterCodes,
+                          letterToListItems: letterToListItems,
                         ),
-                        */
                         /*
                         new ScrollBar(
                           autoScrollController: autoScrollController,
@@ -307,13 +276,13 @@ class ToolBar extends StatelessWidget {
     Key key,
     @required this.toolBarHeight,
     @required this.orientationPrompt,
-    @required this.backFromNewOrSearchContact,
+    @required this.backFromPageNOTpermissionPage,
     @required this.onSelect,
   }) : super(key: key);
 
   final double toolBarHeight;
   final Widget orientationPrompt;
-  final ValueNotifier<bool> backFromNewOrSearchContact;
+  final ValueNotifier<bool> backFromPageNOTpermissionPage;
   final Function onSelect;
 
   @override
@@ -351,7 +320,7 @@ class ToolBar extends StatelessWidget {
                     children: <Widget>[
                       InkWell(
                         onTap: (){
-                          backFromNewOrSearchContact.value = true;
+                          backFromPageNOTpermissionPage.value = true;
                           Navigator.push(
                             context, PageTransition(
                               type: PageTransitionType.rightToLeft,
@@ -398,7 +367,7 @@ class ToolBar extends StatelessWidget {
                       ),
                       InkWell(
                         onTap: (){
-                          backFromNewOrSearchContact.value = true;
+                          backFromPageNOTpermissionPage.value = true;
                           Navigator.push(
                             context, PageTransition(
                               type: PageTransitionType.downToUp,
@@ -457,6 +426,8 @@ class _ScrollToTopButtonState extends State<ScrollToTopButton> {
 
   @override
   Widget build(BuildContext context) {
+    print("-------------------------Build Scroll To Top Button");
+
     return Positioned(
       bottom: 0,
       left: 0,

@@ -54,7 +54,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //contact list then gets passed UX
   ValueNotifier<bool> retreivingContacts = ValueNotifier(false);
   ValueNotifier<List<Contact>> contacts = ValueNotifier<List<Contact>>(new List<Contact>());
-  List<Color> colorsForContacts = new List<Color>();
 
   //set based on whether or not a contact to update was passed
   bool firstPage;
@@ -148,7 +147,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //that way if we pop we know that we had pushed it
   //when we use this to determine what to do on resume, we reset it back to false
   //we use a value notifier so we can pass by reference
-  ValueNotifier<bool> backFromNewContactPage = new ValueNotifier<bool>(false);
+  ValueNotifier<bool> backFromPageNOTpermissionPage = new ValueNotifier<bool>(false);
 
   reactToResume() async{
     //IF -> we came back from the permissions page
@@ -160,7 +159,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
     //  nothing should really happen here
 
     //if we came back from the permissions page
-    bool backFromPermissionPage = (backFromNewContactPage.value == false);
+    bool backFromPermissionPage = (backFromPageNOTpermissionPage.value == false);
     if(backFromPermissionPage){
       PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
       if(isAuthorized(permissionStatus) == false){
@@ -191,7 +190,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
 
       //if we are instead comming back from it because we no longer want to select a user by adding them
       //then this is the appropiate action
-      backFromNewContactPage.value = false;
+      backFromPageNOTpermissionPage.value = false;
     }
   }
 
@@ -217,11 +216,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         //don't tell the user we are retreiving contacts 
         //because technically now we are just updating contacts
         if(rebuildList(false)){
-
-          //assign a color to each contact
-          for(int i = 0; i < contacts.value.length; i++){
-            colorsForContacts.add(theColors[rnd.nextInt(theColors.length)]);
-          }
 
           //get the contacts (WITH THUMBNAILS)
           contacts.value = (await ContactsService.getContacts(
@@ -252,17 +246,19 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //build
   @override
   Widget build(BuildContext context) {
+    print("-------------------------Building Logic");
+
     //pass the widgets
     return WillPopScope(
       //IF first page I should be able to close the app
       //ELSE -> I block the user from going back IF forceSelection is enabled
       onWillPop: () async => !(widget.forceSelection && !firstPage),
       child: SelectContactUX(
+        //value notifiers that will be listened to below in the tree
         retreivingContacts: retreivingContacts,
         contacts: contacts,
-        colorsForContacts: colorsForContacts,
-        
-        backFromNewContact: backFromNewContactPage,
+        backFromPageNOTpermissionPage: backFromPageNOTpermissionPage,
+        //passed once and done
         onSelect: onSelect,
         userPrompt: widget.userPrompt,
       ),
