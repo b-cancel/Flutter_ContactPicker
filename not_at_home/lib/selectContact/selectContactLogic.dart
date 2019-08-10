@@ -7,14 +7,6 @@ import 'package:not_at_home/permission.dart';
 import 'package:not_at_home/request.dart';
 import 'package:not_at_home/selectContact/selectContactUX.dart';
 import 'package:permission/permission.dart';
-import 'contactTile.dart';
-import 'package:flutter_sticky_header/flutter_sticky_header.dart';
-
-//contact deletion is NOT functional
-//as in... DOES NOT delete the contact...
-//but still work on the UI side
-//TODO... make this functional
-bool contactDeletionUI = true;
 
 /*
 the onSelect function is set depending on whether or not we are on the first page
@@ -60,11 +52,9 @@ class SelectContact extends StatefulWidget {
 
 class _SelectContactState extends State<SelectContact> with WidgetsBindingObserver {
   //contact list then gets passed UX
-  bool retreivingContacts = false;
-  int step = 0;
+  ValueNotifier<bool> retreivingContacts = ValueNotifier(false);
   ValueNotifier<List<Contact>> contacts = ValueNotifier<List<Contact>>(new List<Contact>());
   List<Color> colorsForContacts = new List<Color>();
-  List<UniqueKey> keys = new List<UniqueKey>();
 
   //set based on whether or not a contact to update was passed
   bool firstPage;
@@ -122,30 +112,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         //https://flutter.dev/docs/cookbook/navigation/navigate-with-arguments
       };
     }
-
-    //contact listener
-    contacts.addListener(()async{
-      step++; //starts at 0
-      if(step == 1){ //got contacts without thumbnails
-        //assign a color to each contact
-        for(int i = 0; i < contacts.value.length; i++){
-          colorsForContacts.add(theColors[rnd.nextInt(theColors.length)]);
-          keys.add(UniqueKey());
-        }
-
-        //get the contacts (WITH THUMBNAILS)
-        if(rebuild(false)){
-          contacts.value = (await ContactsService.getContacts(
-            photoHighResolution: false,
-          )).toList(); 
-        }
-      }
-      else if(step == 2){ 
-        //got contacts with low quality thumbnails
-        rebuild(false); //last build
-        step = 0; //reset
-      }
-    });
 
     //try to get contacts
     confirmPermission();
@@ -236,181 +202,56 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   getContacts() async{
     PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
     if(isAuthorized(permissionStatus)){
+
       //clear the contacts list
       contacts.value.clear();
+
       //tell the user the contacts are being retreived
-      if(rebuild(true)){
+      if(rebuildList(true)){
+
         //get the contacts (WITHOUT THUMBNAILS)
         contacts.value = (await ContactsService.getContacts(
           withThumbnails: false,
         )).toList(); 
+
+        //don't tell the user we are retreiving contacts 
+        //because technically now we are just updating contacts
+        if(rebuildList(false)){
+
+          //assign a color to each contact
+          for(int i = 0; i < contacts.value.length; i++){
+            colorsForContacts.add(theColors[rnd.nextInt(theColors.length)]);
+          }
+
+          //get the contacts (WITH THUMBNAILS)
+          contacts.value = (await ContactsService.getContacts(
+            photoHighResolution: false,
+          )).toList(); 
+
+          //updte contacts the last time
+          if(rebuildList(false)){
+
+            //get the contacts (WITH HIGH QUALITY THUMBNAILS)
+            contacts.value = (await ContactsService.getContacts(
+              photoHighResolution: true,
+            )).toList(); 
+          }
+        }
       }
     }
   }
 
-  bool rebuild(bool isRetreiving){
+  bool rebuildList(bool isRetreiving){
     if(mounted){
-      setState(() {
-        retreivingContacts = isRetreiving;
-      });
+      retreivingContacts.value = isRetreiving;
       return true;
     }
     else return false;    
   }
 
-  Map<int, List<Widget>> createLetterToWidgetListMap(){
-    Map<int, List<Widget>> letterToListItems = new Map<int,List<Widget>>();
-    for(int i = 0; i < contacts.value.length; i++){
-      //create the new list if we have to
-      int letterCode = contacts.value[i].givenName?.toUpperCase()?.codeUnitAt(0) ?? 63; //63 = ?
-      if(letterToListItems.containsKey(letterCode) == false){
-        letterToListItems[letterCode] = new List<Widget>();
-      }
-
-      //make contact list tile
-      Widget tile = ContactListTile(
-        thisContact: contacts.value[i],
-        thisColor: colorsForContacts[i],
-        onSelect: onSelect,
-      );
-
-      //add contact delete UI if desired
-      //current not functional
-      
-      if(contactDeletionUI){ //TODO... parametrize this
-        tile = Dismissible(
-          key: keys[i],
-          direction: DismissDirection.startToEnd,
-          onDismissed: (direction) async{
-            //remove it from the all the lists (contacts, colors, keys)
-            contacts.value.removeAt(i);
-            colorsForContacts.removeAt(i);
-            keys.removeAt(i);
-
-            //have those changes reflected on rebuild
-            //NOTE: you may be tempted to just merge the contact with its spacer
-            //and then let the automatic deletion occur... BUT
-            //take this scenario
-            //item 1 | [spacer | item 2] | [spacer | item 3]
-            //delete item 1
-            //[spacer | item 2] | [spacer | item 3]
-            //NOTE: how the spacer is not deleted
-            //TODO... in all edge cases where we don't have to rebuild manually... DONT
-            setState(() {
-              
-            });
-
-            //delete the contact
-            //await ContactsService.deleteContact(contacts.value[i]); 
-          },
-          child: tile,
-          background: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            color: Colors.red,
-            alignment: Alignment.centerLeft,
-            child: Icon(
-              FontAwesomeIcons.trash,
-              color: Colors.black,
-            ),
-          ),
-        );
-      }
-
-      //add to the list
-      letterToListItems[letterCode].add(tile);
-    }
-    return letterToListItems;
-  }
-
-  List<Widget> createSliverSectionsList(
-    List<int> sortedLetterCodes,
-    Map<int, List<Widget>> letterToListItems,
-  ){
-    List<Widget> sliverSections = new List<Widget>();
-    for(int i = 0; i < sortedLetterCodes.length; i++){
-      List<Widget> widgetsWithDividers = new List<Widget>();
-      int key = sortedLetterCodes[i];
-
-      //go through keys, grab widgets, and place dividers between
-      List<Widget> widgetsForSection = letterToListItems[key];
-      for(int item = 0; item < widgetsForSection.length; item++){
-        //add divider above all items except first
-        if(item > 0){
-          widgetsWithDividers.add(
-            Container(
-              width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.only(left: 80, right: 24), 
-              child: Container(
-                color: Theme.of(context).dividerColor,
-                height: 2,
-              ),
-            ),
-          );
-        }
-
-        //add widget
-        widgetsWithDividers.add(widgetsForSection[item]);
-      }
-
-      //add all these items into the section
-      sliverSections.add(
-        SliverStickyHeader(
-          header: Container(
-            color: Theme.of(context).primaryColor,
-            padding: new EdgeInsets.only(
-              left: 32,
-              right: 16,
-              top: 16,
-              bottom: 8,
-            ),
-            alignment: Alignment.bottomLeft,
-            child: Container(
-              height: 16,
-              alignment: Alignment.centerLeft,
-              child: new Text(
-                String.fromCharCode(key),
-                style: TextStyle(
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ),
-          sliver: new SliverList(
-            delegate: new SliverChildListDelegate([
-              Card(
-                margin: EdgeInsets.all(0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-                child: Column(
-                  children: widgetsWithDividers,
-                ),
-              ),
-            ]),
-          ),
-        ),
-      );
-    }
-    return sliverSections;
-  }
-
   //build
   @override
   Widget build(BuildContext context) {
-    //for each letter assemble a list of widget
-    Map<int, List<Widget>> letterToListItems = createLetterToWidgetListMap();
-
-    //sort keys
-    List<int> sortedLetterCodes = letterToListItems.keys.toList();
-    sortedLetterCodes.sort();
-
-    //iterate through all letters
-    //and compile the sections with their headers
-    List<Widget> sliverSections = createSliverSectionsList(
-      sortedLetterCodes,
-      letterToListItems,
-    );
-
     //pass the widgets
     return WillPopScope(
       //IF first page I should be able to close the app
@@ -418,10 +259,9 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
       onWillPop: () async => !(widget.forceSelection && !firstPage),
       child: SelectContactUX(
         retreivingContacts: retreivingContacts,
-        contactCount: contacts.value.length,
-        sortedLetterCodes: sortedLetterCodes,
-        letterToListItems: letterToListItems,
-        sliverSections: sliverSections,
+        contacts: contacts,
+        colorsForContacts: colorsForContacts,
+        
         backFromNewContact: backFromNewContactPage,
         onSelect: onSelect,
         userPrompt: widget.userPrompt,

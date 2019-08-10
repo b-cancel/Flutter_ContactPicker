@@ -1,5 +1,7 @@
+import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:not_at_home/searchContact.dart';
+import 'package:not_at_home/selectContact/contactList.dart';
 import 'package:not_at_home/selectContact/scrollBar.dart';
 import 'package:not_at_home/vibrate.dart';
 import 'package:page_transition/page_transition.dart';
@@ -11,34 +13,21 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'dart:math' as math;
 
-//add search bar
-//https://blog.usejournal.com/flutter-search-in-listview-1ffa40956685
-
-//Potential but complicated
-//https://github.com/zhahao/list_view_item_builder
-
-/*
-await controller.scrollToIndex(verseID, preferPosition: AutoScrollPosition.begin);
-controller.highlight(verseID);
-*/
-
 class SelectContactUX extends StatefulWidget {
   SelectContactUX({
-    this.retreivingContacts: false,
-    @required this.contactCount,
-    @required this.sortedLetterCodes,
-    @required this.letterToListItems,
-    @required this.sliverSections,
+    @required this.retreivingContacts,
+    @required this.contacts,
+    @required this.colorsForContacts,
+
     @required this.backFromNewContact,
     @required this.onSelect,
     @required this.userPrompt,
   });
 
-  final bool retreivingContacts;
-  final int contactCount;
-  final List<int> sortedLetterCodes;
-  final Map<int, List<Widget>> letterToListItems;
-  final List<Widget> sliverSections;
+  final ValueNotifier<bool> retreivingContacts;
+  final ValueNotifier<List<Contact>> contacts;
+  final List<Color> colorsForContacts;
+
   final ValueNotifier<bool> backFromNewContact;
   final Function onSelect;
   final List<String> userPrompt;
@@ -108,61 +97,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
       fontWeight: FontWeight.bold,
     );
 
-    //the body slivers
-    List<Widget> bodySlivers = new List<Widget>();
-
-    //Generate the Widget shown in the contacts scroll area
-    //Depending on whether or not there are contacts or they are being retreived
-    bool contactsVisible = true;
-    if(widget.retreivingContacts || widget.sliverSections.length == 0){
-      contactsVisible = false;
-
-      //add sliver to fill screen
-      bodySlivers.add(
-        SliverFillRemaining(
-          hasScrollBody: false, //makes it the proper size
-          child: Container(
-            alignment: Alignment.center,
-            padding: EdgeInsets.all(16),
-            child: Text(
-              (widget.retreivingContacts) ? "Retreiving Contacts" : "No Contacts Found",
-              style: TextStyle(
-                fontSize: 18,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    else{
-      //add all sections to body
-      bodySlivers = widget.sliverSections;
-
-      //add the bottom sliver that gives you section information
-      bodySlivers.add(
-        SliverToBoxAdapter(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.all(16),
-                child: Center(
-                  child: Text(widget.contactCount.toString() + " Contacts"),
-                ),
-              ),
-              Container(
-                width: MediaQuery.of(context).size.width,
-                //make sure to top button isnt covered
-                //16 is padding
-                //48 is the size of the button
-                height: 16.0 + 48 + 16,
-              ),
-            ],
-          ),
-        ),
-      );
-    } 
-
     //build
     return Scaffold(
       body: Container(
@@ -188,6 +122,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                   //generate the prompt
                   Widget orientationPrompt;
 
+                  //adjust the orientation prompt
                   if(isPortrait){
                     //generate the multi lined string
                     List<TextSpan> textSpans = new List<TextSpan>();
@@ -237,59 +172,53 @@ class _SelectContactUXState extends State<SelectContactUX> {
                     child: orientationPrompt,
                   );
 
+                  //changes with orientation
+                  double statusBarHeight = MediaQuery.of(context).padding.top;
+
                   //the header slivers
                   List<Widget> headerSlivers = [
                     Banner(
-                      height: expandedBannerHeight,
+                      height: expandedBannerHeight, //varies with orientation
                       padding: 16,
                       prompt: orientationPrompt,
                     ),
                     ToolBar(
                       toolBarHeight: toolBarHeight,
-                      orientationPrompt: orientationPrompt,
+                      orientationPrompt: orientationPrompt, //varies with orientation
                       backFromNewOrSearchContact: widget.backFromNewContact,
                       onSelect: widget.onSelect,
                     ),
                   ];
-
-                  //changes with orientation
-                  double statusBarHeight = MediaQuery.of(context).padding.top;
-
-                  //all slivers
-                  List<Widget> allSlivers = new List.from(headerSlivers)..addAll(bodySlivers);
-
-                  //TODO... debug this thinga magig
-                  print("banner height: " + bannerHeight.value.toString());
-                  print("expaned banner height: " + expandedBannerHeight.toString());
 
                   //build
                   return Container(
                     color: Theme.of(context).primaryColor,
                     child: Stack(
                       children: <Widget>[
-                        CustomScrollView(
-                          controller: autoScrollController,
-                          //HEADER
-                          //-banner
-                          //-toolbar
-
-                          //BODY
-                          //-IF no contacts OR retreiving contacts -> fill remaining
-                          //-ELSE -> list of widgets
-                          slivers: allSlivers,
-                        ),
-                        (contactsVisible) ? new ScrollBar(
+                        /*
+                        ContactList(
                           autoScrollController: autoScrollController,
+                          headerSlivers: headerSlivers,
+
+                          retreivingContacts: widget.retreivingContacts,
+                          contacts: widget.contacts,
+                          colorsForContacts: widget.colorsForContacts,
+                        ),
+                        */
+                        new ScrollBar(
+                          autoScrollController: autoScrollController,
+                          retreivingContacts: widget.retreivingContacts,
+                          contacts: widget.contacts,
                           //heights
                           statusBarHeight: statusBarHeight,
                           bannerHeight: bannerHeight,
                           expandedBannerHeight: expandedBannerHeight,
                           //show widgets
-                          sortedLetterCodes: widget.sortedLetterCodes,
-                          letterToListItems: widget.letterToListItems,
+                          sortedLetterCodes: new List<int>(), //widget.sortedLetterCodes,
+                          letterToListItems: new Map<int, List<Widget>>(), //widget.letterToListItems,
                           //show/hide thumb tack
                           showThumbTack: showThumbTack,
-                        ) : Container(),
+                        ),
                       ],
                     ),
                   );
