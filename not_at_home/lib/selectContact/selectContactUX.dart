@@ -190,6 +190,16 @@ class _SelectContactUXState extends State<SelectContactUX> {
                     ),
                   ];
 
+                  //NOTE: orientation changes -> size of banner changes -> scroll area changes
+                  //-----
+                  //the contact list itself SHOULD reload
+                  //  - headerSlivers SHOULD update
+                  //  - bodySliver SHOULD NOT update (they are created once and done)
+                  //the scroll bar SHOULD reload and DOES
+                  //BUT IF these TWO change it should only change the scrollbar
+                  //  - sortedLetterCodes LIST
+                  //  - letter2ItemCount MAP
+
                   //build
                   return Container(
                     color: Theme.of(context).primaryColor,
@@ -207,9 +217,10 @@ class _SelectContactUXState extends State<SelectContactUX> {
                         */
                         new ScrollBar(
                           autoScrollController: autoScrollController,
+                          //we listen to their changes to determine if we should show the bar
                           retreivingContacts: widget.retreivingContacts,
                           contacts: widget.contacts,
-                          //heights
+                          //heights (change when orientation changes)
                           statusBarHeight: statusBarHeight,
                           bannerHeight: bannerHeight,
                           expandedBannerHeight: expandedBannerHeight,
