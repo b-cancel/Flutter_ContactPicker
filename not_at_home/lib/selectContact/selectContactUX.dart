@@ -50,6 +50,10 @@ class _SelectContactUXState extends State<SelectContactUX> {
   //NOTE: this is the absolute max height of this bar, else overflow occurs
   double toolBarHeight = 40;
 
+  //stuff to update list and scrollbar
+  List<int> sortedLetterCodes = new List<int>(); //TODO... maybe value notifier
+  Map<int, List<Widget>> letterToListItems = new Map<int, List<Widget>>(); //TODO... maybe value notifier
+
   //init
   @override
   void initState() {
@@ -200,21 +204,46 @@ class _SelectContactUXState extends State<SelectContactUX> {
                   //  - sortedLetterCodes LIST
                   //  - letter2ItemCount MAP
 
+                  headerSlivers.add(
+                    SliverToBoxAdapter(
+                      child: Container(
+                        height: 3500,
+                        width: MediaQuery.of(context).size.width,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  );
+
                   //build
                   return Container(
                     color: Theme.of(context).primaryColor,
                     child: Stack(
                       children: <Widget>[
+                        CustomScrollView(
+                          controller: autoScrollController,
+                          //HEADER
+                          //-banner
+                          //-toolbar
+
+                          //BODY
+                          //-IF no contacts OR retreiving contacts -> fill remaining
+                          //-ELSE -> list of widgets
+                          slivers: headerSlivers,
+                        ),
                         /*
                         ContactList(
                           autoScrollController: autoScrollController,
+                          //things already processed with orientation
                           headerSlivers: headerSlivers,
-
+                          //contact stuff
                           retreivingContacts: widget.retreivingContacts,
                           contacts: widget.contacts,
                           colorsForContacts: widget.colorsForContacts,
+                          //other contacts stuff that also updates scrollbar
+
                         ),
                         */
+                        /*
                         new ScrollBar(
                           autoScrollController: autoScrollController,
                           //we listen to their changes to determine if we should show the bar
@@ -230,6 +259,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                           //show/hide thumb tack
                           showThumbTack: showThumbTack,
                         ),
+                        */
                       ],
                     ),
                   );
@@ -399,7 +429,7 @@ class ToolBar extends StatelessWidget {
   }
 }
 
-class ScrollToTopButton extends StatelessWidget {
+class ScrollToTopButton extends StatefulWidget {
   const ScrollToTopButton({
     Key key,
     @required this.onTop,
@@ -410,6 +440,22 @@ class ScrollToTopButton extends StatelessWidget {
   final AutoScrollController autoScrollController;
 
   @override
+  _ScrollToTopButtonState createState() => _ScrollToTopButtonState();
+}
+
+class _ScrollToTopButtonState extends State<ScrollToTopButton> {
+  @override
+  void initState() {
+    //whenever on top changes we update the button
+    widget.onTop.addListener((){
+      setState(() {
+        
+      });
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Positioned(
       bottom: 0,
@@ -418,8 +464,15 @@ class ScrollToTopButton extends StatelessWidget {
       child: Container(
         alignment: Alignment.bottomCenter,
         padding: EdgeInsets.only(bottom: 16),
-        child: AnimatedBuilder(
-          animation: onTop,
+        child:  AnimatedContainer(
+          duration: Duration(milliseconds: 200),
+          transform: Matrix4.translation(
+            VECT.Vector3(
+              0, 
+              (widget.onTop.value) ? (16.0 + 56) : 0.0, 
+              0,
+            ),
+          ),
           child: FloatingActionButton(
             backgroundColor: Theme.of(context).primaryColorDark.withOpacity(0.5),
             onPressed: (){
@@ -427,7 +480,7 @@ class ScrollToTopButton extends StatelessWidget {
               //scrollToIndex -> too slow to find index
               //jumpTo -> happens instant but scrolling to top should have some animation
               //NOTE: I ended up going with jump since animate was not fully opening the prompt
-              autoScrollController.jumpTo(0);
+              widget.autoScrollController.jumpTo(0);
             },
             //slightly shift the combo of the two icons
             child: FittedBox(
@@ -457,19 +510,6 @@ class ScrollToTopButton extends StatelessWidget {
               ),
             ),
           ),
-          builder: (context, child){
-            return AnimatedContainer(
-              duration: Duration(milliseconds: 200),
-              transform: Matrix4.translation(
-                VECT.Vector3(
-                  0, 
-                  (onTop.value) ? (16.0 + 56) : 0.0, 
-                  0,
-                ),
-              ),
-              child: child,
-            );
-          },
         ),
       ),
     );
