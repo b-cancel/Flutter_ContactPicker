@@ -7,7 +7,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 //the scroll has issues with this but 
 //1. it looks nice in screen captures
 //2. AND it shows off the alpha overlay feature I made
-bool useDynamicTopPadding = false;
+bool useDynamicTopPadding = true;
 
 //only use to debug
 bool scrollBarColors = false;
@@ -56,7 +56,7 @@ class _ScrollBarState extends State<ScrollBar> {
     //when the banner changes we update the scroll bar
     if(useDynamicTopPadding){
       widget.bannerHeight.addListener((){
-        rebuild();
+        //rebuild(); //TODO... this rebuild is causing a rebuild in the parent for some unknown reason
       });
     }
 

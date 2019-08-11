@@ -182,6 +182,8 @@ class _ContactListState extends State<ContactList> {
   void initState() {
     //listen to retreiving contact changes
     widget.retreivingContacts.addListener((){
+      print("retreiving contacts changed");
+
       setState(() {
         
       });
@@ -189,6 +191,8 @@ class _ContactListState extends State<ContactList> {
 
     //listen to contact changes
     widget.contacts.addListener((){
+      print("contacts changed");
+
       //NOTE: that this should ONLY happen once
       if(widget.contacts.value.length > 0 && colorsForContacts.isEmpty){
         //assign a color to each contact

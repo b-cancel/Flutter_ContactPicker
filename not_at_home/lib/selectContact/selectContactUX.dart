@@ -101,6 +101,8 @@ class _SelectContactUXState extends State<SelectContactUX> {
       fontWeight: FontWeight.bold,
     );
 
+    print("-------------------------Building UX");
+
     //build
     return Scaffold(
       body: Container(
@@ -114,6 +116,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
 
                   //variables prepped
                   bool isPortrait = (orientation == Orientation.portrait);
+                  print("changed to portrait: " + isPortrait.toString());
                   expandedBannerHeight = MediaQuery.of(context).size.height;
 
                   //is portrait can have more of the screen taken up

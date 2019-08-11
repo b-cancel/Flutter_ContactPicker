@@ -179,8 +179,8 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
         if(firstPage == false){
           Navigator.pop(context);
         }
-      }
-      //ELSE... the permssions page got the users permission
+      } //got the users permission
+      else getContacts();
     }
     else{
       //NOTE: we might come back from it because our user decided to manually input their data
