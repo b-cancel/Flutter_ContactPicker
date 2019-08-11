@@ -3,6 +3,30 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+String contactToName(Contact c){
+  String prefix = c?.prefix ?? "";
+  String first = c?.givenName ?? "";
+  String middle = c?.middleName ?? "";
+  String last = c?.familyName ?? "";
+  String suffix = c?.suffix ?? "";
+
+  List<String> names = new List<String>();
+
+  if(prefix != "") names.add(prefix);
+  if(first != "") names.add(first);
+  if(middle != "") names.add(middle);
+  if(last != "") names.add(last);
+  if(suffix != "") names.add(suffix);
+
+  String result = "";
+  for(int i = 0; i < names.length; i++){
+    if(i != 0) result += " ";
+    result += names[i];
+  }
+  
+  return result;
+}
+
 //-----Prefixes
 Set<String> prefixes = new Set<String>();
 getPrefixes(){

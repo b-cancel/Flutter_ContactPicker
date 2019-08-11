@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:not_at_home/selectContact/scrollBar.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:vibration/vibration.dart';
 
 import '../vibrate.dart';
 

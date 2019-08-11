@@ -11,6 +11,11 @@ import 'package:vector_math/vector_math_64.dart' as VECT;
 
 import 'package:scroll_to_index/scroll_to_index.dart';
 
+//NOTE: IF you want to use dynamic padding for whatever reason 
+//you need to make sure that the orientation builder only reloads if the orientation has actually changed
+//because currently because of the rebuilds in its children 
+//it might rebuild without the orientation changing causing alot of lag
+
 class SelectContactUX extends StatefulWidget {
   SelectContactUX({
     //value notifiers
@@ -49,8 +54,9 @@ class _SelectContactUXState extends State<SelectContactUX> {
   double toolBarHeight = 40;
 
   //stuff to update list and scrollbar
-  ValueNotifier<List<int>> sortedLetterCodes = new ValueNotifier(new List<int>()); 
-  ValueNotifier<Map<int, List<Widget>>> letterToListItems = new ValueNotifier(new Map<int, List<Widget>>()); 
+  final ValueNotifier<List<int>> sortedLetterCodes = new ValueNotifier(new List<int>()); 
+  final ValueNotifier<Map<int, List<Widget>>> letterToListItems = new ValueNotifier(new Map<int, List<Widget>>()); 
+  final ValueNotifier<Map<String, List<Widget>>> nameToTiles = new ValueNotifier(new Map<String, List<Widget>>());
 
   //init
   @override
@@ -99,8 +105,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
       fontWeight: FontWeight.bold,
     );
 
-    print("-------------------------Building UX");
-
     //build
     return Scaffold(
       body: Container(
@@ -110,11 +114,8 @@ class _SelectContactUXState extends State<SelectContactUX> {
             children: <Widget>[
               OrientationBuilder(
                 builder: (context, orientation){
-                  print("-------------------------Building Because Of Orientation");
-
                   //variables prepped
                   bool isPortrait = (orientation == Orientation.portrait);
-                  print("changed to portrait: " + isPortrait.toString());
                   expandedBannerHeight = MediaQuery.of(context).size.height;
 
                   //is portrait can have more of the screen taken up
@@ -194,6 +195,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                       orientationPrompt: orientationPrompt, //varies with orientation
                       backFromPageNOTpermissionPage: widget.backFromPageNOTpermissionPage,
                       onSelect: widget.onSelect,
+                      nameToTiles: nameToTiles,
                     ),
                   ];
 
@@ -212,6 +214,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                           contacts: widget.contacts,
                           sortedLetterCodes: sortedLetterCodes,
                           letterToListItems: letterToListItems,
+                          nameToTiles: nameToTiles,
                         ),
                         new ScrollBar(
                           autoScrollController: autoScrollController,
@@ -276,12 +279,14 @@ class ToolBar extends StatelessWidget {
     @required this.orientationPrompt,
     @required this.backFromPageNOTpermissionPage,
     @required this.onSelect,
+    @required this.nameToTiles,
   }) : super(key: key);
 
   final double toolBarHeight;
   final Widget orientationPrompt;
   final ValueNotifier<bool> backFromPageNOTpermissionPage;
   final Function onSelect;
+  final ValueNotifier<Map<String, List<Widget>>> nameToTiles;
 
   @override
   Widget build(BuildContext context) {
@@ -370,7 +375,7 @@ class ToolBar extends StatelessWidget {
                             context, PageTransition(
                               type: PageTransitionType.downToUp,
                               child: SearchContact(
-                                onSelect: onSelect,
+                                nameToTiles: nameToTiles,
                               ),
                             ),
                           );
@@ -424,8 +429,6 @@ class _ScrollToTopButtonState extends State<ScrollToTopButton> {
 
   @override
   Widget build(BuildContext context) {
-    print("-------------------------Build Scroll To Top Button");
-
     return Positioned(
       bottom: 0,
       left: 0,

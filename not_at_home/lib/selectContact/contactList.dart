@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:not_at_home/helper.dart';
 import 'package:not_at_home/selectContact/contactTile.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:diacritic/diacritic.dart';
 
 //contact deletion is NOT functional
 //as in... DOES NOT delete the contact...
@@ -24,6 +25,7 @@ class ContactList extends StatefulWidget {
     //value notifiers (used by other to update themeselves)
     @required this.sortedLetterCodes,
     @required this.letterToListItems,
+    @required this.nameToTiles,
   });
 
   //set once and doen
@@ -35,6 +37,7 @@ class ContactList extends StatefulWidget {
   final ValueNotifier<List<Contact>> contacts;
   final ValueNotifier<List<int>> sortedLetterCodes; 
   final ValueNotifier<Map<int, List<Widget>>> letterToListItems;
+  final ValueNotifier<Map<String, List<Widget>>> nameToTiles;
 
   @override
   _ContactListState createState() => _ContactListState();
@@ -56,6 +59,17 @@ class _ContactListState extends State<ContactList> {
         thisColor: colorsForContacts[i],
         onSelect: widget.onSelect,
       );
+
+      //make this tile accessible to the search functionality
+      String tileID = contactToName(widget.contacts.value[i]) ?? "UnKnown";
+      tileID = removeDiacritics(tileID).toLowerCase().trim();
+      //we might have this ID repeated but first make sure it been located atleast once
+      if(widget.nameToTiles.value.containsKey(tileID) == false){
+        widget.nameToTiles.value[tileID] = new List<Widget>();
+      }
+      if(widget.nameToTiles.value[tileID].contains(tile) == false){
+        widget.nameToTiles.value[tileID].add(tile);
+      }
 
       //add contact delete UI if desired
       //current not functional
@@ -182,8 +196,6 @@ class _ContactListState extends State<ContactList> {
   void initState() {
     //listen to retreiving contact changes
     widget.retreivingContacts.addListener((){
-      print("retreiving contacts changed");
-
       setState(() {
         
       });
@@ -191,8 +203,6 @@ class _ContactListState extends State<ContactList> {
 
     //listen to contact changes
     widget.contacts.addListener((){
-      print("contacts changed");
-
       //NOTE: that this should ONLY happen once
       if(widget.contacts.value.length > 0 && colorsForContacts.isEmpty){
         //assign a color to each contact
@@ -214,7 +224,7 @@ class _ContactListState extends State<ContactList> {
   //TODO... it seems to be possible to make some changes here
   @override
   Widget build(BuildContext context) {
-    print("-------------------------Building Contact List");
+    widget.nameToTiles.value.clear();
 
     //for each letter assemble a list of widget
     Map<int, List<Widget>> letterToListItems = createLetterToWidgetListMap();

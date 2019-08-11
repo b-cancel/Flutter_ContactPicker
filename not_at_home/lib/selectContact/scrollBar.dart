@@ -144,10 +144,6 @@ class _ScrollBarState extends State<ScrollBar> {
       //based on this scrollBarHeight we can calculate the size of our alpha overlay
       double alphaOverlayHeight = scrollBarAreaHeight - (paddingAll * 2) - (endsVertical * 2);
       alphaOverlayHeight = noNegative(alphaOverlayHeight);
-
-      //other vars for position
-      double maxScroll = widget.autoScrollController.position.maxScrollExtent;
-      maxScroll -= MediaQuery.of(context).size.height;
       
       //calc padding
       EdgeInsets scrollBarPadding = EdgeInsets.only(

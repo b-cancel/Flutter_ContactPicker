@@ -1,12 +1,66 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'package:diacritic/diacritic.dart';
 
-class SearchContact extends StatelessWidget {
+class SearchContact extends StatefulWidget {
   SearchContact({
-    @required this.onSelect,
+    @required this.nameToTiles,
   });
 
-  final Function onSelect;
+  final ValueNotifier<Map<String, List<Widget>>> nameToTiles;
+
+  @override
+  _SearchContactState createState() => _SearchContactState();
+}
+
+class _SearchContactState extends State<SearchContact> {
+  List<Widget> queryResults = new List<Widget>();
+  TextEditingController search = new TextEditingController();
+
+  @override
+  void initState() {
+    search.addListener((){
+      query(search.text);
+    });
+
+    super.initState();
+  }
+
+  query(String searchString) async{
+    //make the search string easier to work with
+    searchString = removeDiacritics(searchString).toLowerCase().trim();
+
+    //clear the previous query results
+    queryResults.clear();
+
+    print("DIFFERENT: " + widget.nameToTiles.value.keys.toList().length.toString());
+
+    //find matching results
+    if(searchString.length > 0){
+      List<String> keys = widget.nameToTiles.value.keys.toList();
+      print("-------------------------Key Count: " + keys.length.toString() + "-------------------------");
+      for(int key = 0; key < keys.length; key++){
+        String name = keys[key]; //NOTE: already with no diacritics, lowercase, and trimed
+        //print("--------------------b4");
+        //name = removeDiacritics(name).toLowerCase().trim();
+        print(key.toString());
+        //If our search String is contained within the name then add all of the match widgets
+        //print("--------------------" + name);
+        if(name.contains(searchString)){
+          List<Widget> allItemsWithKey = widget.nameToTiles.value[name];
+          for(int item = 0; item < allItemsWithKey.length; item++){
+            queryResults.add(allItemsWithKey[item]);
+          }
+        }
+      }
+      print("-------------------------Key Count: " + keys.length.toString() + "-------------------------");
+    }
+
+    //show the query results
+    setState(() {
+      
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,15 +96,15 @@ class SearchContact extends StatelessWidget {
                     Flexible(
                       child: Padding(
                         padding: EdgeInsets.only(top: 4.0),
-                        child: TextFormField(
+                        child: TextField(
                           scrollPadding: EdgeInsets.all(0),
                           textInputAction: TextInputAction.search,
+                          controller: search,
                           autofocus: true,
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.all(0),
                             border: InputBorder.none,
                           ),
-                          initialValue: "init",
                         ),
                       ),
                     ),
@@ -58,44 +112,48 @@ class SearchContact extends StatelessWidget {
                       tag: 'addToCancel',
                       child: Transform.rotate(
                         angle: - math.pi / 4,
-                        child: Icon(Icons.add),
+                        child: GestureDetector(
+                          onTap: (){
+                            search.text = "";
+                          },
+                          child: Icon(Icons.add)
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
+              Container(
+                color: Theme.of(context).primaryColorDark,
+                padding: EdgeInsets.fromLTRB(16, 32, 16, 8),
+                child: DefaultTextStyle(
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text(
+                        "Contacts",
+                      ),
+                      Text(
+                        queryResults.length.toString() + " Found",
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               Expanded(
                 child: ListView(
                   children: <Widget>[
-                    Container(
-                      color: Theme.of(context).primaryColorDark,
-                      padding: EdgeInsets.fromLTRB(16, 32, 16, 8),
-                      child: DefaultTextStyle(
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text(
-                              "Contacts",
-                            ),
-                            Text(
-                              "74 Found",
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                     Card(
                       color: Theme.of(context).primaryColor,
                       margin: EdgeInsets.all(0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25.0),
                       ),
-                      child: Container(
-                        height: 750,
-                        width: MediaQuery.of(context).size.width,
+                      child: Column(
+                        children: queryResults,
                       )
                     ),
                   ],

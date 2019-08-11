@@ -244,8 +244,6 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //build
   @override
   Widget build(BuildContext context) {
-    print("-------------------------Building Logic");
-
     //pass the widgets
     return WillPopScope(
       //IF first page I should be able to close the app

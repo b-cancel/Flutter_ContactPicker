@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'dart:math' as math;
-
 //NOTE: this widget is designed specifically to go OVER a slider
 //the idea is that the slider takes you to certain positions and this should give you some idea of what those positions are
 

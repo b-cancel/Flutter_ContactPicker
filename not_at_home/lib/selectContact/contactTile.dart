@@ -3,7 +3,9 @@ import 'dart:math';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 
-bool scramblerOn = true;
+import '../helper.dart';
+
+bool scramblerOn = false;
 
 class ContactListTile extends StatelessWidget {
   const ContactListTile({
@@ -23,7 +25,7 @@ class ContactListTile extends StatelessWidget {
     bool noImage = thisContact.avatar.length == 0;
 
     //process name
-    String name = thisContact.givenName ?? "UnKnown";
+    String name = contactToName(thisContact) ?? "UnKnown";
     if(scramblerOn){
       name = scrambler(name, 3/4); //SCRAMBLE
     }
