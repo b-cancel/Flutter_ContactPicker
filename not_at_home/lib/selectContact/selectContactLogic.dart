@@ -220,6 +220,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
             photoHighResolution: false,
           )).toList(); 
 
+          /*
           //updte contacts the last time
           if(rebuildList(false)){
 
@@ -228,6 +229,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
               photoHighResolution: true,
             )).toList(); 
           }
+          */
         }
       }
     }

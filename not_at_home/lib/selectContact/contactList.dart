@@ -47,8 +47,11 @@ class _ContactListState extends State<ContactList> {
   Map<int, List<Widget>> createLetterToWidgetListMap(){
     Map<int, List<Widget>> letterToListItemsNEW = new Map<int,List<Widget>>();
     for(int i = 0; i < widget.contacts.value.length; i++){
+      String contactFullName = contactToName(widget.contacts.value[i]);
+
       //create the new list if we have to
-      int letterCode = widget.contacts.value[i].givenName?.toUpperCase()?.codeUnitAt(0) ?? 63; //63 = ?
+      int letterCode = 63; //or question mark
+      if(contactFullName != "") letterCode = contactFullName.toUpperCase()?.codeUnitAt(0);
       if(letterToListItemsNEW.containsKey(letterCode) == false){
         letterToListItemsNEW[letterCode] = new List<Widget>();
       }
@@ -61,14 +64,13 @@ class _ContactListState extends State<ContactList> {
       );
 
       //make this tile accessible to the search functionality
-      String tileID = contactToName(widget.contacts.value[i]) ?? "UnKnown";
-      tileID = removeDiacritics(tileID).toLowerCase().trim();
+      contactFullName = removeDiacritics(contactFullName).toLowerCase().trim();
       //we might have this ID repeated but first make sure it been located atleast once
-      if(widget.nameToTiles.value.containsKey(tileID) == false){
-        widget.nameToTiles.value[tileID] = new List<Widget>();
+      if(widget.nameToTiles.value.containsKey(contactFullName) == false){
+        widget.nameToTiles.value[contactFullName] = new List<Widget>();
       }
-      if(widget.nameToTiles.value[tileID].contains(tile) == false){
-        widget.nameToTiles.value[tileID].add(tile);
+      if(widget.nameToTiles.value[contactFullName].contains(tile) == false){
+        widget.nameToTiles.value[contactFullName].add(tile);
       }
 
       //add contact delete UI if desired
