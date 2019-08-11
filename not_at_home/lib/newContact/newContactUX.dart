@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:not_at_home/newContactHelper.dart';
+import 'package:not_at_home/newContact/newContactHelper.dart';
 
 //phones, emails, work (job title, company), addresses, note
 

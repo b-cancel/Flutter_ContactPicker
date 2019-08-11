@@ -4,11 +4,6 @@ import 'package:not_at_home/selectContact/alphaScrollBarOverlay.dart';
 import 'package:not_at_home/selectContact/scrollThumb.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-//the scroll has issues with this but 
-//1. it looks nice in screen captures
-//2. AND it shows off the alpha overlay feature I made
-bool useDynamicTopPadding = true;
-
 //only use to debug
 bool scrollBarColors = false;
 
@@ -21,7 +16,6 @@ class ScrollBar extends StatefulWidget {
     @required this.contacts,
     //heights
     @required this.statusBarHeight,
-    @required this.bannerHeight,
     @required this.expandedBannerHeight,
     //show widgets
     @required this.sortedLetterCodes,
@@ -36,7 +30,6 @@ class ScrollBar extends StatefulWidget {
   final ValueNotifier<List<Contact>> contacts;
   //heights
   final double statusBarHeight;
-  final ValueNotifier<double> bannerHeight;
   final double expandedBannerHeight;
   //show widget
   final ValueNotifier<List<int>> sortedLetterCodes;
@@ -53,13 +46,6 @@ class _ScrollBarState extends State<ScrollBar> {
 
   @override
   void initState() {
-    //when the banner changes we update the scroll bar
-    if(useDynamicTopPadding){
-      widget.bannerHeight.addListener((){
-        //rebuild(); //TODO... this rebuild is causing a rebuild in the parent for some unknown reason
-      });
-    }
-
     //update whether or not the contacts should be visible
     widget.retreivingContacts.addListener((){
       updateContactsVisible();
@@ -128,7 +114,7 @@ class _ScrollBarState extends State<ScrollBar> {
       double totalHeight = MediaQuery.of(context).size.height;
       //TODO... maybe instead have the largest flexible height
       //portrait mode and landscape mode should have seperate largest flexible heights
-      double appBarHeight = (useDynamicTopPadding) ? widget.bannerHeight.value : widget.expandedBannerHeight;  
+      double appBarHeight = widget.expandedBannerHeight;  
       double paddingVertical = 16;
       double extraPaddingTop = 40 * 2.0; //TODO... size of toolbar AND sticky header
       double extraPaddingBottom = 0; 
@@ -198,7 +184,6 @@ class _ScrollBarState extends State<ScrollBar> {
                   ),
                 ),
                 //-----Scroll Bar Function
-                /*
                 DraggableScrollBar(
                   autoScrollController: widget.autoScrollController,
                   //set once and done
@@ -208,11 +193,11 @@ class _ScrollBarState extends State<ScrollBar> {
                   scrollThumbHeight: 4 * itemHeight,
                   paddingAll: paddingAll,
                   thumbColor: Theme.of(context).accentColor.withOpacity(0.25),
-                  //value notifiers
-                  sortedLetterCodes: widget.sortedLetterCodes,
-                  letterToListItems: widget.letterToListItems,
+                  expandedBannerHeight: widget.expandedBannerHeight,
+                  //value notifiers, don't need to notify since we KNOW when we pass these they will already not be empty
+                  sortedLetterCodes: widget.sortedLetterCodes.value,
+                  letterToListItems: widget.letterToListItems.value,
                 ),
-                */
                 //-----Letters Overlay
                 IgnorePointer(
                   child: Center(

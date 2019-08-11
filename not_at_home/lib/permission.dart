@@ -7,6 +7,14 @@ import 'package:not_at_home/selectContact/selectContactLogic.dart';
 import 'package:permission/permission.dart';
 import 'package:contact_picker/contact_picker.dart' as contactPicker;
 
+//permssion helper function
+bool isAuthorized(PermissionStatus status){
+  if(status == PermissionStatus.allow) return true;
+  else if(status == PermissionStatus.always) return true;
+  else if(status == PermissionStatus.whenInUse) return true;
+  else return false;
+}
+
 //required because of how the permission plugin operates
 final ValueNotifier<bool> firstTime = new ValueNotifier<bool>(true);
 

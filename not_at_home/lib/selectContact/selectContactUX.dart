@@ -1,5 +1,6 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:not_at_home/newContact/newContact.dart';
 import 'package:not_at_home/searchContact.dart';
 import 'package:not_at_home/selectContact/contactList.dart';
 import 'package:not_at_home/selectContact/scrollBar.dart';
@@ -7,11 +8,8 @@ import 'package:not_at_home/vibrate.dart';
 import 'package:page_transition/page_transition.dart';
 
 import 'package:vector_math/vector_math_64.dart' as VECT;
-import 'package:not_at_home/newContact.dart';
 
 import 'package:scroll_to_index/scroll_to_index.dart';
-
-import 'dart:math' as math;
 
 class SelectContactUX extends StatefulWidget {
   SelectContactUX({
@@ -222,7 +220,6 @@ class _SelectContactUXState extends State<SelectContactUX> {
                           contacts: widget.contacts,
                           //heights (change when orientation changes)
                           statusBarHeight: statusBarHeight,
-                          bannerHeight: bannerHeight,
                           expandedBannerHeight: expandedBannerHeight,
                           //show widgets
                           sortedLetterCodes: sortedLetterCodes,
@@ -372,7 +369,6 @@ class ToolBar extends StatelessWidget {
                           Navigator.push(
                             context, PageTransition(
                               type: PageTransitionType.downToUp,
-                              duration: Duration(seconds: 5),
                               child: SearchContact(
                                 onSelect: onSelect,
                               ),

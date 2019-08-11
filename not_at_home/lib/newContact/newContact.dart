@@ -4,11 +4,10 @@ import 'dart:typed_data';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:not_at_home/helper.dart';
-import 'package:not_at_home/newContactHelper.dart';
+import 'package:not_at_home/newContact/newContactHelper.dart';
 import 'package:not_at_home/permission.dart';
 import 'package:permission/permission.dart';
 
-import 'helper.dart';
 import 'newContactUX.dart';
 
 /*

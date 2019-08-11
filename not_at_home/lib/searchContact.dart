@@ -15,6 +15,7 @@ class SearchContact extends StatelessWidget {
       body: SafeArea(
         child: Container(
           color: Theme.of(context).primaryColorDark,
+          padding: EdgeInsets.symmetric(vertical: 4),
           child: Column(
             children: <Widget>[
               Container(

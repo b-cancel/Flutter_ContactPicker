@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:not_at_home/imagePicker.dart';
+import 'package:not_at_home/newContact/imagePicker.dart';
 
 class FieldData{
   int index;
