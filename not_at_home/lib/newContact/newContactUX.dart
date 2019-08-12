@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:not_at_home/newContact/categorySelect.dart';
 import 'package:not_at_home/newContact/newContactHelper.dart';
+import 'package:page_transition/page_transition.dart';
 
 //phones, emails, work (job title, company), addresses, note
 
-double titleRight = 16;
-double iconRight = 32;
+double titleRightPadding = 16;
+double iconRightPadding = 32;
 
 class NewContactUX extends StatelessWidget {
   NewContactUX({
@@ -146,6 +148,9 @@ class NewContactUX extends StatelessWidget {
               bottomBarHeight: bottomBarHeight, 
               nextFunction: jobTitleField.nextFunction, 
               label: "Phone 1",
+              labelField: CategorySelector(
+                labelType: LabelType.phone,
+              ),
               rightIconButton: RightIconButton(
                 onTapped: (){
                   print("right icon button pressed");
@@ -163,6 +168,9 @@ class NewContactUX extends StatelessWidget {
               bottomBarHeight: bottomBarHeight, 
               nextFunction: jobTitleField.nextFunction, 
               label: "Phone 2",
+              labelField: CategorySelector(
+                labelType: LabelType.email,
+              ),
               rightIconButton: RightIconButton(
                 onTapped: (){
                   print("right icon button pressed");
@@ -180,6 +188,9 @@ class NewContactUX extends StatelessWidget {
               bottomBarHeight: bottomBarHeight, 
               nextFunction: jobTitleField.nextFunction, 
               label: "Phone 3",
+              labelField: CategorySelector(
+                labelType: LabelType.address,
+              ),
               rightIconButton: RightIconButton(
                 onTapped: (){
                   print("right icon button pressed");
@@ -298,7 +309,7 @@ class Title extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: 16),
               child: Padding(
                 padding: EdgeInsets.only(
-                  right: (rightIconButton == null) ? titleRight : 0,
+                  right: (rightIconButton == null) ? titleRightPadding : 0,
                 ),
                 child: Text(
                   name,
@@ -333,6 +344,7 @@ class TheField extends StatelessWidget {
     @required this.controller,
     @required this.nextFunction,
     @required this.bottomBarHeight,
+    this.labelField,
     this.rightIconButton,
     this.noPadding: false,
   });
@@ -342,6 +354,7 @@ class TheField extends StatelessWidget {
   final TextEditingController controller;
   final Function nextFunction;
   final double bottomBarHeight;
+  final Widget labelField;
   final Widget rightIconButton;
   final bool noPadding;
 
@@ -359,7 +372,7 @@ class TheField extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.only(
                   right: (rightIconButton == null) 
-                  ? ((noPadding) ? 0 : iconRight)
+                  ? ((noPadding) ? 0 : iconRightPadding)
                   : 0,
                 ),
                 child: TextFormField(
@@ -389,8 +402,62 @@ class TheField extends StatelessWidget {
               ),
             ),
           ),
+          labelField ?? Container(),
           rightIconButton ?? Container(),
         ],
+      ),
+    );
+  }
+}
+
+class CategorySelector extends StatelessWidget {
+  CategorySelector({
+    @required this.labelType,
+  });
+
+  final LabelType labelType;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: (){
+          Navigator.push(
+            context, PageTransition(
+              type: PageTransitionType.downToUp,
+              child: CategorySelectionPage(
+                labelType: labelType,
+              ),
+            ),
+          );
+        },
+        child: Container(
+          width: 86,
+          height: 8 + 32.0 + 8,
+          alignment: Alignment.bottomCenter,
+          padding: EdgeInsets.only(
+            left: 16,
+            bottom: 11,
+          ),
+          child: Container(
+            width: 78,
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Theme.of(context).primaryColorLight,
+                )
+              )
+            ),
+            child: Text(
+              "Mobile",
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 18,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -449,7 +516,7 @@ class RightIconButton extends StatelessWidget {
       //color: Colors.grey,
       height: 8 + 8 + 32.0,
       padding: EdgeInsets.symmetric(
-        horizontal: iconRight,
+        horizontal: iconRightPadding,
         vertical: 0,
       ),
       child: SizedBox(
