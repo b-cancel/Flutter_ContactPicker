@@ -2,85 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:not_at_home/newContact/newContactHelper.dart';
 
-class LeftIcon extends StatelessWidget {
-  final IconData icon;
-
-  LeftIcon({
-    this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) { 
-    Color iconColor;
-    if(icon == null){
-      iconColor = Colors.transparent;
-    }
-    else{
-      iconColor = Theme.of(context).primaryColorLight;
-    }
-
-    //return widget
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 8,
-      ),
-      child: SizedBox(
-        width: 24,
-        child: Icon(
-          icon ?? Icons.lock,
-          color: iconColor,
-        ),
-      ),
-    );
-  }
-}
-
-class RightIconButton extends StatelessWidget {
-  RightIconButton({
-    this.onPressed,
-    this.height,
-    this.icon,
-  });
-
-  final Function onPressed;
-  final double height;
-  final Icon icon;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget child = Container(
-      color: Colors.grey,
-      height: height,
-      padding: EdgeInsets.only(
-        right: 16
-      ),
-      child: Container(
-        color: Colors.blue,
-        child: SizedBox(
-          width: 24,
-          child: icon,
-        ),
-      ),
-    );
-
-    //button or no button
-    if(onPressed == null){
-      return child;
-    }
-    else{
-      return FlatButton(
-        padding: EdgeInsets.all(0),
-        splashColor: Colors.transparent,  
-        highlightColor: Colors.transparent,
-        onPressed: onPressed,
-        child: child,
-      );
-    } 
-  }
-}
-
 //phones, emails, work (job title, company), addresses, note
+
+double titleRight = 16;
+double iconRight = 32;
 
 class NewContactUX extends StatelessWidget {
   NewContactUX({
@@ -130,6 +55,7 @@ class NewContactUX extends StatelessWidget {
           controller: thisField.controller,
           nextFunction: thisField.nextFunction,
           label: nameLabels[i],
+          noPadding: true,
         ), 
       );
     }
@@ -141,7 +67,7 @@ class NewContactUX extends StatelessWidget {
         new Title(
           icon: Icons.person,
           name: "Name",
-          onPressed: null,
+          onTapped: null,
         ),
         //displayName, givenName, middleName, prefix, suffix, familyName;
         //Name prefix(prefix), Name suffix(suffix)
@@ -150,26 +76,18 @@ class NewContactUX extends StatelessWidget {
         //NAME START-------------------------
         Visibility(
           visible: (namesSpread.value == false),
-          child: Row(
-            children: <Widget>[
-              Flexible(
-                child: new TheField(
-                  bottomBarHeight: bottomBarHeight,
-                  label: "Name",
-                  focusNode: nameField.focusNode,
-                  controller: nameField.controller,
-                  nextFunction: nameField.nextFunction,
-                ),
-              ),
-              RightIconButton(
-                onPressed: (){
-                  namesSpread.value = !namesSpread.value;
-                },
-                height: 42,
-                icon: Icon(Icons.keyboard_arrow_down),
-                //padding: EdgeInsets.only(left: 8), //TODO...
-              ),
-            ],
+          child: TheField(
+            bottomBarHeight: bottomBarHeight,
+            label: "Name",
+            focusNode: nameField.focusNode,
+            controller: nameField.controller,
+            nextFunction: nameField.nextFunction,
+            rightIconButton: RightIconButton(
+              onTapped: (){
+                namesSpread.value = !namesSpread.value;
+              },
+              icon: Icon(Icons.keyboard_arrow_down),
+            ),
           ),
         ),
         Visibility(
@@ -183,56 +101,23 @@ class NewContactUX extends StatelessWidget {
                 ),
               ),
               Container(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    /*
-                    //GUIDE BELOW
-                    Container(
-                      color: Colors.pink,
-                      //32 from right + 24 icon + 24 left
-                      width: 80,
-                      padding: EdgeInsets.only(
-                        left: 24,
-                        right: 24,
-                      ),
-                      child: Container(
-                        width: 24,
-                        height: 42,
-                        color: Colors.green,
-                      ),
-                    ),
-                    */
-                    FlatButton(
-                      padding: EdgeInsets.all(0),
-                      splashColor: Colors.transparent,  
-                      highlightColor: Colors.transparent,
-                      onPressed: (){
-                        namesSpread.value = !namesSpread.value;
-                      },
-                      child: Container(
-                        height: 42 * 5.0,
-                        width: 80,
-                        padding: EdgeInsets.only(left: 8),
-                        alignment: Alignment.topCenter,
-                        child: Column(
-                          children: <Widget>[
-                            Container(
-                              height: 42,
-                              width: 24,
-                              child: Icon(
-                                Icons.keyboard_arrow_up,
-                              ),
-                            ),
-                            Expanded(
-                              child: Container(),
-                            )
-                          ],
+                //color: Colors.orange,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: (){
+                    namesSpread.value = !namesSpread.value;
+                  },
+                  child: IgnorePointer(
+                    child: Container(
+                      height: 49.0 * 5,
+                      alignment: Alignment.topCenter,
+                      child: RightIconButton(
+                        icon: Icon(
+                          Icons.keyboard_arrow_up,
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],
@@ -242,11 +127,10 @@ class NewContactUX extends StatelessWidget {
         new Title( 
           icon: Icons.phone,
           name: "Phone",
-          onPressed: (){
+          onTapped: (){
             print("tapped phone");
           },
-          rightButton: RightIconButton(
-            height: 42,
+          rightIconButton: RightIconButton(
             icon: Icon(
               Icons.add,
               color: Colors.green,
@@ -262,9 +146,8 @@ class NewContactUX extends StatelessWidget {
               bottomBarHeight: bottomBarHeight, 
               nextFunction: jobTitleField.nextFunction, 
               label: "Phone 1",
-              rightIcon: RightIconButton(
-                height: 42,
-                onPressed: (){
+              rightIconButton: RightIconButton(
+                onTapped: (){
                   print("right icon button pressed");
                 },
                 icon: Icon(
@@ -272,7 +155,40 @@ class NewContactUX extends StatelessWidget {
                   color: Colors.red,
                   size: 16,
                 ),
-                //padding: EdgeInsets.only(left: 8), //TODO...
+              ),
+            ),
+            TheField(
+              focusNode: jobTitleField.focusNode, 
+              controller: jobTitleField.controller, 
+              bottomBarHeight: bottomBarHeight, 
+              nextFunction: jobTitleField.nextFunction, 
+              label: "Phone 2",
+              rightIconButton: RightIconButton(
+                onTapped: (){
+                  print("right icon button pressed");
+                },
+                icon: Icon(
+                  FontAwesomeIcons.minus,
+                  color: Colors.red,
+                  size: 16,
+                ),
+              ),
+            ),
+            TheField(
+              focusNode: jobTitleField.focusNode, 
+              controller: jobTitleField.controller, 
+              bottomBarHeight: bottomBarHeight, 
+              nextFunction: jobTitleField.nextFunction, 
+              label: "Phone 3",
+              rightIconButton: RightIconButton(
+                onTapped: (){
+                  print("right icon button pressed");
+                },
+                icon: Icon(
+                  FontAwesomeIcons.minus,
+                  color: Colors.red,
+                  size: 16,
+                ),
               ),
             ),
           ],
@@ -281,11 +197,10 @@ class NewContactUX extends StatelessWidget {
         new Title( 
           icon: Icons.email,
           name: "Email",
-          onPressed: (){
+          onTapped: (){
             print("tapped email");
           },
-          rightButton: RightIconButton(
-            height: 42,
+          rightIconButton: RightIconButton(
             icon: Icon(
               Icons.add,
               color: Colors.green,
@@ -295,7 +210,7 @@ class NewContactUX extends StatelessWidget {
         new Title( 
           icon: Icons.work,
           name: "Work",
-          onPressed: (){
+          onTapped: (){
             workOpen.value = true;
           }
         ),
@@ -323,11 +238,10 @@ class NewContactUX extends StatelessWidget {
         new Title( 
           icon: Icons.location_on,
           name: "Address",
-          onPressed: (){
+          onTapped: (){
             print("tapped address");
           },
-          rightButton: RightIconButton(
-            height: 42,
+          rightIconButton: RightIconButton(
             icon: Icon(
               Icons.add,
               color: Colors.green,
@@ -337,7 +251,7 @@ class NewContactUX extends StatelessWidget {
         new Title( 
           icon: Icons.note,
           name: "Note",
-          onPressed: (){
+          onTapped: (){
             noteOpen.value = true;
           }
         ),
@@ -359,47 +273,53 @@ class NewContactUX extends StatelessWidget {
 class Title extends StatelessWidget {
   final IconData icon;
   final String name;
-  final Function onPressed;
-  final Widget rightButton;
+  final Function onTapped;
+  final Widget rightIconButton;
 
   const Title({
     @required this.icon,
     @required this.name,
-    this.onPressed,
-    this.rightButton,
+    this.onTapped,
+    this.rightIconButton,
     Key key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    Container theTitle = Container(
-      color: Colors.red,
-      padding: EdgeInsets.symmetric(vertical: 16),
+    Widget theTitle = Container(
+      //color: Colors.red,
       child: Row(
         children: <Widget>[
           LeftIcon(
             icon: icon,
           ),
           Expanded(
-            child: Text(
-              name,
-              style: TextStyle(
-                color: Theme.of(context).primaryColorLight,
-                fontSize: 20,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Padding(
+                padding: EdgeInsets.only(
+                  right: (rightIconButton == null) ? titleRight : 0,
+                ),
+                child: Text(
+                  name,
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColorLight,
+                    fontSize: 20,
+                  ),
+                ),
               ),
             ),
           ),
-          rightButton ?? Container(),
+          rightIconButton ?? Container(),
         ],
       ),
     );
 
     //whether or not the area is clickable
-    if(onPressed == null) return theTitle;
+    if(onTapped == null) return theTitle;
     else{
-      return FlatButton(
-        padding: EdgeInsets.all(0),
-        onPressed: onPressed,
+      return GestureDetector(
+        onTap: onTapped,
         child: theTitle,
       );
     }
@@ -413,7 +333,8 @@ class TheField extends StatelessWidget {
     @required this.controller,
     @required this.nextFunction,
     @required this.bottomBarHeight,
-    this.rightIcon,
+    this.rightIconButton,
+    this.noPadding: false,
   });
 
   final String label;
@@ -421,46 +342,137 @@ class TheField extends StatelessWidget {
   final TextEditingController controller;
   final Function nextFunction;
   final double bottomBarHeight;
-  final Widget rightIcon;
+  final Widget rightIconButton;
+  final bool noPadding;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.purple,
-      padding: EdgeInsets.only(right: 16),
+      //color: Colors.purple,
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           LeftIcon(),
           Flexible(
-            child: TextFormField(
-              focusNode: focusNode,
-              controller: controller,
-              scrollPadding: EdgeInsets.only(bottom: bottomBarHeight * 2 + 8),
-              autofocus: true,
-              style: TextStyle(
-                fontSize: 18,
-              ),
-              onEditingComplete: (nextFunction == null)
-              ? null
-              : (){
-                nextFunction();
-              },
-              textInputAction: (nextFunction == null)
-              ? TextInputAction.done
-              : TextInputAction.next,
-              decoration: InputDecoration(
-                contentPadding: EdgeInsets.only(bottom: 4),
-                hintText: label,
-                hintStyle: TextStyle(
-                  fontSize: 18,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Padding(
+                padding: EdgeInsets.only(
+                  right: (rightIconButton == null) 
+                  ? ((noPadding) ? 0 : iconRight)
+                  : 0,
+                ),
+                child: TextFormField(
+                  focusNode: focusNode,
+                  controller: controller,
+                  scrollPadding: EdgeInsets.only(bottom: bottomBarHeight * 2 + 8),
+                  autofocus: true,
+                  style: TextStyle(
+                    fontSize: 18,
+                  ),
+                  onEditingComplete: (nextFunction == null)
+                  ? null
+                  : (){
+                    nextFunction();
+                  },
+                  textInputAction: (nextFunction == null)
+                  ? TextInputAction.done
+                  : TextInputAction.next,
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.only(bottom: 4),
+                    hintText: label,
+                    hintStyle: TextStyle(
+                      fontSize: 18,
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-          rightIcon ?? Container(),
+          rightIconButton ?? Container(),
         ],
       ),
     );
+  }
+}
+
+//-------------------------CAN OPTIMIZE-------------------------
+
+class LeftIcon extends StatelessWidget {
+  final IconData icon;
+
+  LeftIcon({
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) { 
+    Color iconColor;
+    if(icon == null){
+      iconColor = Colors.transparent;
+    }
+    else{
+      iconColor = Theme.of(context).primaryColorLight;
+    }
+
+    //return widget
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 8,
+      ),
+      child: SizedBox(
+        width: 24,
+        child: Icon(
+          icon ?? Icons.lock,
+          color: iconColor,
+        ),
+      ),
+    );
+  }
+}
+
+class RightIconButton extends StatelessWidget {
+  RightIconButton({
+    @required this.icon,
+    this.onTapped,
+    this.height,
+  });
+
+  final Icon icon;
+  final Function onTapped;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget child = Container(
+      //color: Colors.grey,
+      height: 8 + 8 + 32.0,
+      padding: EdgeInsets.symmetric(
+        horizontal: iconRight,
+        vertical: 0,
+      ),
+      child: SizedBox(
+        child: Container(
+          //color: Colors.blue,
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: icon,
+          ),
+        ),
+      ),
+    );
+
+    //button or no button
+    if(onTapped == null){
+      return child;
+    }
+    else{
+      return GestureDetector(
+        onTap: onTapped,
+        child: child,
+      );
+    } 
   }
 }
