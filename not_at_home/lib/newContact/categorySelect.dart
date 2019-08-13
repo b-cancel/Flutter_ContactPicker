@@ -1,20 +1,94 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+
+import 'package:path_provider/path_provider.dart';
+import 'dart:async';
 
 enum LabelType {phone, email, address}
 enum Boolean { TRUE, FALSE }
 
-class CategorySelectionPage extends StatelessWidget {
+class CategorySelectionPage extends StatefulWidget {
   CategorySelectionPage({
     @required this.labelType,
   });
 
   final LabelType labelType;
-  Boolean boolean = Boolean.TRUE;
+
+  @override
+  _CategorySelectionPageState createState() => _CategorySelectionPageState();
+}
+
+class _CategorySelectionPageState extends State<CategorySelectionPage> {
+  final List<String> labels = new List<String>();
+  
+  @override
+  void initState() {
+    //async init
+    init();
+
+    //super init
+    super.initState();
+  }
+
+  readFile(File reference) async{
+    JsonEncoder encoder = new JsonEncoder.withIndent('  ');
+    String fileString = await reference.readAsString();
+    Map jsonMap = json.decode(fileString);
+    //NOTE: encoder.convert(jsonMap) here should work
+    //BUT because of some caching issue with the function it cuts off
+    //making it never cut off is going to be difficult
+    //but I could split the map into 6 parts and print that
+    var keys = jsonMap.keys.toList();
+    for(int i = 0; i < keys.length; i++){
+      var key = keys[i];
+      print(key + ": " + encoder.convert(jsonMap[key]));
+    }
+  }
+
+  init() async{
+    //calculate all basic params
+    String fileName = widget.labelType.toString();
+    String localPath = (await getApplicationDocumentsDirectory()).path;
+    String filePath = '$localPath/$fileName';
+
+    //create a reference to the file
+    bool fileExists = (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound);
+    File fileReference = File(filePath);
+
+    //If needed create the file
+    if(fileExists == false){
+      //create the file
+      fileReference.create();
+
+      //fill it with defaults
+      String defaultString;
+      switch(widget.labelType){
+        case LabelType.phone:
+          defaultString = '["Mobile", "Home", "Work", "Main", "Work Fax", "Home Fax", "Pager", "Other"]';
+          break;
+        case LabelType.email:
+          defaultString = '["Home", "Work", "Other"]';
+          break;
+        default:
+          defaultString = '["Home", "Work", "Other"]'; 
+          break;
+      }
+      defaultString = '{ "types": ' + defaultString + ' }';
+
+      //write to file
+      await fileReference.writeAsString(defaultString);
+    }
+
+    //Use the file data to populate a list
+    readFile(fileReference);
+  }
 
   @override
   Widget build(BuildContext context) {
     String theType = "";
-    switch(labelType){
+    switch(widget.labelType){
       case LabelType.phone: 
       theType = "phone number"; break;
       case LabelType.email: 
