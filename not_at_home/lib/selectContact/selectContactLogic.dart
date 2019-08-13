@@ -1,6 +1,7 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:not_at_home/newContact/categorySelect.dart';
 import 'package:not_at_home/permission.dart';
 import 'package:not_at_home/request.dart';
 import 'package:not_at_home/selectContact/selectContactUX.dart';
@@ -60,8 +61,11 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   //init
   @override
   void initState(){
+    CategoryData.init(); //read all category data
+
     //super init
     super.initState(); 
+    
     //observer for onResume
     WidgetsBinding.instance.addObserver(this); 
     //if no contact is passed then we know this is the first page

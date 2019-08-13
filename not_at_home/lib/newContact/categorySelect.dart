@@ -70,13 +70,51 @@ class CategoryData{
   }
 }
 
+void customTypePopUp(
+  BuildContext context,
+  bool create, 
+  ValueNotifier<String> labelString,
+  ){
+  // flutter defined function
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      // return object of type Dialog
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(32.0))
+        ),
+        title: new Text(
+          ((create) ? "Create" : "Rename") + " custom type",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        contentPadding: EdgeInsets.only(
+          left: 24,
+          right: 24
+        ),
+        content: new AlertContent(
+          labelString: labelString,
+          //rename set labelString value on init
+          create: create,
+        ),
+      );
+    },
+  );
+}
+
 class CategorySelectionPage extends StatelessWidget {
   CategorySelectionPage({
     @required this.labelType,
+    @required this.labelString,
+    @required this.create,
   });
 
   final LabelType labelType;
-  final GlobalKey<AnimatedListState> listKey = new GlobalKey();
+  final ValueNotifier<String> labelString;
+  final bool create;
 
   @override
   Widget build(BuildContext context) {
@@ -98,20 +136,29 @@ class CategorySelectionPage extends StatelessWidget {
         break;
     }
 
-    //create the widgets
-    List<Widget> widgets = new List<Widget>();
-    for(int i = 0; i < items.length; i++){
-      widgets.add(
-        new AnItem(
-          selected: (i == 0) ? true : false,
-          label: items[i],
-          onTap: (){
-            Navigator.pop(context);
-          },
-        ),
+    //check if the label we passed is contained within the defaults
+    bool hadDefault = items.contains(labelString.value);
+    int theIndexSelected = 0;
+    Widget bottomContent;
+    if(hadDefault){
+      bottomContent = AnItem(
+        label: "Create custom type",
+        labelString: labelString,
+      );
+
+      //determine which default is selected
+      theIndexSelected = items.indexOf(labelString.value);
+    }
+    else{
+      bottomContent = AnItem(
+        label: labelString.value,
+        labelString: labelString,
+        selected: true,
+        showEdit: true,
       );
     }
 
+    //build the widgets
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColorDark,
       appBar: AppBar(
@@ -131,16 +178,21 @@ class CategorySelectionPage extends StatelessWidget {
               ),
             ),
             child: ListView.builder(
-              key: listKey,
               physics: ClampingScrollPhysics(),
               shrinkWrap: true,
               itemBuilder: (context, index){
+                //mark the selected index as selected
+                bool markSelected;
+                if(hadDefault == false) markSelected = false;
+                else{
+                  markSelected = (index == theIndexSelected) ? true : false;
+                }
+
+                //build
                 return AnItem(
-                  selected: (index == 0) ? true : false,
+                  selected: markSelected,
                   label: items[index],
-                  onTap: (){
-                    Navigator.pop(context);
-                  },
+                  labelString: labelString,
                 );
               },
               itemCount: items.length,
@@ -154,14 +206,128 @@ class CategorySelectionPage extends StatelessWidget {
                 bottomRight: Radius.circular(32.0),
               ),
             ),
-            child: AnItem(
-              label: "Create custom type",
-              onTap: (){
-                print("adding custom type");
-              },
-            ),
+            child: bottomContent,
           )
         ],
+      ),
+    );
+  }
+}
+
+class AlertContent extends StatefulWidget {
+  const AlertContent({
+    Key key,
+    @required this.labelString,
+    @required this.create,
+  }) : super(key: key);
+
+  final ValueNotifier<String> labelString;
+  final bool create;
+
+  @override
+  _AlertContentState createState() => _AlertContentState();
+}
+
+class _AlertContentState extends State<AlertContent> {
+  TextEditingController customType = new TextEditingController();
+  bool canCreate = false;
+
+  @override
+  void initState() {
+    if(widget.create == false){
+      customType.text = widget.labelString.value;
+    }
+
+    //enable the create button when possible
+    customType.addListener((){
+      canCreate = (customType.text.length != 0);
+      setState(() {
+        
+      });
+    });
+
+    //super init
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          TextField(
+            autofocus: true,
+            controller: customType,
+            textInputAction: TextInputAction.done,
+          ),
+          Row(
+            children: <Widget>[
+              new PopUpButton(
+                onTapped: (){
+                  Navigator.pop(context);
+                }, 
+                text: "Cancel",
+              ),
+              Center(
+                child: Container(
+                  width: 2,
+                  height: 26,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+              new PopUpButton(
+                onTapped: canCreate ? (){
+                  //save string
+                  widget.labelString.value = customType.text;
+                  //pop the pop up
+                  Navigator.pop(context);
+                  //pop the select type window
+                  Navigator.pop(context);
+                }
+                : null, 
+                text: "Create",
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class PopUpButton extends StatelessWidget {
+  const PopUpButton({
+    Key key,
+    @required this.onTapped,
+    @required this.text,
+  }) : super(key: key);
+
+  final Function onTapped;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTapped,
+          child: Container(
+            padding: EdgeInsets.all(24),
+            alignment: Alignment.center,
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).primaryColorLight.withOpacity(
+                  (onTapped == null) ? 0.5 : 1,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -170,14 +336,16 @@ class CategorySelectionPage extends StatelessWidget {
 class AnItem extends StatelessWidget {
   const AnItem({
     @required this.label,
-    @required this.onTap,
+    @required this.labelString,
     this.selected,
+    this.showEdit: false,
   });
 
   
   final String label;
-  final Function onTap;
+  final ValueNotifier<String> labelString;
   final bool selected;
+  final bool showEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -202,31 +370,72 @@ class AnItem extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16),
-          child: Row(
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: Container(
-                  child: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: leading,
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: InkWell(
+              onTap: (){
+                if(selected == null){ //create pop up
+                  customTypePopUp(
+                    context,
+                    true,
+                    labelString,
+                  );
+                }
+                else{ //select item
+                  labelString.value = label;
+                  Navigator.pop(context);
+                }
+              },
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 24),
+                      child: Container(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: leading,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          showEdit ? InkWell(
+            onTap: (){
+              customTypePopUp(
+                context,
+                false,
+                labelString,
+              );
+            },
+            child: Container(
+              alignment: Alignment.centerRight,
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Text(
+                  "Edit",
+                  style: TextStyle(
+                    fontSize: 20,
                   ),
                 ),
               ),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 20,
-                ),
-              )
-            ],
-          ),
-        ),
+            ),
+          )
+          : Container(),
+        ],
       ),
     );
   }

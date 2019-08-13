@@ -147,7 +147,7 @@ class NewContactUX extends StatelessWidget {
               controller: jobTitleField.controller, 
               bottomBarHeight: bottomBarHeight, 
               nextFunction: jobTitleField.nextFunction, 
-              label: "Phone 1",
+              label: "Phone Test",
               labelField: CategorySelector(
                 labelType: LabelType.phone,
               ),
@@ -167,7 +167,7 @@ class NewContactUX extends StatelessWidget {
               controller: jobTitleField.controller, 
               bottomBarHeight: bottomBarHeight, 
               nextFunction: jobTitleField.nextFunction, 
-              label: "Phone 2",
+              label: "Email Test",
               labelField: CategorySelector(
                 labelType: LabelType.email,
               ),
@@ -187,7 +187,7 @@ class NewContactUX extends StatelessWidget {
               controller: jobTitleField.controller, 
               bottomBarHeight: bottomBarHeight, 
               nextFunction: jobTitleField.nextFunction, 
-              label: "Phone 3",
+              label: "Address Test",
               labelField: CategorySelector(
                 labelType: LabelType.address,
               ),
@@ -410,12 +410,45 @@ class TheField extends StatelessWidget {
   }
 }
 
-class CategorySelector extends StatelessWidget {
+class CategorySelector extends StatefulWidget {
   CategorySelector({
     @required this.labelType,
   });
 
   final LabelType labelType;
+
+  @override
+  _CategorySelectorState createState() => _CategorySelectorState();
+}
+
+class _CategorySelectorState extends State<CategorySelector> {
+  ValueNotifier<String> labelSelected; 
+
+  @override
+  void initState() {
+    //init
+    switch(widget.labelType){
+      case LabelType.phone:
+        labelSelected = new ValueNotifier<String>(CategoryData.phoneLabels[0]);
+        break;
+      case LabelType.email:
+        labelSelected = new ValueNotifier<String>(CategoryData.emailLabels[0]);
+        break;
+      default: 
+        labelSelected = new ValueNotifier<String>(CategoryData.addressLabels[0]);
+        break;
+    }
+
+    //when label Selected changes reload
+    labelSelected.addListener((){
+      setState(() {
+        
+      });
+    });
+
+    //super init
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -427,13 +460,15 @@ class CategorySelector extends StatelessWidget {
             context, PageTransition(
               type: PageTransitionType.downToUp,
               child: CategorySelectionPage(
-                labelType: labelType,
+                labelType: widget.labelType,
+                labelString: labelSelected,
+                create: true,
               ),
             ),
           );
         },
         child: Container(
-          width: 86,
+          width: 100,
           height: 8 + 32.0 + 8,
           alignment: Alignment.bottomCenter,
           padding: EdgeInsets.only(
@@ -441,7 +476,9 @@ class CategorySelector extends StatelessWidget {
             bottom: 11,
           ),
           child: Container(
-            width: 78,
+            alignment: Alignment.center,
+            padding: EdgeInsets.only(top: 12),
+            width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
@@ -450,7 +487,7 @@ class CategorySelector extends StatelessWidget {
               )
             ),
             child: Text(
-              "Mobile",
+              labelSelected.value,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 18,

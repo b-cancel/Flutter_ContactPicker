@@ -295,8 +295,6 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   //-------------------------Init-------------------------
   @override
   void initState() {
-    CategoryData.init(); //read all category data
-
     workOpen.addListener((){
       //set state to reflect that change
       setState(() {});
