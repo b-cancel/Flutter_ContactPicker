@@ -102,7 +102,7 @@ class CategorySelectionPage extends StatelessWidget {
     List<Widget> widgets = new List<Widget>();
     for(int i = 0; i < items.length; i++){
       widgets.add(
-        new Item(
+        new AnItem(
           selected: (i == 0) ? true : false,
           label: items[i],
           onTap: (){
@@ -135,7 +135,7 @@ class CategorySelectionPage extends StatelessWidget {
               physics: ClampingScrollPhysics(),
               shrinkWrap: true,
               itemBuilder: (context, index){
-                return Item(
+                return AnItem(
                   selected: (index == 0) ? true : false,
                   label: items[index],
                   onTap: (){
@@ -154,7 +154,7 @@ class CategorySelectionPage extends StatelessWidget {
                 bottomRight: Radius.circular(32.0),
               ),
             ),
-            child: Item(
+            child: AnItem(
               label: "Create custom type",
               onTap: (){
                 print("adding custom type");
@@ -167,8 +167,8 @@ class CategorySelectionPage extends StatelessWidget {
   }
 }
 
-class Item extends StatelessWidget {
-  const Item({
+class AnItem extends StatelessWidget {
+  const AnItem({
     @required this.label,
     @required this.onTap,
     this.selected,
