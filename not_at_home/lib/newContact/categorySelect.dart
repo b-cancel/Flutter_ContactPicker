@@ -9,160 +9,107 @@ import 'dart:async';
 enum LabelType {phone, email, address}
 enum Boolean { TRUE, FALSE }
 
-class CategorySelectionPage extends StatefulWidget {
+class CategoryData{
+  static List<String> phoneLabels = new List<String>();
+  static List<String> emailLabels = new List<String>();
+  static List<String> addressLabels = new List<String>();
+
+  static init(){
+    listInit(LabelType.phone);
+    listInit(LabelType.email);
+    listInit(LabelType.address);
+  }
+
+  static listInit(LabelType labelType) async{
+    //calculate all basic params
+    String fileName = labelType.toString();
+    String localPath = (await getApplicationDocumentsDirectory()).path;
+    String filePath = '$localPath/$fileName';
+    File fileReference = File(filePath);
+
+    //If needed create the file
+    bool fileExists = (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound);
+    if(fileExists == false) await createDefault(labelType, fileReference);
+
+    //Use the file data to populate a list
+    readFile(labelType, fileReference);
+  }
+
+  static createDefault(LabelType labelType, File reference) async{
+    //create the file
+    reference.create();
+
+    //fill it with defaults
+    String defaultString;
+    switch(labelType){
+      case LabelType.phone:
+        defaultString = '["Mobile", "Home", "Work", "Main", "Work Fax", "Home Fax", "Pager", "Other"]';
+        break;
+      case LabelType.email:
+        defaultString = '["Home", "Work", "Other"]';
+        break;
+      default:
+        defaultString = '["Home", "Work", "Other"]'; 
+        break;
+    }
+    defaultString = '{ "types": ' + defaultString + ' }';
+
+    //write to file
+    await reference.writeAsString(defaultString);
+  }
+
+  static readFile(LabelType labelType, File reference) async{
+    String fileString = await reference.readAsString();
+    Map jsonMap = json.decode(fileString);
+    List<String> list = new List<String>.from(jsonMap[jsonMap.keys.toList()[0]]);
+    switch(labelType){
+      case LabelType.phone: phoneLabels = list; break;
+      case LabelType.email: emailLabels = list; break;
+      default: addressLabels = list; break;
+    }
+  }
+}
+
+class CategorySelectionPage extends StatelessWidget {
   CategorySelectionPage({
     @required this.labelType,
   });
 
   final LabelType labelType;
-
-  @override
-  _CategorySelectionPageState createState() => _CategorySelectionPageState();
-}
-
-class _CategorySelectionPageState extends State<CategorySelectionPage> {
-  final List<String> labels = new List<String>();
-  
-  @override
-  void initState() {
-    //async init
-    init();
-
-    //super init
-    super.initState();
-  }
-
-  readFile(File reference) async{
-    JsonEncoder encoder = new JsonEncoder.withIndent('  ');
-    String fileString = await reference.readAsString();
-    Map jsonMap = json.decode(fileString);
-    //NOTE: encoder.convert(jsonMap) here should work
-    //BUT because of some caching issue with the function it cuts off
-    //making it never cut off is going to be difficult
-    //but I could split the map into 6 parts and print that
-    var keys = jsonMap.keys.toList();
-    for(int i = 0; i < keys.length; i++){
-      var key = keys[i];
-      print(key + ": " + encoder.convert(jsonMap[key]));
-    }
-  }
-
-  init() async{
-    //calculate all basic params
-    String fileName = widget.labelType.toString();
-    String localPath = (await getApplicationDocumentsDirectory()).path;
-    String filePath = '$localPath/$fileName';
-
-    //create a reference to the file
-    bool fileExists = (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound);
-    File fileReference = File(filePath);
-
-    //If needed create the file
-    if(fileExists == false){
-      //create the file
-      fileReference.create();
-
-      //fill it with defaults
-      String defaultString;
-      switch(widget.labelType){
-        case LabelType.phone:
-          defaultString = '["Mobile", "Home", "Work", "Main", "Work Fax", "Home Fax", "Pager", "Other"]';
-          break;
-        case LabelType.email:
-          defaultString = '["Home", "Work", "Other"]';
-          break;
-        default:
-          defaultString = '["Home", "Work", "Other"]'; 
-          break;
-      }
-      defaultString = '{ "types": ' + defaultString + ' }';
-
-      //write to file
-      await fileReference.writeAsString(defaultString);
-    }
-
-    //Use the file data to populate a list
-    readFile(fileReference);
-  }
+  final GlobalKey<AnimatedListState> listKey = new GlobalKey();
 
   @override
   Widget build(BuildContext context) {
+    //create the title AND retreive the list
     String theType = "";
-    switch(widget.labelType){
+    List<String> items;
+    switch(labelType){
       case LabelType.phone: 
-      theType = "phone number"; break;
+        theType = "phone number"; 
+        items = CategoryData.phoneLabels;
+        break;
       case LabelType.email: 
-      theType = "email address"; break;
-      default: theType = "address"; break;
+        theType = "email address"; 
+        items = CategoryData.emailLabels;
+        break;
+      default: 
+        theType = "address"; 
+        items = CategoryData.addressLabels;
+        break;
     }
 
-    List<Widget> items = [
-      new Item(
-        selected: true,
-        label: "Mobile",
-        onTap: (){
-          Navigator.pop(context);
-        },
-      ),
-      new Item(
-        selected: false,
-        label: "Home",
-        onTap: (){
-          Navigator.pop(context);
-        },
-      ),
-      new Item(
-        selected: false,
-        label: "Work",
-        onTap: (){
-          Navigator.pop(context);
-        },
-      ),
-      new Item(
-        selected: false,
-        label: "Main",
-        onTap: (){
-          Navigator.pop(context);
-        },
-      ),
-      new Item(
-        selected: false,
-        label: "Work Fax",
-        onTap: (){
-          Navigator.pop(context);
-        },
-      ),
-      new Item(
-        selected: false,
-        label: "Home Fax",
-        onTap: (){
-          Navigator.pop(context);
-        },
-      ),
-      new Item(
-        selected: false, 
-        label: "Pager",
-        onTap: (){
-          Navigator.pop(context);
-        },
-      ),
-      new Item(
-        selected: false,
-        label: "Other",
-        onTap: (){
-          Navigator.pop(context);
-        },
-      ),
-      new Item(
-        label: "Create custom type",
-        onTap: (){
-          Navigator.pop(context);
-        },
-      ),
-    ];
-
+    //create the widgets
+    List<Widget> widgets = new List<Widget>();
     for(int i = 0; i < items.length; i++){
-      
+      widgets.add(
+        new Item(
+          selected: (i == 0) ? true : false,
+          label: items[i],
+          onTap: (){
+            Navigator.pop(context);
+          },
+        ),
+      );
     }
 
     return Scaffold(
@@ -173,15 +120,48 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
           "Select " + theType + " type", 
         ),
       ),
-      body: Card(
-        margin: EdgeInsets.all(0),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(32.0),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: items,
-        ),
+      body: ListView(
+        children: <Widget>[
+          Container(
+            decoration: new BoxDecoration(
+              color: Theme.of(context).primaryColor,
+              borderRadius: new BorderRadius.only(
+                topLeft: Radius.circular(32.0),
+                topRight: Radius.circular(32.0),
+              ),
+            ),
+            child: ListView.builder(
+              key: listKey,
+              physics: ClampingScrollPhysics(),
+              shrinkWrap: true,
+              itemBuilder: (context, index){
+                return Item(
+                  selected: (index == 0) ? true : false,
+                  label: items[index],
+                  onTap: (){
+                    Navigator.pop(context);
+                  },
+                );
+              },
+              itemCount: items.length,
+            ),
+          ),
+          Container(
+            decoration: new BoxDecoration(
+              color: Theme.of(context).primaryColor,
+              borderRadius: new BorderRadius.only(
+                bottomLeft: Radius.circular(32.0),
+                bottomRight: Radius.circular(32.0),
+              ),
+            ),
+            child: Item(
+              label: "Create custom type",
+              onTap: (){
+                print("adding custom type");
+              },
+            ),
+          )
+        ],
       ),
     );
   }

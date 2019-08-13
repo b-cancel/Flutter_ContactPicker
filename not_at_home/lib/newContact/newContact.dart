@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:not_at_home/helper.dart';
+import 'package:not_at_home/newContact/categorySelect.dart';
 import 'package:not_at_home/newContact/newContactHelper.dart';
 import 'package:not_at_home/permission.dart';
 import 'package:permission/permission.dart';
@@ -294,6 +295,8 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   //-------------------------Init-------------------------
   @override
   void initState() {
+    CategoryData.init(); //read all category data
+
     workOpen.addListener((){
       //set state to reflect that change
       setState(() {});
