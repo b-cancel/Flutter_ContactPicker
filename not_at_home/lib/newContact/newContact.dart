@@ -82,7 +82,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   ValueNotifier<bool> workOpen = new ValueNotifier<bool>(false);
 
   //-------------------------Addresses
-  bool autoAddFirstAddress = false; //TODO... the default of this is true
+  bool autoAddFirstAddress = false;
   List<FieldData> addressStreetFields = new List<FieldData>();
   List<FieldData> addressCityFields = new List<FieldData>();
   List<FieldData> addressPostcodeFields = new List<FieldData>();
@@ -158,11 +158,11 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
   //-------------------------Next Function Helpers-------------------------
 
-  toFirstPhone(){
+  toFirstPhone(){ //TODO... shift addPhone to addFirstPhone
     toFirstItem(phoneValueFields, autoAddFirstPhone, addPhone, toFirstEmail);
   }
 
-  toFirstEmail(){
+  toFirstEmail(){ //TODO... shift addEmail to addFirstEmail
     toFirstItem(emailValueFields, autoAddFirstEmail, addEmail, toWork);
   }
 
@@ -174,7 +174,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     }
   }
 
-  toFirstAddress(){
+  toFirstAddress(){ //TODO... shift addPostalAddress to addFirstPostalAddress
     toFirstItem(addressStreetFields, autoAddFirstAddress, addPostalAddress, toNote);
   }
 
@@ -189,12 +189,11 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   //-------------------------Add To List Helper-------------------------
 
   addItem(List<List<FieldData>> allFields){
-    int newIndex = allFields[0].length; //TODO... possible fix
+    int newIndex = allFields[0].length; 
 
-    //init all fields
+    //init all fields for the new item
     for(int i = 0; i < allFields.length; i++){
       allFields[i].add(FieldData()); //add both values
-      allFields[i][newIndex].index = newIndex; //set the indices 
     }
 
     //set the state so the UI rebuilds with the new number
@@ -254,12 +253,21 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
   //-------------------------Remove From Lists Helper-------------------------
 
+  //NOTE: edge case where you delete the last item is handled
+  //NOTE: if you are focused on some other item while deleting this one, your focus will not shift
+  //NOTE: if you delete the last item in a list focus will be taken and keyboard closed
   removeItem(int index, List<List<FieldData>> allFields){
     if(0 <= index && index < allFields[0].length){
-      //save next focus function
-      Function nextFocus = allFields.last[index].nextFunction; //TODO... possile repair
+      //determine if we are currently focusing on any fields that will be deleted
+      bool deleteFocusedField = false;
+      for(int i = 0; i < allFields.length; i++){
+        if(allFields[i][index].focusNode.hasFocus){
+          deleteFocusedField = true;
+          break;
+        }
+      }
 
-      //remove the item
+      //remove the all fields of the item
       for(int i = 0; i < allFields.length; i++){
         allFields[i].removeAt(index);
       }
@@ -268,9 +276,15 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
       setState(() {});
 
       //focus on the NEXT field AFTER build completes (above)
-      WidgetsBinding.instance.addPostFrameCallback((_){
-        nextFocus();
-      });
+      if(deleteFocusedField){
+        print("length: " + allFields.length.toString());
+        WidgetsBinding.instance.addPostFrameCallback((_){
+          FocusScope.of(context).requestFocus(new FocusNode());
+          //NOTE: we could focus on the "nextFunction" of the deleted item
+          //but it seems more standard to simply close up the keybaord
+        });
+      }
+      //ELSE... stay focused on whatever other field you were before deleting this one
     }
     //ELSE... we can't remove what doesn't exist
   }
@@ -351,7 +365,6 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     int fieldCount = 0; //0,1,2,3,4
     while(fieldCount < 5){
       nameFields.add(FieldData());
-      nameFields[fieldCount].index = fieldCount;
       fieldCount++;
     }
     nameLabels.add("Name prefix");
@@ -587,8 +600,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   //-------------------------build-------------------------
   @override
   Widget build(BuildContext context) {
-
-    //TODO... fill all the function arguments depending on current vars
+    print("*****BUILDING*****");
 
     //TODO... I should be able to shift everything below to init
     //from our name field we move onto the first phone
@@ -599,7 +611,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     //or whatever else we can
     for(int i = 0; i < nameFields.length; i++){
       FieldData thisField = nameFields[i];
-      if(i != (nameFields.length - 1)){
+      if(i != (nameFields.length - 1)){ //not last index
         thisField.nextFunction = (){
           FocusScope.of(context).requestFocus(nameFields[i+1].focusNode);
         };
@@ -610,7 +622,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     //phones section
     for(int i = 0; i < phoneValueFields.length; i++){
       FieldData thisField = phoneValueFields[i];
-      if(i != (phoneValueFields.length - 1)){
+      if(i != (phoneValueFields.length - 1)){ //not last index
         thisField.nextFunction = (){
           FocusScope.of(context).requestFocus(phoneValueFields[i+1].focusNode);
         };
@@ -621,7 +633,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     //emails section
     for(int i = 0; i < emailValueFields.length; i++){
       FieldData thisField = emailValueFields[i];
-      if(i != (emailValueFields.length - 1)){
+      if(i != (emailValueFields.length - 1)){ //not last index
         thisField.nextFunction = (){
           FocusScope.of(context).requestFocus(emailValueFields[i+1].focusNode);
         };

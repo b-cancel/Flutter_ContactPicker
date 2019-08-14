@@ -4,13 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:not_at_home/newContact/imagePicker.dart';
 
 class FieldData{
-  int index;
   TextEditingController controller;
   FocusNode focusNode;
   Function nextFunction;
 
   FieldData(){
-    index = 0;
     controller = new TextEditingController();
     focusNode = new FocusNode();
     nextFunction = (){

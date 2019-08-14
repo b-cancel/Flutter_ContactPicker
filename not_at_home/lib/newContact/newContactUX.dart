@@ -91,6 +91,7 @@ class NewContactUX extends StatelessWidget {
           label: "Phone",
           labelField: CategorySelector(
             labelType: LabelType.phone,
+            labelSelected: phoneLabels[i],
           ),
           rightIconButton: RightIconButton(
             onTapped: () => removePhone(i),
@@ -117,6 +118,7 @@ class NewContactUX extends StatelessWidget {
           label: "Email",
           labelField: CategorySelector(
             labelType: LabelType.email,
+            labelSelected: emailLabels[i],
           ),
           rightIconButton: RightIconButton(
             onTapped: () => removeEmail(i),
@@ -421,34 +423,21 @@ class TheField extends StatelessWidget {
 class CategorySelector extends StatefulWidget {
   CategorySelector({
     @required this.labelType,
+    @required this.labelSelected,
   });
 
   final LabelType labelType;
+  final ValueNotifier<String> labelSelected;
 
   @override
   _CategorySelectorState createState() => _CategorySelectorState();
 }
 
 class _CategorySelectorState extends State<CategorySelector> {
-  ValueNotifier<String> labelSelected; 
-
   @override
   void initState() {
-    //init
-    switch(widget.labelType){
-      case LabelType.phone:
-        labelSelected = new ValueNotifier<String>(CategoryData.phoneLabels[0]);
-        break;
-      case LabelType.email:
-        labelSelected = new ValueNotifier<String>(CategoryData.emailLabels[0]);
-        break;
-      default: 
-        labelSelected = new ValueNotifier<String>(CategoryData.addressLabels[0]);
-        break;
-    }
-
     //when label Selected changes reload
-    labelSelected.addListener((){
+    widget.labelSelected.addListener((){
       setState(() {
         
       });
@@ -469,7 +458,7 @@ class _CategorySelectorState extends State<CategorySelector> {
               type: PageTransitionType.downToUp,
               child: CategorySelectionPage(
                 labelType: widget.labelType,
-                labelString: labelSelected,
+                labelString: widget.labelSelected,
                 create: true,
               ),
             ),
@@ -495,7 +484,7 @@ class _CategorySelectorState extends State<CategorySelector> {
               )
             ),
             child: Text(
-              labelSelected.value,
+              widget.labelSelected.value,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 18,
