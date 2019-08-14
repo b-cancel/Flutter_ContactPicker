@@ -600,8 +600,6 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   //-------------------------build-------------------------
   @override
   Widget build(BuildContext context) {
-    print("*****BUILDING*****");
-
     //TODO... I should be able to shift everything below to init
     //from our name field we move onto the first phone
     //or whatever else we can
@@ -768,81 +766,78 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   }
 
   createContact() async{
-    //create empty contact
-    Contact newContact = new Contact();
+    bool firstName = true; //nameFields[1].controller.text != "";
+    bool lastName = true; //nameFields[3].controller.text != "";
+    if(firstName && lastName){
+      //create empty contact
+      Contact newContact = new Contact();
 
-    //save the image
-    if(imageLocation.value != ""){
-      List<int> avatarList = await File(imageLocation.value).readAsBytes();
-      newContact.avatar = Uint8List.fromList(avatarList);
-    }
+      //save the image
+      if(imageLocation.value != ""){
+        List<int> avatarList = await File(imageLocation.value).readAsBytes();
+        newContact.avatar = Uint8List.fromList(avatarList);
+      }
 
-    //save the name(s)
-    newContact.givenName = nameField.controller.text;
+      //save the name(s)
+      newContact.displayName = "display"; //nameField.controller.text;
 
-    newContact.prefix = nameFields[0].controller.text;
-    newContact.displayName = nameFields[1].controller.text;
-    newContact.middleName = nameFields[2].controller.text;
-    newContact.familyName = nameFields[3].controller.text;
-    newContact.suffix = nameFields[4].controller.text;
+      newContact.prefix = "prefix"; //nameFields[0].controller.text;
+      newContact.givenName = "first"; //nameFields[1].controller.text;
+      newContact.middleName = "middle"; //nameFields[2].controller.text;
+      newContact.familyName = "last"; //nameFields[3].controller.text;
+      newContact.suffix = "suffix"; //nameFields[4].controller.text;
 
-    //save the phones
-    newContact.phones = itemFieldData2ItemList(
-      phoneValueFields, 
-      phoneLabelStrings,
-    );
-
-    //save the emails
-    newContact.emails= itemFieldData2ItemList(
-      emailValueFields, 
-      emailLabelStrings,
-    );
-
-    //save the work stuff
-    newContact.jobTitle = jobTitleField.controller.text;
-    newContact.company = companyField.controller.text;
-
-    //save the addresses
-    //TODO... save the addresses
-
-    //save the note
-    newContact.note = noteField.controller.text;
-
-    //TODO... remove this test code
-    // The contact must have a firstName / lastName to be successfully added
-    if(newContact.givenName == "") newContact.givenName = "given";
-    if(newContact.displayName == "") newContact.displayName = "display";
-    if(newContact.familyName == "") newContact.familyName = "family";
-    if(newContact.middleName == "") newContact.middleName = "middle";
-    newContact.phones = [Item(value: "9567772692", label: "mobile")];
-
-    //handle permissions
-    PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
-    if(isAuthorized(permissionStatus)){
-      //with permission we can both
-      //1. add the contact
-      //NOTE: The contact must have a firstName / lastName to be successfully added  
-      await ContactsService.addContact(new Contact(givenName: "a", familyName: "b"));  
-      //2. and update the contact
-      widget.onSelect(context, newContact);
-    }
-    else{
-      //we know that we don't have permission so we know either the modal or page will pop up
-      backFromPermissionPage.value = true;
-
-      //without permission we give the user the option to ONLY
-      //1. update the contact
-      permissionRequired(
-        context,
-        //the user is never forced to create a contact, only to select one
-        false, 
-        false, //we are creating a contact
-        (){
-          //on Select only updates the contact
-          //or the user can give us permission and come back and add it as well
-          widget.onSelect(context, newContact);
-        }
+      //save the phones
+      newContact.phones = itemFieldData2ItemList(
+        phoneValueFields, 
+        phoneLabelStrings,
       );
+
+      //save the emails
+      newContact.emails= itemFieldData2ItemList(
+        emailValueFields, 
+        emailLabelStrings,
+      );
+
+      //save the work stuff
+      newContact.jobTitle = jobTitleField.controller.text;
+      newContact.company = companyField.controller.text;
+
+      //save the addresses
+      newContact.postalAddresses = fieldsToAddresses();
+
+      //save the note
+      newContact.note = noteField.controller.text;
+
+      //handle permissions
+      PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
+      if(isAuthorized(permissionStatus)){
+        //with permission we can both
+        //1. add the contact
+        //NOTE: The contact must have a firstName / lastName to be successfully added  
+        await ContactsService.addContact(newContact);  
+        //2. and update the contact
+        widget.onSelect(context, newContact);
+      }
+      else{
+        //we know that we don't have permission so we know either the modal or page will pop up
+        backFromPermissionPage.value = true;
+
+        //without permission we give the user the option to ONLY
+        //1. update the contact
+        permissionRequired(
+          context,
+          //the user is never forced to create a contact, only to select one
+          false, 
+          false, //we are creating a contact
+          (){
+            //on Select only updates the contact
+            //or the user can give us permission and come back and add it as well
+            widget.onSelect(context, newContact);
+          }
+        );
+      }
     }
+    else print("POP UP HERE");
   }
 }
