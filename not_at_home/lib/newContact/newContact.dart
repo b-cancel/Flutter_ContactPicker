@@ -513,30 +513,27 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
       }
       else{ //If all the names have been closed
         //combine all the names into a single name
-        //NOTE: before suffix we add a ','
-        String name = "";
+        //NOTE: before suffix we add a ', '
+        List<String> names = new List<String>();
+        bool prefixPresent = false;
         for(int i = 0; i < nameFields.length; i++){
           FieldData thisField = nameFields[i];
           String text = thisField.controller.text.trim();
-          if(i == (nameFields.length - 1)){
-            if(text != ""){
-              if(name == ""){
-                name += "," + text;
-              }
-              else{
-                name += " ," + text;
-              }
-            }
+          if(text.length > 0){
+            names.add(text);
+
+            //check if prefix
+            if(i == (nameFields.length - 1)) prefixPresent = true;
           }
-          else{
-            if(i == 0) name = text;
-            else{ //there is some text already in the name
-              //so to do things properly we have to add a space behind us
-              if(text != ""){
-                name = name + " " + text;
-              }
-            }
-          }
+        }
+
+        //from all grabbed names get name
+        String name = "";
+        for(int i = 0; i < names.length; i++){
+          //dr cancel, bubo
+          if(prefixPresent && i == (names.length - 1)) name += ", ";
+          else if(i != 0) name += " ";
+          name += names[i];
         }
 
         //set the combine name into our field
