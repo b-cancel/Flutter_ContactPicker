@@ -46,12 +46,12 @@ class NewContactUX extends StatelessWidget {
   final Function addPhone;
   final Function removePhone;
   final List<FieldData> phoneFields;
-  final List<String> phoneLabels;
+  final List<ValueNotifier<String>> phoneLabels;
   //emails
   final Function addEmail;
   final Function removeEmail;
   final List<FieldData> emailFields;
-  final List<String> emailLabels;
+  final List<ValueNotifier<String>> emailLabels;
   //handle work
   final FieldData jobTitleField;
   final FieldData companyField;
@@ -75,6 +75,58 @@ class NewContactUX extends StatelessWidget {
           label: nameLabels[i],
           noPadding: true,
         ), 
+      );
+    }
+
+    //create all needed phone rows
+    List<Widget> phoneRows = new List<Widget>();
+    for(int i = 0; i < phoneFields.length; i++){
+      FieldData thisField = phoneFields[i];
+      phoneRows.add(
+        TheField(
+          focusNode: thisField.focusNode, 
+          controller: thisField.controller, 
+          bottomBarHeight: bottomBarHeight, 
+          nextFunction: thisField.nextFunction, 
+          label: "Phone",
+          labelField: CategorySelector(
+            labelType: LabelType.phone,
+          ),
+          rightIconButton: RightIconButton(
+            onTapped: () => removePhone(i),
+            icon: Icon(
+              FontAwesomeIcons.minus,
+              color: Colors.red,
+              size: 16,
+            ),
+          ),
+        ),
+      );
+    }
+
+    //create all needed email rows
+    List<Widget> emailRows = new List<Widget>();
+    for(int i = 0; i < emailFields.length; i++){
+      FieldData thisField = emailFields[i];
+      emailRows.add(
+        TheField(
+          focusNode: thisField.focusNode, 
+          controller: thisField.controller, 
+          bottomBarHeight: bottomBarHeight, 
+          nextFunction: thisField.nextFunction, 
+          label: "Email",
+          labelField: CategorySelector(
+            labelType: LabelType.email,
+          ),
+          rightIconButton: RightIconButton(
+            onTapped: () => removeEmail(i),
+            icon: Icon(
+              FontAwesomeIcons.minus,
+              color: Colors.red,
+              size: 16,
+            ),
+          ),
+        ),
       );
     }
 
@@ -155,85 +207,24 @@ class NewContactUX extends StatelessWidget {
           )
           : Container(),
         ),
-        //PHONE START-------------------------
-        //TODO... replace with actual phone widgets created on build
         Column(
-          children: <Widget>[
-            TheField(
-              focusNode: jobTitleField.focusNode, 
-              controller: jobTitleField.controller, 
-              bottomBarHeight: bottomBarHeight, 
-              nextFunction: jobTitleField.nextFunction, 
-              label: "Phone Test",
-              labelField: CategorySelector(
-                labelType: LabelType.phone,
-              ),
-              rightIconButton: RightIconButton(
-                onTapped: (){
-                  print("right icon button pressed");
-                },
-                icon: Icon(
-                  FontAwesomeIcons.minus,
-                  color: Colors.red,
-                  size: 16,
-                ),
-              ),
-            ),
-            TheField(
-              focusNode: jobTitleField.focusNode, 
-              controller: jobTitleField.controller, 
-              bottomBarHeight: bottomBarHeight, 
-              nextFunction: jobTitleField.nextFunction, 
-              label: "Email Test",
-              labelField: CategorySelector(
-                labelType: LabelType.email,
-              ),
-              rightIconButton: RightIconButton(
-                onTapped: (){
-                  print("right icon button pressed");
-                },
-                icon: Icon(
-                  FontAwesomeIcons.minus,
-                  color: Colors.red,
-                  size: 16,
-                ),
-              ),
-            ),
-            TheField(
-              focusNode: jobTitleField.focusNode, 
-              controller: jobTitleField.controller, 
-              bottomBarHeight: bottomBarHeight, 
-              nextFunction: jobTitleField.nextFunction, 
-              label: "Address Test",
-              labelField: CategorySelector(
-                labelType: LabelType.address,
-              ),
-              rightIconButton: RightIconButton(
-                onTapped: (){
-                  print("right icon button pressed");
-                },
-                icon: Icon(
-                  FontAwesomeIcons.minus,
-                  color: Colors.red,
-                  size: 16,
-                ),
-              ),
-            ),
-          ],
+          children: phoneRows,
         ),
-        //PHONE END-------------------------
         new Title( 
           icon: Icons.email,
           name: "Email",
-          onTapped: (){
-            print("tapped email");
-          },
-          rightIconButton: RightIconButton(
+          onTapped: () => addEmail(),
+          rightIconButton: (emailFields.length != 0) 
+          ? RightIconButton(
             icon: Icon(
               Icons.add,
               color: Colors.green,
             ),
-          ),
+          )
+          : Container(),
+        ),
+        Column(
+          children: emailRows,
         ),
         new Title( 
           icon: Icons.work,

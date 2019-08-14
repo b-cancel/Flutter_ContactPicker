@@ -66,14 +66,14 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   List<String> nameLabels = List<String>();
 
   //-------------------------Phones
-  bool autoAddFirstPhone = false; //TODO... the default of this is true
+  bool autoAddFirstPhone = true;
   List<FieldData> phoneValueFields = List<FieldData>();
-  List<String> phoneLabelStrings = List<String>();
+  List<ValueNotifier<String>> phoneLabelStrings = List<ValueNotifier<String>>();
 
   //-------------------------Emails
-  bool autoAddFirstEmail = false; //TODO... the default of this is true
+  bool autoAddFirstEmail = true;
   List<FieldData> emailValueFields = List<FieldData>();
-  List<String> emailLabelStrings = List<String>();
+  List<ValueNotifier<String>> emailLabelStrings = List<ValueNotifier<String>>();
 
   //-------------------------Work
   bool autoOpenWork = true;
@@ -88,7 +88,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   List<FieldData> addressPostcodeFields = new List<FieldData>();
   List<FieldData> addressRegionFields = new List<FieldData>();
   List<FieldData> addressCountryFields = new List<FieldData>();
-  List<String> addressLabelStrings = new List<String>();
+  List<ValueNotifier<String>> addressLabelStrings = new List<ValueNotifier<String>>();
 
   //-------------------------Note
   bool autoOpenNote = true;
@@ -189,12 +189,12 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   //-------------------------Add To List Helper-------------------------
 
   addItem(List<List<FieldData>> allFields){
-    int newIndex = allFields[0].length;
+    int newIndex = allFields[0].length; //TODO... possible fix
 
     //init all fields
     for(int i = 0; i < allFields.length; i++){
       allFields[i].add(FieldData()); //add both values
-      allFields[i][newIndex].index = newIndex; //set the indices
+      allFields[i][newIndex].index = newIndex; //set the indices 
     }
 
     //set the state so the UI rebuilds with the new number
@@ -220,7 +220,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
     //add default string
     phoneLabelStrings.add(
-      CategoryData.phoneLabels[0],
+      ValueNotifier<String>(CategoryData.phoneLabels[0]),
     );
   }
 
@@ -232,7 +232,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
     //add default string
     emailLabelStrings.add(
-      CategoryData.emailLabels[0],
+      ValueNotifier<String>(CategoryData.emailLabels[0]),
     );
   }
 
@@ -248,7 +248,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
     //add default string
     addressLabelStrings.add(
-      CategoryData.addressLabels[0],
+      ValueNotifier<String>(CategoryData.addressLabels[0]),
     );
   }
 
@@ -257,7 +257,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   removeItem(int index, List<List<FieldData>> allFields){
     if(0 <= index && index < allFields[0].length){
       //save next focus function
-      Function nextFocus = allFields.last[index].nextFunction;
+      Function nextFocus = allFields.last[index].nextFunction; //TODO... possile repair
 
       //remove the item
       for(int i = 0; i < allFields.length; i++){
@@ -693,12 +693,12 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   }
 
   //-------------------------Save Contact Helper-------------------------
-  List<Item> itemFieldData2ItemList(List<FieldData> values, List<String> labels){
+  List<Item> itemFieldData2ItemList(List<FieldData> values, List<ValueNotifier<String>> labels){
     List<Item> itemList = new List<Item>();
     for(int i = 0; i < values.length; i++){
       itemList.add(Item(
         value: values[i].controller.text,
-        label: labels[i],
+        label: labels[i].value,
       ));
     }
     return itemList;
@@ -713,7 +713,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
         postcode: addressPostcodeFields[i].controller.text,
         region: addressRegionFields[i].controller.text,
         country: addressCountryFields[i].controller.text,
-        label: addressLabelStrings[i],
+        label: addressLabelStrings[i].value,
       ));
     }
     return addresses;
