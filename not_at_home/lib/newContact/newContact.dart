@@ -647,7 +647,31 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     };
     companyField.nextFunction = toFirstAddress;
 
-    //TODO... addresses section
+    //address section
+    int addressCount = addressStreetFields.length;
+    for(int i = 0; i < addressCount; i++){
+      //street, city, postcode, region, country
+      addressStreetFields[i].nextFunction = (){
+        FocusScope.of(context).requestFocus(addressCityFields[i].focusNode);
+      };
+      addressCityFields[i].nextFunction = (){
+        FocusScope.of(context).requestFocus(addressPostcodeFields[i].focusNode);
+      };
+      addressPostcodeFields[i].nextFunction = (){
+        FocusScope.of(context).requestFocus(addressRegionFields[i].focusNode);
+      };
+      addressRegionFields[i].nextFunction = (){
+        FocusScope.of(context).requestFocus(addressCountryFields[i].focusNode);
+      };
+      addressCountryFields[i].nextFunction = (){
+        if(i == (addressCount - 1)){ //last address
+          toNote();
+        }
+        else{
+          FocusScope.of(context).requestFocus(addressStreetFields[i + 1].focusNode);
+        }
+      };
+    }
 
     //handle note section
     noteField.nextFunction = null;
@@ -693,7 +717,14 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
             workOpen: workOpen,
 
             //address
-            //TODO... address stuff
+            addAddress: addPostalAddress,
+            removeAddress: removalPostalAddress,
+            addressStreetFields: addressStreetFields,
+            addressCityFields: addressCityFields,
+            addressPostcodeFields: addressPostcodeFields,
+            addressRegionFields: addressRegionFields,
+            addressCountryFields: addressCountryFields,
+            addressLabels: addressLabelStrings,
 
             //note stuff
             noteField: noteField,

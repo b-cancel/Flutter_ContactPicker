@@ -31,7 +31,16 @@ class NewContactUX extends StatelessWidget {
     @required this.jobTitleField,
     @required this.companyField,
     @required this.workOpen,
-    //TODO... add addresses here
+    //address
+    @required this.addAddress,
+    @required this.removeAddress,
+    @required this.addressStreetFields,
+    @required this.addressCityFields,
+    @required this.addressPostcodeFields,
+    @required this.addressRegionFields,
+    @required this.addressCountryFields,
+    @required this.addressLabels,
+    //note
     @required this.noteField,
     @required this.noteOpen,
   });
@@ -56,7 +65,16 @@ class NewContactUX extends StatelessWidget {
   final FieldData jobTitleField;
   final FieldData companyField;
   final ValueNotifier<bool> workOpen;
-  //TODO... add addresses here
+  //address
+  final Function addAddress;
+  final Function removeAddress;
+  final List<FieldData> addressStreetFields;
+  final List<FieldData> addressCityFields;
+  final List<FieldData> addressPostcodeFields;
+  final List<FieldData> addressRegionFields;
+  final List<FieldData> addressCountryFields;
+  final List<ValueNotifier<String>> addressLabels;
+  //note
   final FieldData noteField;
   final ValueNotifier<bool> noteOpen;
 
@@ -128,6 +146,27 @@ class NewContactUX extends StatelessWidget {
               size: 16,
             ),
           ),
+        ),
+      );
+    }
+
+    List<Widget> addressRows = new List<Widget>();
+    for(int i = 0; i < addressStreetFields.length; i++){
+      addressRows.add(
+        AddressField(
+          addressStuff: [
+            addressStreetFields[i],
+            addressCityFields[i],
+            addressPostcodeFields[i],
+            addressRegionFields[i],
+            addressCountryFields[i],
+          ], 
+          //other
+          bottomBarHeight: bottomBarHeight, 
+          removeTheAddress: (){
+            removeAddress(i);
+          },
+          addressLabel: addressLabels[i],
         ),
       );
     }
@@ -259,15 +298,18 @@ class NewContactUX extends StatelessWidget {
         new Title( 
           icon: Icons.location_on,
           name: "Address",
-          onTapped: (){
-            print("tapped address");
-          },
-          rightIconButton: RightIconButton(
+          onTapped: () => addAddress(),
+          rightIconButton: (addressCityFields.length != 0) 
+          ? RightIconButton(
             icon: Icon(
               Icons.add,
               color: Colors.green,
             ),
-          ),
+          )
+          : Container(),
+        ),
+        Column(
+          children: addressRows,
         ),
         new Title( 
           icon: Icons.note,
@@ -575,5 +617,88 @@ class RightIconButton extends StatelessWidget {
         child: child,
       );
     } 
+  }
+}
+
+//-------------------------ADDRESS FIELDS-------------------------(extension of TheField class)
+List<String> addressLabels = ["Street", "City", "Postal Code", "Region", "Country"];
+class AddressField extends StatelessWidget {
+  const AddressField({
+    @required this.addressStuff,
+    //other
+    @required this.bottomBarHeight,
+    @required this.addressLabel,
+    @required this.removeTheAddress,
+  });
+
+  final List<FieldData> addressStuff;
+  //other
+  final double bottomBarHeight;
+  final ValueNotifier<String> addressLabel;
+  final Function removeTheAddress;
+
+  @override
+  Widget build(BuildContext context) {
+    List<Widget> fields = new List<Widget>();
+    for(int i = 0; i < 5; i++){
+      FieldData thisField = addressStuff[i];
+      fields.add(
+        Padding(
+          padding: EdgeInsets.only(
+            bottom: (i == 4) ? 0 : 12,
+          ),
+          child: TextFormField(
+            focusNode: thisField.focusNode,
+            controller: thisField.controller,
+            scrollPadding: EdgeInsets.only(
+              bottom: bottomBarHeight * 2 + 8,
+            ),
+            style: TextStyle(
+              fontSize: 18,
+            ),
+            onEditingComplete: () => thisField.nextFunction(),
+            textInputAction: TextInputAction.next,
+            decoration: InputDecoration(
+              contentPadding: EdgeInsets.only(bottom: 4),
+              hintText: addressLabels[i],
+              hintStyle: TextStyle(
+                fontSize: 18,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      //color: Colors.purple,
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          LeftIcon(),
+          Flexible(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Column(
+                children: fields,
+              ),
+            ),
+          ),
+          CategorySelector(
+            labelType: LabelType.address,
+            labelSelected: addressLabel,
+          ),
+          RightIconButton(
+            onTapped: () => removeTheAddress(),
+            icon: Icon(
+              FontAwesomeIcons.minus,
+              color: Colors.red,
+              size: 16,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
