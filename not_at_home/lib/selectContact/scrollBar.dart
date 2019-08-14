@@ -112,7 +112,7 @@ class _ScrollBarState extends State<ScrollBar> {
 
       //prep vars for below
       double totalHeight = MediaQuery.of(context).size.height;
-      //TODO... maybe instead have the largest flexible height
+      
       //portrait mode and landscape mode should have seperate largest flexible heights
       double appBarHeight = widget.expandedBannerHeight;  
       double paddingVertical = 16;

@@ -92,7 +92,7 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
     //JUST KIDDING if we snap the sliver into place we CAN GUARANTEE this
     for(int i = 0; i < widget.sortedLetterCodes.length; i++){
       double thisItemsOffset = 0;
-      double bannerAndToolbar = widget.expandedBannerHeight + 40;
+      double bannerAndToolbar = 40; //banner added on runtime
       int headersBefore = i - 1;
 
       if(i != 0){
@@ -185,7 +185,7 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
         widget.autoScrollController.jumpTo(0);
       }
       else{
-        widget.autoScrollController.jumpTo(offsets[index]);
+        widget.autoScrollController.jumpTo(offsets[index] + widget.expandedBannerHeight);
       }
     }
     
