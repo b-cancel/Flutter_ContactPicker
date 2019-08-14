@@ -38,6 +38,7 @@ Widget bigIcon(BuildContext context, ValueNotifier<String> imageLocation, Functi
 }
 
 //return whether or not you should set state
+//TODO... handle case when selecting contacts the user decides to not give you permission to access storage
 changeImage(BuildContext context, ValueNotifier<String> imageLocation, Function ifNewImage, bool fromCamera) async {
   File tempImage = await ImagePicker.pickImage(
     source: (fromCamera) ? ImageSource.camera : ImageSource.gallery,
