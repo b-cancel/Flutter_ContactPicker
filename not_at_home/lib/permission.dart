@@ -34,6 +34,10 @@ permissionRequired(
     //else we can ASK FOR PERMISSION -> if fail ask again
 
     if(startStatus == PermissionStatus.notAgain && !firstTime.value){
+      //NOTE: the below is taken care of by willPopScope function
+      //when force permission is FALSE
+      //AND we are selecting a contact -> we also need to pop back to whatever page brought us up
+      //AND we are creating a contact -> we don't need to pop back because from the create contact page we retrigger things
       showDialog(
         context: context,
         barrierDismissible: (forcePermission == false),
@@ -143,8 +147,19 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
     }
     else altButton = "Use Don't Save";
 
+    //NOTE: required on top of barrier dismissible thing
     return WillPopScope(
-      onWillPop:  () async => (widget.forcePermission == false),
+      //NOTE: this is also triggered when we press the dismissable barrier
+      //when force permission is FALSE
+      //AND we are selecting a contact -> we also need to pop back to whatever page brought us up
+      //AND we are creating a contact -> we don't need to pop back because from the create contact page we retrigger things
+      onWillPop:  () async{
+        //TODO... test this
+        if(widget.forcePermission == false && widget.selectingContact){
+          Navigator.pop(context);
+        }
+        return (widget.forcePermission == false);
+      },
       child: Theme(
         data: ThemeData.light(),
         child: AlertDialog(
