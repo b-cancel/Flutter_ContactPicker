@@ -412,6 +412,8 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
           //NOTE: now first name is at 0
 
           if(names.length > 0){
+            print("names left: " + names.length.toString());
+
             //NOTE: below we could implement more complex logic like samsung does
             //but this is realistically never going to be used
 
@@ -430,6 +432,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
             //or after the name before
             int lastNameIndex = names.length - 1;
             String lastName = names[lastNameIndex];
+            //NOTE: needs to check length
             bool commaBeforeLast = (lastName.length > 0 && lastName[0] == ",");
             if(commaBeforeLast){
               //remove the comma
@@ -447,7 +450,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
                   //remove the comma
                   names[lastNameIndex - 1] = names[lastNameIndex - 1].substring(0, beforeLastName.length - 1);
                   //0(prefix), 1, 2, 3, 4(suffix)
-                  nameFields[4].controller.text = names[lastNameIndex - 1];
+                  nameFields[4].controller.text = names[lastNameIndex];
                   //remove this name from the list since it's been handled
                   names.removeLast();
                 } 
