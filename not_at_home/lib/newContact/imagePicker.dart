@@ -39,7 +39,27 @@ Widget bigIcon(BuildContext context, ValueNotifier<String> imageLocation, Functi
 
 //return whether or not you should set state
 //TODO... handle case when selecting contacts the user decides to not give you permission to access storage
+/*
+do the same thing as the permissionRequired thing EXCEPT
+1. getting permission isn't required which means
+2. if we soft deny -> stay at select or take picture pop up
+3. if we force deny -> stay at select or take picture pop up
+4. Force pop up should have close option
+
+-> get status
+if NOT authorized
+  if(notAgain && !firstTime)
+    -> show my own forced dialog
+  else
+    -> firstTime = false
+    -> request permission
+    if NOT authorized
+      -> recurse
+else -> actually let this stuff run
+*/
 changeImage(BuildContext context, ValueNotifier<String> imageLocation, Function ifNewImage, bool fromCamera) async {
+  //Cover "PlatformException (PlatformException(photo_access_denied, The user did not allow photo access., null))"
+  //when "ImagePicker.pickImage" runs
   File tempImage = await ImagePicker.pickImage(
     source: (fromCamera) ? ImageSource.camera : ImageSource.gallery,
   );
