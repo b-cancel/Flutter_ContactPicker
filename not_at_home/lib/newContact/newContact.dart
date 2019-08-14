@@ -68,12 +68,12 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   //-------------------------Phones
   bool autoAddFirstPhone = false; //TODO... the default of this is true
   List<FieldData> phoneValueFields = List<FieldData>();
-  List<FieldData> phoneLabelFields = List<FieldData>();
+  List<String> phoneLabelStrings = List<String>();
 
   //-------------------------Emails
   bool autoAddFirstEmail = false; //TODO... the default of this is true
   List<FieldData> emailValueFields = List<FieldData>();
-  List<FieldData> emailLabelFields = List<FieldData>();
+  List<String> emailLabelStrings = List<String>();
 
   //-------------------------Work
   bool autoOpenWork = true;
@@ -88,7 +88,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   List<FieldData> addressPostcodeFields = new List<FieldData>();
   List<FieldData> addressRegionFields = new List<FieldData>();
   List<FieldData> addressCountryFields = new List<FieldData>();
-  List<FieldData> addressLabelFields = new List<FieldData>();
+  List<String> addressLabelStrings = new List<String>();
 
   //-------------------------Note
   bool autoOpenNote = true;
@@ -213,28 +213,43 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   //3. whenever we add, we also have to focus on what we add
 
   addPhone(){
+    //add field
     addItem([
       phoneValueFields,
-      phoneLabelFields,
     ]);
+
+    //add default string
+    phoneLabelStrings.add(
+      CategoryData.phoneLabels[0],
+    );
   }
 
   addEmail(){
+    //add field
     addItem([
       emailValueFields,
-      emailLabelFields,
     ]);
+
+    //add default string
+    emailLabelStrings.add(
+      CategoryData.emailLabels[0],
+    );
   }
 
   addPostalAddress(){
+    //add field
     addItem([
       addressStreetFields,
       addressCityFields,
       addressPostcodeFields,
       addressRegionFields,
       addressCountryFields,
-      addressLabelFields,
     ]);
+
+    //add default string
+    addressLabelStrings.add(
+      CategoryData.addressLabels[0],
+    );
   }
 
   //-------------------------Remove From Lists Helper-------------------------
@@ -268,28 +283,43 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   //  on the thing we removed
 
   removePhone(int index){
+    //remove field
     removeItem(index, [
       phoneValueFields,
-      phoneLabelFields,
     ]);
+
+    //remove string
+    phoneLabelStrings.removeAt(
+      index,
+    );
   }
 
   removeEmail(int index){
+    //remove field
     removeItem(index, [
       emailValueFields,
-      emailLabelFields,
     ]);
+
+    //remove string
+    emailLabelStrings.removeAt(
+      index,
+    );
   }
 
   removalPostalAddress(int index){
+    //remove field
     removeItem(index, [
       addressStreetFields,
       addressCityFields,
       addressPostcodeFields,
       addressRegionFields,
       addressCountryFields,
-      addressLabelFields,
     ]);
+
+    //remove string
+    addressLabelStrings.removeAt(
+      index,
+    );
   }
 
   //-------------------------Init-------------------------
@@ -560,6 +590,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
     //TODO... fill all the function arguments depending on current vars
 
+    //TODO... I should be able to shift everything below to init
     //from our name field we move onto the first phone
     //or whatever else we can
     nameField.nextFunction = toFirstPhone;
@@ -576,8 +607,27 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
       else thisField.nextFunction = toFirstPhone;
     }
     
-    //TODO... phones section
-    //TODO... emails section
+    //phones section
+    for(int i = 0; i < phoneValueFields.length; i++){
+      FieldData thisField = phoneValueFields[i];
+      if(i != (phoneValueFields.length - 1)){
+        thisField.nextFunction = (){
+          FocusScope.of(context).requestFocus(phoneValueFields[i+1].focusNode);
+        };
+      }
+      else thisField.nextFunction = toFirstEmail;
+    }
+
+    //emails section
+    for(int i = 0; i < emailValueFields.length; i++){
+      FieldData thisField = emailValueFields[i];
+      if(i != (emailValueFields.length - 1)){
+        thisField.nextFunction = (){
+          FocusScope.of(context).requestFocus(emailValueFields[i+1].focusNode);
+        };
+      }
+      else thisField.nextFunction = toWork;
+    }
 
     //handle work section
     jobTitleField.nextFunction = (){
@@ -606,22 +656,34 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
           isPortrait: isPortrait,
           bottomBarHeight: bottomBarHeight,
           fields: NewContactUX(
+            //names stuff
             bottomBarHeight: bottomBarHeight,
             namesSpread: namesSpread,
-
             nameField: nameField,
             nameFields: nameFields,
             nameLabels: nameLabels,
 
             //phones
-            //emails
+            addPhone: addPhone,
+            removePhone: removePhone,
+            phoneFields: phoneValueFields,
+            phoneLabels: phoneLabelStrings,
 
+            //emails
+            addEmail: addEmail,
+            removeEmail: removeEmail,
+            emailFields: emailValueFields,
+            emailLabels: emailLabelStrings,
+
+            //work stuff
             jobTitleField: jobTitleField,
             companyField: companyField,
             workOpen: workOpen,
 
             //address
+            //TODO... address stuff
 
+            //note stuff
             noteField: noteField,
             noteOpen: noteOpen,
           ),
@@ -631,12 +693,12 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
   }
 
   //-------------------------Save Contact Helper-------------------------
-  List<Item> itemFieldData2ItemList(List<FieldData> values, List<FieldData> labels){
+  List<Item> itemFieldData2ItemList(List<FieldData> values, List<String> labels){
     List<Item> itemList = new List<Item>();
     for(int i = 0; i < values.length; i++){
       itemList.add(Item(
         value: values[i].controller.text,
-        label: labels[i].controller.text,
+        label: labels[i],
       ));
     }
     return itemList;
@@ -651,7 +713,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
         postcode: addressPostcodeFields[i].controller.text,
         region: addressRegionFields[i].controller.text,
         country: addressCountryFields[i].controller.text,
-        label: addressLabelFields[i].controller.text,
+        label: addressLabelStrings[i],
       ));
     }
     return addresses;
@@ -684,13 +746,13 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     //save the phones
     newContact.phones = itemFieldData2ItemList(
       phoneValueFields, 
-      phoneLabelFields,
+      phoneLabelStrings,
     );
 
     //save the emails
     newContact.emails= itemFieldData2ItemList(
       emailValueFields, 
-      emailLabelFields,
+      emailLabelStrings,
     );
 
     //save the work stuff
@@ -698,6 +760,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     newContact.company = companyField.controller.text;
 
     //save the addresses
+    //TODO... save the addresses
 
     //save the note
     newContact.note = noteField.controller.text;

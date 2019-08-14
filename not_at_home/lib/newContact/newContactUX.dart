@@ -17,8 +17,16 @@ class NewContactUX extends StatelessWidget {
     @required this.nameField,
     @required this.nameFields,
     @required this.nameLabels,
-    //TODO... add phones here
-    //TODO... add emails here
+    //phones
+    @required this.addPhone,
+    @required this.removePhone,
+    @required this.phoneFields,
+    @required this.phoneLabels,
+    //email
+    @required this.addEmail,
+    @required this.removeEmail,
+    @required this.emailFields,
+    @required this.emailLabels,
     //handle work
     @required this.jobTitleField,
     @required this.companyField,
@@ -34,8 +42,16 @@ class NewContactUX extends StatelessWidget {
   final FieldData nameField;
   final List<FieldData> nameFields;
   final List<String> nameLabels;
-  //TODO... add phones here
-  //TODO... add emails here
+  //phones
+  final Function addPhone;
+  final Function removePhone;
+  final List<FieldData> phoneFields;
+  final List<String> phoneLabels;
+  //emails
+  final Function addEmail;
+  final Function removeEmail;
+  final List<FieldData> emailFields;
+  final List<String> emailLabels;
   //handle work
   final FieldData jobTitleField;
   final FieldData companyField;
@@ -129,17 +145,18 @@ class NewContactUX extends StatelessWidget {
         new Title( 
           icon: Icons.phone,
           name: "Phone",
-          onTapped: (){
-            print("tapped phone");
-          },
-          rightIconButton: RightIconButton(
+          onTapped: () => addPhone(),
+          rightIconButton: (phoneFields.length != 0) 
+          ? RightIconButton(
             icon: Icon(
               Icons.add,
               color: Colors.green,
             ),
-          ),
+          )
+          : Container(),
         ),
         //PHONE START-------------------------
+        //TODO... replace with actual phone widgets created on build
         Column(
           children: <Widget>[
             TheField(
