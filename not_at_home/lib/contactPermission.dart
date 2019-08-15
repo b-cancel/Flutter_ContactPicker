@@ -7,19 +7,11 @@ import 'package:not_at_home/selectContact/selectContactLogic.dart';
 import 'package:permission/permission.dart';
 import 'package:contact_picker/contact_picker.dart' as contactPicker;
 
-//permssion helper function
-bool isAuthorized(PermissionStatus status){
-  if(status == PermissionStatus.allow) return true;
-  else if(status == PermissionStatus.always) return true;
-  else if(status == PermissionStatus.whenInUse) return true;
-  else return false;
-}
-
 //required because of how the permission plugin operates
-final ValueNotifier<bool> firstTime = new ValueNotifier<bool>(true);
+final ValueNotifier<bool> contactFirstTime = new ValueNotifier<bool>(true);
 
 //request contact permission from the user
-permissionRequired(
+checkContactPermission(
   BuildContext context, 
   bool forcePermission, 
   bool selectingContact, 
@@ -33,7 +25,7 @@ permissionRequired(
     //  IF valid should show manual ELSE should ASK FOR PERMISSION
     //else we can ASK FOR PERMISSION -> if fail ask again
 
-    if(startStatus == PermissionStatus.notAgain && !firstTime.value){
+    if(startStatus == PermissionStatus.notAgain && !contactFirstTime.value){
       //NOTE: the below is taken care of by willPopScope function
       //when force permission is FALSE
       //AND we are selecting a contact -> we also need to pop back to whatever page brought us up
@@ -53,13 +45,13 @@ permissionRequired(
     }
     else{
       //covers edge case where the first time we request a permission its status is not at home
-      firstTime.value = false;
+      contactFirstTime.value = false;
 
       //ask for permission
       PermissionStatus status = (await Permission.requestPermissions([PermissionName.Contacts]))[0].permissionStatus;
       if(isAuthorized(status) == false){
         //---top
-        permissionRequired(
+        checkContactPermission(
           context, 
           forcePermission, 
           selectingContact, 
@@ -169,7 +161,7 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
                 padding: EdgeInsets.only(right: 16),
                 child: Icon(
                   Icons.contacts,
-                  color: Theme.of(context).buttonColor,
+                  color: Colors.black,
                 ),
               ),
               new Text("Grant Us Access"),

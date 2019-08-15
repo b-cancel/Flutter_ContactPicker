@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:not_at_home/storagePermissions.dart';
 
 void showImagePicker(BuildContext context, ValueNotifier<String> imageLocation, Function ifNewImage) {
   // flutter defined function
@@ -60,6 +61,17 @@ else -> actually let this stuff run
 changeImage(BuildContext context, ValueNotifier<String> imageLocation, Function ifNewImage, bool fromCamera) async {
   //Cover "PlatformException (PlatformException(photo_access_denied, The user did not allow photo access., null))"
   //when "ImagePicker.pickImage" runs
+  if(fromCamera) actuallyChangeImage(context, imageLocation, ifNewImage, true);
+  else{
+    checkStoragePermission(
+      context, 
+      //not from camera
+      () => actuallyChangeImage(context, imageLocation, ifNewImage, false), 
+    );
+  }
+}
+
+actuallyChangeImage(BuildContext context, ValueNotifier<String> imageLocation, Function ifNewImage, bool fromCamera) async {
   File tempImage = await ImagePicker.pickImage(
     source: (fromCamera) ? ImageSource.camera : ImageSource.gallery,
   );

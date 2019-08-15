@@ -3,11 +3,11 @@ import 'dart:typed_data';
 
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:not_at_home/contactPermission.dart';
 import 'package:not_at_home/helper.dart';
 import 'package:not_at_home/newContact/categorySelect.dart';
 import 'package:not_at_home/newContact/nameHandler.dart';
 import 'package:not_at_home/newContact/newContactHelper.dart';
-import 'package:not_at_home/permission.dart';
 import 'package:permission/permission.dart';
 
 import 'newContactUX.dart';
@@ -709,7 +709,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
         //without permission we give the user the option to ONLY
         //1. update the contact
-        permissionRequired(
+        checkContactPermission(
           context,
           //the user is never forced to create a contact, only to select one
           false, 

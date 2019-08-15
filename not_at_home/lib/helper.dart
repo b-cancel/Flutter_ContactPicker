@@ -3,6 +3,16 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+import 'package:permission/permission.dart';
+
+//permssion helper function
+bool isAuthorized(PermissionStatus status){
+  if(status == PermissionStatus.allow) return true;
+  else if(status == PermissionStatus.always) return true;
+  else if(status == PermissionStatus.whenInUse) return true;
+  else return false;
+}
+
 String contactToName(Contact c){
   String prefix = c?.prefix ?? "";
   String first = c?.givenName ?? "";
