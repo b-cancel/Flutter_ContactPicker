@@ -97,7 +97,7 @@ class _ManuallyChangePermissionState extends State<ManuallyChangePermission> wit
             Container(
               padding: EdgeInsets.only(right: 16),
               child: Icon(
-                Icons.storage,
+                Icons.folder_open,
                 color: Colors.black,
               ),
             ),
