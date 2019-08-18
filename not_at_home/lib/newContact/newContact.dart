@@ -643,8 +643,22 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
     //we can create the contact ONLY IF we have a first name
     if(hasFirstName || hasLastName){
-      //create empty contact
-      Contact newContact = new Contact();
+      //save the name(s)
+      String maybeFirstName = nameFields[1].controller.text;
+      String maybeLastName = nameFields[3].controller.text;
+
+      //NOTE: these are showing up exactly as expected on android
+      //create contact WITH name to avoid error
+      Contact newContact = new Contact(
+        prefix: nameFields[0].controller.text,
+        givenName: (maybeFirstName == "") ? " " : maybeFirstName,
+        middleName: nameFields[2].controller.text,
+        familyName: (maybeLastName == "") ? " " : maybeLastName,
+        suffix: nameFields[4].controller.text,
+      );
+
+      //NOTE: this one isn't showing up on android
+      newContact.displayName = nameField.controller.text;
 
       //save the image
       if(imageLocation.value != ""){
@@ -652,46 +666,27 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
         newContact.avatar = Uint8List.fromList(avatarList);
       }
 
-      //save the name(s)
-      //NOTE: this one isn't showing up on android
-      newContact.displayName = nameField.controller.text;
-
-      String maybeFirstName = nameFields[1].controller.text;
-      String maybeLastName = nameFields[3].controller.text;
-
-      //NOTE: these are showing up exactly as expected on android
-      newContact.prefix = nameFields[0].controller.text;
-      newContact.givenName = (maybeFirstName == "") ? " " : maybeFirstName;
-      newContact.middleName = nameFields[2].controller.text;
-      //require to properly create contact
-      newContact.familyName = (maybeLastName == "") ? " " : maybeLastName; 
-      newContact.suffix = nameFields[4].controller.text;
-
       //save the phones
-      /*
       newContact.phones = itemFieldData2ItemList(
         phoneValueFields, 
         phoneLabelStrings,
       );
-      */
 
       //save the emails
-      /*
       newContact.emails= itemFieldData2ItemList(
         emailValueFields, 
         emailLabelStrings,
       );
-      */
 
       //save the work stuff
-      //newContact.jobTitle = jobTitleField.controller.text;
-      //newContact.company = companyField.controller.text;
+      newContact.jobTitle = jobTitleField.controller.text;
+      newContact.company = companyField.controller.text;
 
       //save the addresses
-      //newContact.postalAddresses = fieldsToAddresses();
+      newContact.postalAddresses = fieldsToAddresses();
 
       //save the note
-      //newContact.note = noteField.controller.text;
+      newContact.note = noteField.controller.text;
 
       //handle permissions
       PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
@@ -699,7 +694,27 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
         //with permission we can both
         //1. add the contact
         //NOTE: The contact must have a firstName / lastName to be successfully added  
-        await ContactsService.addContact(newContact);  
+        await ContactsService.addContact(
+        newContact,
+          /*new Contact(
+          //image
+          avatar: newContact.avatar,
+          //name
+          prefix: newContact.prefix,
+          givenName: newContact.givenName,
+          middleName: newContact.middleName,
+          familyName: newContact.familyName,
+          suffix: newContact.suffix,
+          //phones
+          phones: newContact.phones,
+          //emails
+          emails: newContact.emails,
+          //work
+          jobTitle: newContact.jobTitle,
+          company: newContact.company,
+        )
+        */
+        );  
         //2. and update the contact
         widget.onSelect(context, newContact);
       }

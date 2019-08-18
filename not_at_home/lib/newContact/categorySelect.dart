@@ -28,7 +28,9 @@ class CategoryData{
 
     //If needed create the file
     bool fileExists = (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound);
-    if(fileExists == false) await createDefault(labelType, fileReference);
+    //if(fileExists == false) await createDefault(labelType, fileReference);
+    await fileReference.delete();
+    await createDefault(labelType, fileReference);
 
     //Use the file data to populate a list
     readFile(labelType, fileReference);
@@ -42,13 +44,13 @@ class CategoryData{
     String defaultString;
     switch(labelType){
       case LabelType.phone:
-        defaultString = '["Mobile", "Home", "Work", "Main", "Work Fax", "Home Fax", "Pager", "Other"]';
+        defaultString = '["mobile", "home", "work", "main", "work fax", "home fax", "pager", "other"]';
         break;
       case LabelType.email:
-        defaultString = '["Home", "Work", "Other"]';
+        defaultString = '["home", "work", "other"]';
         break;
       default:
-        defaultString = '["Home", "Work", "Other"]'; 
+        defaultString = '["home", "work", "other"]'; 
         break;
     }
     defaultString = '{ "types": ' + defaultString + ' }';
@@ -401,7 +403,7 @@ class AnItem extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      label,
+                      upperFirst(label),
                       style: TextStyle(
                         fontSize: 20,
                       ),
@@ -437,5 +439,9 @@ class AnItem extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  upperFirst(String s){
+    return '${s[0].toUpperCase()}${s.substring(1)}';
   }
 }
