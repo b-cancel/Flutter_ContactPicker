@@ -128,16 +128,16 @@ class _ManualState extends State<Manual> with WidgetsBindingObserver {
     String options;
     if(isSelecting){
       if(manualInput) options = "Or Manually Input the Contact below";
-      else options = "Or \"System Select Contact\" below";
+      else options = "Or System Select the Contact below";
     }
-    else options = "Use the Contact without saving it below";
+    else options = "Or Use the Contact without saving it below";
 
     String altButton;
     if(isSelecting){
       if(manualInput) altButton = "Manual Input";
       else altButton = "System Select Contact";
     }
-    else altButton = "Use Don't Save";
+    else altButton = "Use But Don't Save";
 
     //NOTE: required on top of barrier dismissible thing
     return WillPopScope(

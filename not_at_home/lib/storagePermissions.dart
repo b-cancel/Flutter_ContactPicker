@@ -10,7 +10,7 @@ checkStoragePermission(
   BuildContext context, 
   Function onPermissionGiven,
 ) async{
-  PermissionStatus startStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
+  PermissionStatus startStatus = (await Permission.getPermissionsStatus([PermissionName.Storage]))[0].permissionStatus;
   if(isAuthorized(startStatus) == false){
     //NOTE: if notAgain && not firstTime -> guaranted notAgain
     //else if notAgain && firstTime -> maybe not valid notAgain 
@@ -18,19 +18,11 @@ checkStoragePermission(
     //else we can ASK FOR PERMISSION -> if fail ask again
 
     if(startStatus == PermissionStatus.notAgain && !storageFirstTime.value){
-      //NOTE: the below is taken care of by willPopScope function
-      //when force permission is FALSE
-      //AND we are selecting a contact -> we also need to pop back to whatever page brought us up
-      //AND we are creating a contact -> we don't need to pop back because from the create contact page we retrigger things
       showDialog(
         context: context,
-        barrierDismissible: true, //TODO... check (we are indeed never forcing)
         builder: (BuildContext context) {
           return ManuallyChangePermission(
-            forcePermission: false, //TODO... check (we dont force but how do we react)
-            onSecondaryOption: (){
-              print("secondary option");
-            },
+            onPermissionGiven: onPermissionGiven,
           );
         },
       );
@@ -40,27 +32,19 @@ checkStoragePermission(
       storageFirstTime.value = false;
 
       //ask for permission
-      PermissionStatus status = (await Permission.requestPermissions([PermissionName.Contacts]))[0].permissionStatus;
-      if(isAuthorized(status) == false){
-        //---top
-        checkStoragePermission(
-          context,
-          onPermissionGiven,
-        );
-      }
+      PermissionStatus status = (await Permission.requestPermissions([PermissionName.Storage]))[0].permissionStatus;
+      if(isAuthorized(status)) onPermissionGiven();
     }
   }
-  //ELSE... permission already given
+  else onPermissionGiven();
 }
 
 //display the WE NEED PERMISSION pop up
 class ManuallyChangePermission extends StatefulWidget {
-  final bool forcePermission;
-  final Function onSecondaryOption;
+  final Function onPermissionGiven;
 
   ManuallyChangePermission({
-    @required this.forcePermission,
-    @required this.onSecondaryOption,
+    @required this.onPermissionGiven,
   });
 
   @override
@@ -94,8 +78,9 @@ class _ManuallyChangePermissionState extends State<ManuallyChangePermission> wit
   //If the user came back having given us permission then we automatically pop
   //ELSE we let the read the message so we can evetually pop or allow then the other navigation options
   void checkIfCanPop() async{
-    PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
+    PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Storage]))[0].permissionStatus;
     if(isAuthorized(permissionStatus)){
+      widget.onPermissionGiven();
       Navigator.of(context).pop();
     }
   }
@@ -103,62 +88,44 @@ class _ManuallyChangePermissionState extends State<ManuallyChangePermission> wit
   //build
   @override
   Widget build(BuildContext context) {
-
-    String inOrderTo = "In order to " + "\"Save\"" + " a Contact.";
-    String action = "Enable \"Contacts\" in the \"Permissions\" section of \"App Settings\"";
-    String options = "Use the Contact without saving it below";
-    String altButton = "Use Don't Save";
-
     //NOTE: required on top of barrier dismissible thing
-    return WillPopScope(
-      //NOTE: this is also triggered when we press the dismissable barrier
-      //when force permission is FALSE
-      //AND we are selecting a contact -> we also need to pop back to whatever page brought us up
-      //AND we are creating a contact -> we don't need to pop back because from the create contact page we retrigger things
-      onWillPop:  () async{
-        //TODO... test this
-        /*
-        if(widget.forcePermission == false && widget.selectingContact){
-          Navigator.pop(context);
-        }
-        */
-        return (widget.forcePermission == false);
-      },
-      child: Theme(
-        data: ThemeData.light(),
-        child: AlertDialog(
-          title: Row(
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.only(right: 16),
-                child: Icon(
-                  Icons.contacts,
-                  color: Colors.black,
-                ),
+    return Theme(
+      data: ThemeData.light(),
+      child: AlertDialog(
+        title: Row(
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.only(right: 16),
+              child: Icon(
+                Icons.storage,
+                color: Colors.black,
               ),
-              new Text("Grant Us Access"),
-            ],
-          ),
-          content: new Text(
-            inOrderTo + "\n\n" + action + "\n" + options,
-          ),
-          actions: <Widget>[
-            new FlatButton(
-              child: new Text(altButton),
-              onPressed: () async{
-              },
             ),
-            new RaisedButton(
-              textColor: Colors.white,
-              child: new Text(
-                "App Settings",
-              ),
-              onPressed: (){
-                Permission.openSettings();
-              },
-            ),
+            new Text("Grant Us Access"),
           ],
         ),
+        content: new Text(
+          "In order to \"Select a Photo\" you must" 
+          + "\n\n" 
+          + "Enable \"Storage\" in the \"Permissions\" section of \"App Settings\"",
+        ),
+        actions: <Widget>[
+          new FlatButton(
+            child: new Text("Close"),
+            onPressed: () async{
+              Navigator.pop(context);
+            },
+          ),
+          new RaisedButton(
+            textColor: Colors.white,
+            child: new Text(
+              "App Settings",
+            ),
+            onPressed: (){
+              Permission.openSettings();
+            },
+          ),
+        ],
       ),
     );
   }
