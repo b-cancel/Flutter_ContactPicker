@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:not_at_home/newContact/storagePermissions.dart';
+import 'package:not_at_home/newContact/newContactPermissions.dart';
 
 void showImagePicker(BuildContext context, ValueNotifier<String> imageLocation, Function ifNewImage) {
   // flutter defined function

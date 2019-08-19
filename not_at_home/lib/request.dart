@@ -124,10 +124,10 @@ class _ContactDisplayState extends State<ContactDisplay> {
                     onChanged: (value) {
                       setState(() {
                         if(value){
-                            _themeChanger.setTheme(ThemeData.dark());
+                            _themeChanger.setTheme(ourDark);
                           }
                           else{
-                            _themeChanger.setTheme(ThemeData.light());
+                            _themeChanger.setTheme(ourLight);
                           }
                           darkMode = value;
                       });

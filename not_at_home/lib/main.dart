@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ThemeChanger>(
       //by default start off in dark mode
-      builder: (_) => ThemeChanger(ThemeData.dark()),
+      builder: (_) => ThemeChanger(ourDark), //START THEME
       child: StatelessLink(),
     );
   }

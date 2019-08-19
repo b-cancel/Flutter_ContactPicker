@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:not_at_home/contactPermission.dart';
 import 'package:not_at_home/helper.dart';
 import 'package:not_at_home/newContact/categorySelect.dart';
@@ -10,6 +11,7 @@ import 'package:not_at_home/newContact/nameHandler.dart';
 import 'package:not_at_home/newContact/newContactHelper.dart';
 import 'package:permission/permission.dart';
 import 'package:image_picker_saver/image_picker_saver.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 
 import 'newContactUX.dart';
 
@@ -648,7 +650,10 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     bool hasLastName = (nameFields[3].controller.text.length > 0);
 
     //we can create the contact ONLY IF we have a first name
-    if(hasFirstName || hasLastName){
+    if((hasFirstName || hasLastName) && phoneValueFields.length > 0){
+      //maybe get avatar
+      Uint8List maybeAvatar = await getAvatar();
+
       //save the name(s)
       String maybeFirstName = nameFields[1].controller.text;
       String maybeLastName = nameFields[3].controller.text;
@@ -656,57 +661,36 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
       //NOTE: these are showing up exactly as expected on android
       //create contact WITH name to avoid error
       Contact newContact = new Contact(
+        //avatar
+        avatar: maybeAvatar,
+        //name
         prefix: nameFields[0].controller.text,
         givenName: (maybeFirstName == "") ? " " : maybeFirstName,
         middleName: nameFields[2].controller.text,
         familyName: (maybeLastName == "") ? " " : maybeLastName,
         suffix: nameFields[4].controller.text,
+        //phones
+        phones: itemFieldData2ItemList(
+          phoneValueFields, 
+          phoneLabelStrings,
+        ),
+        //emails
+        emails: itemFieldData2ItemList(
+          emailValueFields, 
+          emailLabelStrings,
+        ),
+        //work
+        jobTitle: jobTitleField.controller.text,
+        company: companyField.controller.text,
+        //addresses
+        postalAddresses: fieldsToAddresses(),
+        //note
+        note: noteField.controller.text,
       );
 
       //handle permissions
       PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
       if(isAuthorized(permissionStatus)){
-        //NOTE: this one isn't showing up on android
-        newContact.displayName = nameField.controller.text;
-
-        //save the image
-        if(imageLocation.value != ""){
-          List<int> avatarList = await File(imageLocation.value).readAsBytes();
-          newContact.avatar = Uint8List.fromList(avatarList);
-
-          //TODO... check if this is needed
-          if(isFromCamera.value){ //image was taken right now
-            String filePath = await ImagePickerSaver.saveFile(
-              fileData: newContact.avatar,
-            );
-            //File savedFile = File.fromUri(Uri.file(filePath));
-            //await File(savedFile.path).readAsBytes();
-          }
-          //TODO... check the above as well
-        }
-
-        //save the phones
-        newContact.phones = itemFieldData2ItemList(
-          phoneValueFields, 
-          phoneLabelStrings,
-        );
-
-        //save the emails
-        newContact.emails= itemFieldData2ItemList(
-          emailValueFields, 
-          emailLabelStrings,
-        );
-
-        //save the work stuff
-        newContact.jobTitle = jobTitleField.controller.text;
-        newContact.company = companyField.controller.text;
-
-        //save the addresses
-        newContact.postalAddresses = fieldsToAddresses();
-
-        //save the note
-        newContact.note = noteField.controller.text;
-
         //with permission we can both
         //1. add the contact
         //NOTE: The contact must have a firstName / lastName to be successfully added  
@@ -733,6 +717,67 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
         );
       }
     }
-    else print("POP UP HERE"); //TODO... replace this for an actual pop up
+    else{
+      showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Name And Number Required'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Ok'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  Future<Uint8List> getAvatar() async{
+    //save the image
+    if(imageLocation.value != ""){
+      List<int> dataList = await File(imageLocation.value).readAsBytes();
+      Uint8List eightList = Uint8List.fromList(dataList);
+
+      //take extra steps if needed
+      if(isFromCamera.value){
+        /*
+        new File(path).writeAsBytes(buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+        */
+        /*
+        var buffer = new Uint8List(8).buffer;
+        var bdata = new ByteData.view(buffer);
+        bdata.setFloat32(0, 3.04);
+        int huh = bdata.getInt32(0);
+        */
+        /*
+        ByteData bytes = 
+        await rootBundle.load('assets/flutter.png');
+        */
+        /*
+        //save the file since right now its only in temp memory
+        imageLocation.value = await ImagePickerSaver.saveFile(
+          fileData: eightList,
+        );
+
+        //get a reference to the file and update values
+        File ref = File.fromUri(Uri.file(imageLocation.value));
+        dataList = await ref.readAsBytes();
+        eightList = Uint8List.fromList(dataList);
+        */
+      }
+
+      //save in new contact
+      return eightList;
+    }
+    return null;
+    /*
+    ByteData bytes = await rootBundle.load('assets/flutter.png');
+    final result = await ImageGallerySaver.save(byteData.buffer.asUint8List());
+    */
   }
 }

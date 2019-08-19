@@ -1,6 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+ThemeData ourDark = ThemeData.dark();
+ThemeData ourLight = ThemeData.light();
+
+/*
+//set changes on theme
+//Color.fromRGBO(255, 255, 255, 1); //O always set to 1
+//Color.fromARGB(255, 255, 255, 255); //A always set to 255
+//Color(0xAARRGGBB) //with a hex code //AA is always FF
+
+//setup for light theme
+ourLight = ThemeData.light().copyWith(
+  primaryColor: Colors.blue,
+);
+*/
+
 //-----Theme Changer Code
 class ThemeChanger with ChangeNotifier {
   ThemeData _themeData;
@@ -29,7 +44,7 @@ void showThemeSwitcher(BuildContext context) {
             groupValue: Theme.of(context).brightness,
             onChanged: (Brightness value) {
               if(value == Brightness.light){
-                _themeChanger.setTheme(ThemeData.light());
+                _themeChanger.setTheme(ourLight);
               }
             },
             title: const Text('Light'),
@@ -39,7 +54,7 @@ void showThemeSwitcher(BuildContext context) {
             groupValue: Theme.of(context).brightness,
             onChanged: (Brightness value) {
               if(value == Brightness.dark){
-                _themeChanger.setTheme(ThemeData.dark());
+                _themeChanger.setTheme(ourDark);
               }
             },
             title: const Text('Spooky  👻'),
