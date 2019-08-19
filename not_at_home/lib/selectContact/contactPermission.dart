@@ -11,7 +11,7 @@ import 'package:contact_picker/contact_picker.dart' as contactPicker;
 final ValueNotifier<bool> contactFirstTime = new ValueNotifier<bool>(true);
 
 //request contact permission from the user
-checkContactPermission(
+getContactPermission(
   BuildContext context, 
   bool forcePermission, 
   bool selectingContact, 
@@ -51,7 +51,7 @@ checkContactPermission(
       PermissionStatus status = (await Permission.requestPermissions([PermissionName.Contacts]))[0].permissionStatus;
       if(isAuthorized(status) == false){
         //---top
-        checkContactPermission(
+        getContactPermission(
           context, 
           forcePermission, 
           selectingContact, 

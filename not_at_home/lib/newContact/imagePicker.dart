@@ -62,6 +62,8 @@ actuallyChangeImage(BuildContext context, ValueNotifier<String> imageLocation, F
   //NOTE: here we KNOW that we have already been given the permissions we need
   File tempImage = await ImagePicker.pickImage(
     source: (fromCamera) ? ImageSource.camera : ImageSource.gallery,
+    maxHeight: 500,
+    maxWidth: 500,
   );
 
   //if an image was actually selected

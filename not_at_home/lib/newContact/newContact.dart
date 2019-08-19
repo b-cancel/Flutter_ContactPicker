@@ -3,12 +3,11 @@ import 'dart:typed_data';
 
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:not_at_home/contactPermission.dart';
 import 'package:not_at_home/helper.dart';
 import 'package:not_at_home/newContact/categorySelect.dart';
 import 'package:not_at_home/newContact/nameHandler.dart';
 import 'package:not_at_home/newContact/newContactHelper.dart';
+import 'package:not_at_home/selectContact/contactPermission.dart';
 import 'package:permission/permission.dart';
 import 'package:image_picker_saver/image_picker_saver.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
@@ -707,7 +706,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
         //without permission we give the user the option to ONLY
         //1. update the contact
-        checkContactPermission(
+        getContactPermission(
           context,
           //the user is never forced to create a contact, only to select one
           false, 
@@ -755,6 +754,8 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
 
       //take extra steps if needed
       if(isFromCamera.value){
+        var res = await ImageGallerySaver.save(eightList);
+        print("*******" + res.toString());
         /*
         new File(path).writeAsBytes(buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
         */
@@ -768,18 +769,22 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
         ByteData bytes = 
         await rootBundle.load('assets/flutter.png');
         */
-        /*
         //save the file since right now its only in temp memory
         imageLocation.value = await ImagePickerSaver.saveFile(
           fileData: eightList,
+          title: "some title",
+          description: "some description",
         );
 
         //get a reference to the file and update values
         File ref = File.fromUri(Uri.file(imageLocation.value));
         dataList = await ref.readAsBytes();
         eightList = Uint8List.fromList(dataList);
-        */
       }
+
+      print("-----");
+      print(eightList.toString());
+      print("-----");
 
       //save in new contact
       return eightList;

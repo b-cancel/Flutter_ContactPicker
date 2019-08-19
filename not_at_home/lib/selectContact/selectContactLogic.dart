@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:not_at_home/helper.dart';
 import 'package:not_at_home/newContact/categorySelect.dart';
-import 'package:not_at_home/contactPermission.dart';
 import 'package:not_at_home/request.dart';
+import 'package:not_at_home/selectContact/contactPermission.dart';
 import 'package:not_at_home/selectContact/selectContactUX.dart';
 import 'package:permission/permission.dart';
 
@@ -123,7 +123,7 @@ class _SelectContactState extends State<SelectContact> with WidgetsBindingObserv
   confirmPermission() async{
     PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
     if(isAuthorized(permissionStatus) == false){
-      checkContactPermission(
+      getContactPermission(
         context, 
         widget.forceSelection, //we force selection
         true, //we are selecting
