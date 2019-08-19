@@ -9,6 +9,7 @@ import 'package:not_at_home/newContact/categorySelect.dart';
 import 'package:not_at_home/newContact/nameHandler.dart';
 import 'package:not_at_home/newContact/newContactHelper.dart';
 import 'package:permission/permission.dart';
+import 'package:image_picker_saver/image_picker_saver.dart';
 
 import 'newContactUX.dart';
 
@@ -43,6 +44,8 @@ class NewContact extends StatefulWidget {
 }
 
 class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
+  ValueNotifier<bool> isFromCamera = new ValueNotifier(false);
+
   //-------------------------Logic Code-------------------------
   ValueNotifier<bool> namesSpread = new ValueNotifier<bool>(false);
 
@@ -546,7 +549,10 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
           cancelContact: cancelContact,
           createContact: createContact,
           imageLocation: imageLocation,
-          onImagePicked: () => setState(() {}),
+          onImagePicked: ({bool fromTheCamera: false}){
+            isFromCamera.value = fromTheCamera;
+            setState(() {});
+          },
           isPortrait: isPortrait,
           bottomBarHeight: bottomBarHeight,
           fields: NewContactUX(
@@ -657,64 +663,54 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
         suffix: nameFields[4].controller.text,
       );
 
-      //NOTE: this one isn't showing up on android
-      newContact.displayName = nameField.controller.text;
-
-      //save the image
-      if(imageLocation.value != ""){
-        List<int> avatarList = await File(imageLocation.value).readAsBytes();
-        newContact.avatar = Uint8List.fromList(avatarList);
-      }
-
-      //save the phones
-      newContact.phones = itemFieldData2ItemList(
-        phoneValueFields, 
-        phoneLabelStrings,
-      );
-
-      //save the emails
-      newContact.emails= itemFieldData2ItemList(
-        emailValueFields, 
-        emailLabelStrings,
-      );
-
-      //save the work stuff
-      newContact.jobTitle = jobTitleField.controller.text;
-      newContact.company = companyField.controller.text;
-
-      //save the addresses
-      newContact.postalAddresses = fieldsToAddresses();
-
-      //save the note
-      newContact.note = noteField.controller.text;
-
       //handle permissions
       PermissionStatus permissionStatus = (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0].permissionStatus;
       if(isAuthorized(permissionStatus)){
+        //NOTE: this one isn't showing up on android
+        newContact.displayName = nameField.controller.text;
+
+        //save the image
+        if(imageLocation.value != ""){
+          List<int> avatarList = await File(imageLocation.value).readAsBytes();
+          newContact.avatar = Uint8List.fromList(avatarList);
+
+          //TODO... check if this is needed
+          if(isFromCamera.value){ //image was taken right now
+            String filePath = await ImagePickerSaver.saveFile(
+              fileData: newContact.avatar,
+            );
+            //File savedFile = File.fromUri(Uri.file(filePath));
+            //await File(savedFile.path).readAsBytes();
+          }
+          //TODO... check the above as well
+        }
+
+        //save the phones
+        newContact.phones = itemFieldData2ItemList(
+          phoneValueFields, 
+          phoneLabelStrings,
+        );
+
+        //save the emails
+        newContact.emails= itemFieldData2ItemList(
+          emailValueFields, 
+          emailLabelStrings,
+        );
+
+        //save the work stuff
+        newContact.jobTitle = jobTitleField.controller.text;
+        newContact.company = companyField.controller.text;
+
+        //save the addresses
+        newContact.postalAddresses = fieldsToAddresses();
+
+        //save the note
+        newContact.note = noteField.controller.text;
+
         //with permission we can both
         //1. add the contact
         //NOTE: The contact must have a firstName / lastName to be successfully added  
-        await ContactsService.addContact(
-        newContact,
-          /*new Contact(
-          //image
-          avatar: newContact.avatar,
-          //name
-          prefix: newContact.prefix,
-          givenName: newContact.givenName,
-          middleName: newContact.middleName,
-          familyName: newContact.familyName,
-          suffix: newContact.suffix,
-          //phones
-          phones: newContact.phones,
-          //emails
-          emails: newContact.emails,
-          //work
-          jobTitle: newContact.jobTitle,
-          company: newContact.company,
-        )
-        */
-        );  
+        await ContactsService.addContact(newContact);  
         //2. and update the contact
         widget.onSelect(context, newContact);
       }
@@ -737,6 +733,6 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
         );
       }
     }
-    else print("POP UP HERE");
+    else print("POP UP HERE"); //TODO... replace this for an actual pop up
   }
 }

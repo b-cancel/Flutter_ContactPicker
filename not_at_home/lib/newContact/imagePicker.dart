@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:not_at_home/storagePermissions.dart';
+import 'package:not_at_home/newContact/storagePermissions.dart';
 
 void showImagePicker(BuildContext context, ValueNotifier<String> imageLocation, Function ifNewImage) {
   // flutter defined function
@@ -39,49 +39,41 @@ Widget bigIcon(BuildContext context, ValueNotifier<String> imageLocation, Functi
 }
 
 //return whether or not you should set state
-//TODO... handle case when selecting contacts the user decides to not give you permission to access storage
-/*
-do the same thing as the permissionRequired thing EXCEPT
-1. getting permission isn't required which means
-2. if we soft deny -> stay at select or take picture pop up
-3. if we force deny -> stay at select or take picture pop up
-4. Force pop up should have close option
-
--> get status
-if NOT authorized
-  if(notAgain && !firstTime)
-    -> show my own forced dialog
-  else
-    -> firstTime = false
-    -> request permission
-    if NOT authorized
-      -> recurse
-else -> actually let this stuff run
-*/
 changeImage(BuildContext context, ValueNotifier<String> imageLocation, Function ifNewImage, bool fromCamera) async {
-  //Cover "PlatformException (PlatformException(photo_access_denied, The user did not allow photo access., null))"
-  //when "ImagePicker.pickImage" runs
-  if(fromCamera) actuallyChangeImage(context, imageLocation, ifNewImage, true);
+  if(fromCamera){
+    askPermission(
+      context, 
+      //from camera
+      () => actuallyChangeImage(context, imageLocation, ifNewImage, true), 
+      PermissionBeingRequested.camera,
+    );
+  }
   else{
-    checkStoragePermission(
+    askPermission(
       context, 
       //not from camera
       () => actuallyChangeImage(context, imageLocation, ifNewImage, false), 
+      PermissionBeingRequested.storage,
     );
   }
 }
 
 actuallyChangeImage(BuildContext context, ValueNotifier<String> imageLocation, Function ifNewImage, bool fromCamera) async {
+  //NOTE: here we KNOW that we have already been given the permissions we need
   File tempImage = await ImagePicker.pickImage(
     source: (fromCamera) ? ImageSource.camera : ImageSource.gallery,
   );
 
+  //if an image was actually selected
   if(tempImage != null){
     //pop the popup 
     Navigator.of(context).pop();
+
     //set the new image location
     imageLocation.value = tempImage.path;
+
     //set state in the widget that called this image picker
-    ifNewImage();
+    ifNewImage(fromTheCamera: fromCamera);
   }
+  //ELSE... we back out of selecting it
 }
