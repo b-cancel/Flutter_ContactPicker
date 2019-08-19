@@ -12,6 +12,7 @@ import 'package:not_at_home/newContact/newContactHelper.dart';
 import 'package:permission/permission.dart';
 import 'package:image_picker_saver/image_picker_saver.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'newContactUX.dart';
 
@@ -648,9 +649,11 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
     //gen bools
     bool hasFirstName = (nameFields[1].controller.text.length > 0);
     bool hasLastName = (nameFields[3].controller.text.length > 0);
+    bool hasName = (hasFirstName || hasLastName);
+    bool hasNumber = (phoneValueFields.length > 0);
 
     //we can create the contact ONLY IF we have a first name
-    if((hasFirstName || hasLastName) && phoneValueFields.length > 0){
+    if(hasName && hasNumber){
       //maybe get avatar
       Uint8List maybeAvatar = await getAvatar();
 
@@ -718,22 +721,29 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
       }
     }
     else{
-      showDialog<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Name And Number Required'),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('Ok'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
+      //create the message
+      String message;
+      if(hasNumber == false && hasName) message = "The Number is";
+      else if(hasName == false && hasNumber) message = "The Name is";
+      else message = "The Name and Number are";
+
+      //inform the user of why their command didn't go through
+      Fluttertoast.showToast(
+        msg: message + " Required",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIos: 3,
       );
+      
+      //act accordingly
+      if(hasName == false){ //then focus on the name field
+        FocusScope.of(context).requestFocus(
+          (namesSpread.value) ? nameFields[1].focusNode : nameField.focusNode,
+        );
+      }
+      else{
+        addPhone();
+      }
     }
   }
 

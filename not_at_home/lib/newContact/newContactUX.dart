@@ -119,6 +119,7 @@ class NewContactUX extends StatelessWidget {
               size: 16,
             ),
           ),
+          textInputType: TextInputType.phone,
         ),
       );
     }
@@ -146,6 +147,7 @@ class NewContactUX extends StatelessWidget {
               size: 16,
             ),
           ),
+          textInputType: TextInputType.emailAddress,
         ),
       );
     }
@@ -399,6 +401,7 @@ class TheField extends StatelessWidget {
     this.labelField,
     this.rightIconButton,
     this.noPadding: false,
+    this.textInputType: TextInputType.text,
   });
 
   final String label;
@@ -409,6 +412,7 @@ class TheField extends StatelessWidget {
   final Widget labelField;
   final Widget rightIconButton;
   final bool noPadding;
+  final TextInputType textInputType;
 
   @override
   Widget build(BuildContext context) {
@@ -443,6 +447,7 @@ class TheField extends StatelessWidget {
                   textInputAction: (nextFunction == null)
                   ? TextInputAction.done
                   : TextInputAction.next,
+                  keyboardType: textInputType,
                   decoration: InputDecoration(
                     contentPadding: EdgeInsets.only(bottom: 4),
                     hintText: label,

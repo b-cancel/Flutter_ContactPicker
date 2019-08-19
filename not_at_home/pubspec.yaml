@@ -62,6 +62,7 @@ dependencies:
   #indexed_list_view: ^0.0.5 #would work great IF it didn't require an infinitely scrolling list
   diacritic: ^0.1.1
   path_provider: ^1.2.0
+  fluttertoast: ^3.1.0
 
   # share 
   # https://pub.dev/packages/share
