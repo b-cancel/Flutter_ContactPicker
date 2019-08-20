@@ -58,7 +58,8 @@ class _ContactListState extends State<ContactList> {
 
       //make contact list tile
       Widget tile = ContactListTile(
-        thisContact: widget.contacts.value[i],
+        theContacts: widget.contacts,
+        theContactID: i,
         thisColor: colorsForContacts[i],
         onSelect: widget.onSelect,
       );
@@ -211,12 +212,12 @@ class _ContactListState extends State<ContactList> {
         for(int i = 0; i < widget.contacts.value.length; i++){
           colorsForContacts.add(theColors[rnd.nextInt(theColors.length)]);
         }
-      }
 
-      //you set state when contacts get updated in any way
-      setState(() {
-        
-      });
+        //you set state when contacts get updated in any way
+        setState(() {
+          
+        });
+      }
     });
 
     //super init

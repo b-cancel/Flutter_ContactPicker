@@ -10,19 +10,20 @@ bool scramblerOn = false;
 class ContactListTile extends StatelessWidget {
   const ContactListTile({
     Key key,
-    @required this.thisContact,
+    @required this.theContacts,
+    @required this.theContactID,
     @required this.thisColor,
     this.onSelect,
   }) : super(key: key);
 
-  final Contact thisContact;
+  final ValueNotifier<List<Contact>> theContacts;
+  final int theContactID;
   final Color thisColor;
   final Function onSelect;
 
   @override
   Widget build(BuildContext context) {
-    //process image
-    bool noImage = thisContact.avatar.length == 0;
+    Contact thisContact = theContacts.value[theContactID];
 
     //process name
     String name = contactToName(thisContact) ?? "UnKnown";
@@ -59,18 +60,10 @@ class ContactListTile extends StatelessWidget {
             color: thisColor,
             shape: BoxShape.circle,
           ),
-          child: (noImage) ? Icon(
-            Icons.person,
-            color: Theme.of(context).primaryColor,
-          )
-          : ClipOval(
-            child: FittedBox(
-              fit: BoxFit.cover,
-                child: Image.memory(
-                thisContact.avatar,
-              ),
-            )
-          )
+          child: TileImage(
+            theContacts: theContacts,
+            theContactID: theContactID,
+          ),
         ),
         title: Text(
           name,
@@ -84,6 +77,68 @@ class ContactListTile extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class TileImage extends StatefulWidget {
+  final ValueNotifier<List<Contact>> theContacts;
+  final int theContactID;
+
+  TileImage({
+    @required this.theContacts,
+    @required this.theContactID,
+  });
+
+  @override
+  _TileImageState createState() => _TileImageState();
+}
+
+class _TileImageState extends State<TileImage> {
+  Contact theContact;
+  bool noImage;
+
+  @override
+  void initState() {
+    //set the initial value
+    theContact = widget.theContacts.value[widget.theContactID];
+    
+
+    //listen to contact list changes to update photo
+    widget.theContacts.addListener((){
+      //the list may have changed but did we?
+      theContact = widget.theContacts.value[widget.theContactID]
+      bool newNoImage = (theContact.avatar.length <= 0);
+
+      //we now have an image, or a high res one
+      if(noImage != newNoImage){
+        setState(() {});
+      }
+    });
+
+    //super init
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    noImage = (theContact.avatar.length <= 0);
+
+    if(noImage){
+      return Icon(
+        Icons.person,
+        color: Theme.of(context).primaryColor,
+      );
+    }
+    else{
+      return ClipOval(
+        child: FittedBox(
+          fit: BoxFit.cover,
+            child: Image.memory(
+            theContact.avatar,
+          ),
+        )
+      );
+    }
   }
 }
 
