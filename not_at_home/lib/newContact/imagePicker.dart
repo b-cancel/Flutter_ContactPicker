@@ -10,12 +10,37 @@ void showImagePicker(BuildContext context, ValueNotifier<String> imageLocation, 
   showDialog(
     context: context,
     builder: (BuildContext context) {
+      bool showRemoveImage = (imageLocation.value != "");
+      Widget removeImage = Container();
+      if(showRemoveImage){
+        removeImage = FlatButton(
+          padding: EdgeInsets.all(32),
+          onPressed: (){
+            Navigator.pop(context);
+            imageLocation.value = "";
+            ifNewImage();
+          },
+          child: Text(
+            "Remove Image",
+            style: TextStyle(
+              fontSize: 22,
+            ),
+          ),
+        );
+      }
+
       // return object of type Dialog
       return Dialog(
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            bigIcon(context, imageLocation, ifNewImage, false, FontAwesomeIcons.images),
-            bigIcon(context, imageLocation, ifNewImage, true, Icons.camera),
+            Row(
+              children: <Widget>[
+                bigIcon(context, imageLocation, ifNewImage, false, FontAwesomeIcons.images),
+                bigIcon(context, imageLocation, ifNewImage, true, Icons.camera),
+              ],
+            ),
+            removeImage,
           ],
         ),
       );
@@ -75,7 +100,7 @@ actuallyChangeImage(BuildContext context, ValueNotifier<String> imageLocation, F
     imageLocation.value = tempImage.path;
 
     //set state in the widget that called this image picker
-    ifNewImage(fromTheCamera: fromCamera);
+    ifNewImage();
   }
   //ELSE... we back out of selecting it
 }

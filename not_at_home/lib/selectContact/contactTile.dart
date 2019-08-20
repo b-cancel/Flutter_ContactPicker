@@ -106,7 +106,7 @@ class _TileImageState extends State<TileImage> {
     //listen to contact list changes to update photo
     widget.theContacts.addListener((){
       //the list may have changed but did we?
-      theContact = widget.theContacts.value[widget.theContactID]
+      theContact = widget.theContacts.value[widget.theContactID];
       bool newNoImage = (theContact.avatar.length <= 0);
 
       //we now have an image, or a high res one

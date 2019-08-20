@@ -551,8 +551,7 @@ class _NewContactState extends State<NewContact> with WidgetsBindingObserver {
           cancelContact: cancelContact,
           createContact: createContact,
           imageLocation: imageLocation,
-          onImagePicked: ({bool fromTheCamera: false}){
-            isFromCamera.value = fromTheCamera;
+          onImagePicked: (){
             setState(() {});
           },
           isPortrait: isPortrait,
