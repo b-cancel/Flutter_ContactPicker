@@ -14,7 +14,6 @@ void showImagePicker(BuildContext context, ValueNotifier<String> imageLocation, 
       Widget removeImage = Container();
       if(showRemoveImage){
         removeImage = FlatButton(
-          padding: EdgeInsets.all(32),
           onPressed: (){
             Navigator.pop(context);
             imageLocation.value = "";
@@ -22,26 +21,31 @@ void showImagePicker(BuildContext context, ValueNotifier<String> imageLocation, 
           },
           child: Text(
             "Remove Image",
-            style: TextStyle(
-              fontSize: 22,
-            ),
           ),
         );
       }
 
       // return object of type Dialog
       return Dialog(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                bigIcon(context, imageLocation, ifNewImage, false, FontAwesomeIcons.images),
-                bigIcon(context, imageLocation, ifNewImage, true, Icons.camera),
-              ],
-            ),
-            removeImage,
-          ],
+        child: FittedBox(
+          fit: BoxFit.contain,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    bigIcon(context, imageLocation, ifNewImage, false, FontAwesomeIcons.images),
+                    bigIcon(context, imageLocation, ifNewImage, true, Icons.camera),
+                  ],
+                ),
+              ),
+              Container(
+                child: removeImage,
+              ),
+            ],
+          ),
         ),
       );
     },
@@ -49,16 +53,11 @@ void showImagePicker(BuildContext context, ValueNotifier<String> imageLocation, 
 }
 
 Widget bigIcon(BuildContext context, ValueNotifier<String> imageLocation, Function ifNewImage, bool fromCamera, IconData icon){
-  return Expanded(
-    child: FittedBox(
-      fit: BoxFit.fill,
-      child: Container(
-        padding: EdgeInsets.only(left: 4, right: 8, top: 4, bottom: 4),
-        child: IconButton(
-          onPressed: () => changeImage(context, imageLocation, ifNewImage, fromCamera),
-          icon: Icon(icon),
-        ),
-      ),
+  return Container(
+    padding: EdgeInsets.all(4),
+    child: IconButton(
+      onPressed: () => changeImage(context, imageLocation, ifNewImage, fromCamera),
+      icon: Icon(icon),
     ),
   );
 }
