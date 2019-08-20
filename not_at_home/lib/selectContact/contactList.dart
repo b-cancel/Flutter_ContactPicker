@@ -227,26 +227,6 @@ class _ContactListState extends State<ContactList> {
   //TODO... it seems to be possible to make some changes here
   @override
   Widget build(BuildContext context) {
-    widget.nameToTiles.value.clear();
-
-    //for each letter assemble a list of widget
-    Map<int, List<Widget>> letterToListItems = createLetterToWidgetListMap();
-    //update notifier so scroll bar can adjust
-    widget.letterToListItems.value = letterToListItems;
-
-    //sort keys
-    List<int> sortedLetterCodes = letterToListItems.keys.toList();
-    sortedLetterCodes.sort();
-    //update notifier so scroll bar can adjust
-    widget.sortedLetterCodes.value = sortedLetterCodes;
-
-    //iterate through all letters
-    //and compile the sections with their headers
-    List<Widget> sliverSections = createSliverSectionsList(
-      sortedLetterCodes,
-      letterToListItems,
-    );
-
     //the body slivers
     List<Widget> bodySlivers = new List<Widget>();
 
@@ -271,6 +251,26 @@ class _ContactListState extends State<ContactList> {
       );
     }
     else{
+      widget.nameToTiles.value.clear();
+
+      //for each letter assemble a list of widget
+      Map<int, List<Widget>> letterToListItems = createLetterToWidgetListMap();
+      //update notifier so scroll bar can adjust
+      widget.letterToListItems.value = letterToListItems;
+
+      //sort keys
+      List<int> sortedLetterCodes = letterToListItems.keys.toList();
+      sortedLetterCodes.sort();
+      //update notifier so scroll bar can adjust
+      widget.sortedLetterCodes.value = sortedLetterCodes;
+
+      //iterate through all letters
+      //and compile the sections with their headers
+      List<Widget> sliverSections = createSliverSectionsList(
+        sortedLetterCodes,
+        letterToListItems,
+      );
+
       //add all sections to body
       bodySlivers = sliverSections;
 

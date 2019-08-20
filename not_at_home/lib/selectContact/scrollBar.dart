@@ -22,6 +22,8 @@ class ScrollBar extends StatefulWidget {
     @required this.letterToListItems,
     //show/hide thumb tack
     @required this.showThumbTack,
+    //smooth adjusting scrollBarHeight
+    @required this.bannerHeight,
   });
 
   final AutoScrollController autoScrollController;
@@ -36,6 +38,8 @@ class ScrollBar extends StatefulWidget {
   final ValueNotifier<Map<int, List<Widget>>> letterToListItems;
   //show/hide thumb tack
   final ValueNotifier<bool> showThumbTack;
+  //for smooth adjusting scrollBarHeight
+  final ValueNotifier<double> bannerHeight;
 
   @override
   _ScrollBarState createState() => _ScrollBarState();
@@ -63,37 +67,37 @@ class _ScrollBarState extends State<ScrollBar> {
       updateContactsVisible();
     });
 
-    //if either var above changes this might change 
-    //which should trigger a set state
-    showContacts.addListener((){
-      rebuild();
+    widget.bannerHeight.addListener((){
+      setState(() {
+        
+      });
     });
 
     //init the super
     super.initState();
   }
 
-  //set state with mounted check first
-  rebuild(){
-    if(mounted){
-      WidgetsBinding.instance.addPostFrameCallback((_){
-        setState(() {
-        
-        });
-      });
-    }
-  }
-
   //this MIGHT trigger a rebuild
   updateContactsVisible(){
-    if(
-      widget.retreivingContacts.value 
+    bool prev = showContacts.value;
+    if(widget.retreivingContacts.value 
       || widget.contacts.value.length == 0 
       || widget.letterToListItems.value.length == 0
       || widget.sortedLetterCodes.value.length == 0){
       showContacts.value = false;
     }
     else showContacts.value = true;
+
+    //reload if mismatch
+    if(prev != showContacts.value){
+      if(mounted){
+        WidgetsBinding.instance.addPostFrameCallback((_){ //REQUIRED
+          setState(() {
+          
+          });
+        });
+      }
+    }
   }
 
   //build
@@ -114,7 +118,7 @@ class _ScrollBarState extends State<ScrollBar> {
       double totalHeight = MediaQuery.of(context).size.height;
       
       //portrait mode and landscape mode should have seperate largest flexible heights
-      double appBarHeight = widget.expandedBannerHeight;  
+      double appBarHeight = widget.bannerHeight.value; //.expandedBannerHeight;  
       double paddingVertical = 16;
       //size of toolbar AND NOT sticky header
       double extraPaddingTop = 40; 

@@ -39,7 +39,7 @@ class SelectContactUX extends StatefulWidget {
   _SelectContactUXState createState() => _SelectContactUXState();
 }
 
-class _SelectContactUXState extends State<SelectContactUX> {
+class _SelectContactUXState extends State<SelectContactUX>{
   double expandedBannerHeight = 0;
   final ValueNotifier<double> bannerHeight = new ValueNotifier(0); 
 
@@ -57,6 +57,9 @@ class _SelectContactUXState extends State<SelectContactUX> {
   final ValueNotifier<List<int>> sortedLetterCodes = new ValueNotifier(new List<int>()); 
   final ValueNotifier<Map<int, List<Widget>>> letterToListItems = new ValueNotifier(new Map<int, List<Widget>>()); 
   final ValueNotifier<Map<String, List<Widget>>> nameToTiles = new ValueNotifier(new Map<String, List<Widget>>());
+
+  //we assume this, the problem will self correct if needed
+  final ValueNotifier<bool> isPortrait = new ValueNotifier(true);
 
   //init
   @override
@@ -89,6 +92,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
       bannerHeight.value = visiblePortionOfBanner.abs();
     }
     else bannerHeight.value = 0;
+    print("height: " + bannerHeight.value.toString());
   }
 
   //dispose
@@ -98,6 +102,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
     super.dispose();
   }
 
+  //build
   @override
   Widget build(BuildContext context) {
     //Styling of the User Question Prompt
@@ -112,10 +117,19 @@ class _SelectContactUXState extends State<SelectContactUX> {
         child: SafeArea(
           child: Stack(
             children: <Widget>[
-              OrientationBuilder(
-                builder: (context, orientation){
+              AnimatedBuilder(
+                animation: isPortrait,
+                builder: (context, child){
+                  //NOTE: as strange as it may seem we 
+                  //DONT RELY ON ISPORTRAIT
+                  //to give us our orientation
+                  //we simply grab it here
+
+                  print("orientation change");
+
                   //variables prepped
-                  bool isPortrait = (orientation == Orientation.portrait);
+                  bool isPortrait = (MediaQuery.of(context).orientation == Orientation.portrait);
+                  print("isportrit: " + isPortrait.toString());
                   expandedBannerHeight = MediaQuery.of(context).size.height;
 
                   //is portrait can have more of the screen taken up
@@ -204,6 +218,7 @@ class _SelectContactUXState extends State<SelectContactUX> {
                     color: Theme.of(context).primaryColor,
                     child: Stack(
                       children: <Widget>[
+                        //NOTE: this updates nameToTiles so that it can be used when searching
                         ContactList(
                           //set once ance done
                           autoScrollController: autoScrollController,
@@ -229,6 +244,8 @@ class _SelectContactUXState extends State<SelectContactUX> {
                           letterToListItems: letterToListItems,
                           //show/hide thumb tack
                           showThumbTack: showThumbTack,
+                          //for smooth sizing scroll bar
+                          bannerHeight: bannerHeight,
                         ),
                       ],
                     ),
