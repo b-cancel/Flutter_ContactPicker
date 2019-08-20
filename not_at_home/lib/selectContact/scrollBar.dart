@@ -120,8 +120,8 @@ class _ScrollBarState extends State<ScrollBar> {
       //portrait mode and landscape mode should have seperate largest flexible heights
       double appBarHeight = widget.bannerHeight.value; //.expandedBannerHeight;  
       double paddingVertical = 16;
-      //size of toolbar AND NOT sticky header
-      double extraPaddingTop = 40; 
+      //size of toolbar AND sticky header
+      double extraPaddingTop = 40 + 40.0; 
       double extraPaddingBottom = 0; 
 
       //calculate scroll bar height
