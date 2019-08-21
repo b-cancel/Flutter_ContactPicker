@@ -5,6 +5,8 @@ import 'package:not_at_home/theme.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 
+import 'helper.dart';
+
 //this Class is required in order to be able to pass parameters to named routes
 class ContactDisplayArgs {
   final Contact contact;
@@ -65,7 +67,7 @@ class _ContactDisplayState extends State<ContactDisplay> {
     ThemeChanger _themeChanger = Provider.of<ThemeChanger>(context);
     
     //button text
-    String buttonText = contact.value?.givenName ?? "Select Contact";
+    String buttonText = contactToName(contact.value) ?? "Select Contact";
 
     //build
     return Scaffold(
