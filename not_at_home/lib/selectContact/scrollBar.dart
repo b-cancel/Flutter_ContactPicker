@@ -47,9 +47,13 @@ class ScrollBar extends StatefulWidget {
 
 class _ScrollBarState extends State<ScrollBar> {
   ValueNotifier<bool> showContacts = new ValueNotifier(false);
+  ValueNotifier<bool> showSlider = new ValueNotifier(false);
+  ValueNotifier<double> actualBannerHeight = new ValueNotifier(0);
 
   @override
   void initState() {
+    actualBannerHeight.value = widget.bannerHeight.value;
+
     //update whether or not the contacts should be visible
     widget.retreivingContacts.addListener((){
       updateContactsVisible();
@@ -68,6 +72,18 @@ class _ScrollBarState extends State<ScrollBar> {
     });
 
     widget.bannerHeight.addListener((){
+      if(showSlider.value == false){
+        actualBannerHeight.value = widget.bannerHeight.value;
+      }
+    });
+
+    showSlider.addListener((){
+      if(showSlider.value == false){
+        actualBannerHeight.value = widget.bannerHeight.value;
+      }
+    });
+
+    actualBannerHeight.addListener((){
       setState(() {
         
       });
@@ -118,7 +134,7 @@ class _ScrollBarState extends State<ScrollBar> {
       double totalHeight = MediaQuery.of(context).size.height;
       
       //portrait mode and landscape mode should have seperate largest flexible heights
-      double appBarHeight = widget.bannerHeight.value; //.expandedBannerHeight;  
+      double appBarHeight = actualBannerHeight.value; //.expandedBannerHeight;  
       double paddingVertical = 16;
       //size of toolbar AND sticky header
       double extraPaddingTop = 40 + 40.0; 
@@ -198,6 +214,7 @@ class _ScrollBarState extends State<ScrollBar> {
                   //value notifiers, don't need to notify since we KNOW when we pass these they will already not be empty
                   sortedLetterCodes: widget.sortedLetterCodes.value,
                   letterToListItems: widget.letterToListItems.value,
+                  showSlider: showSlider,
                 ),
                 //-----Letters Overlay
                 IgnorePointer(

@@ -23,6 +23,7 @@ class DraggableScrollBar extends StatefulWidget {
     //value notifiers
     @required this.sortedLetterCodes,
     @required this.letterToListItems,
+    @required this.showSlider,
   });
 
   final AutoScrollController autoScrollController;
@@ -37,6 +38,7 @@ class DraggableScrollBar extends StatefulWidget {
   //value notifiers
   final List<int> sortedLetterCodes;
   final Map<int, List<Widget>> letterToListItems;
+  final ValueNotifier<bool> showSlider;
 
   @override
   _DraggableScrollBarState createState() => new _DraggableScrollBarState();
@@ -64,9 +66,6 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
   double space;
   double offsetAtSart;
   double offsetAtEnd;
-
-  //show or hide the slider
-  ValueNotifier<bool> showSlider;
 
   //our positions
   List<double> offsets = new List<double>();
@@ -111,11 +110,8 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
       spacerCountSoFar += (ourItemCount - 1);
     }
 
-    //handle show hide slider stuff
-    showSlider = new ValueNotifier(false);
-
     //whenever this changes we need to set state
-    showSlider.addListener((){
+    widget.showSlider.addListener((){
       setState(() {
         
       });
@@ -155,7 +151,7 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
-    showSlider.value = true;
+    widget.showSlider.value = true;
 
     //travel to our fingers position
     double barOffset = details.localPosition.dy;
@@ -181,12 +177,7 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
     if(newIndex != index){
       index = newIndex;
       vibrate();
-      if(index == 0){
-        widget.autoScrollController.jumpTo(0);
-      }
-      else{
-        widget.autoScrollController.jumpTo(offsets[index] + widget.expandedBannerHeight);
-      }
+      widget.autoScrollController.jumpTo(offsets[index] + widget.expandedBannerHeight);
     }
     
     //set state to reflect all the changes
@@ -212,13 +203,13 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
             //NOT true on dragDown or dragStart
             onVerticalDragUpdate: _onVerticalDragUpdate,
             onVerticalDragCancel: (){
-              showSlider.value = false;
+              widget.showSlider.value = false;
             },
             onVerticalDragEnd: (dragEndDetails){
-              showSlider.value = false;
+              widget.showSlider.value = false;
             },
             child: Opacity(
-              opacity: (showSlider.value) ? 1 : 0,
+              opacity: (widget.showSlider.value) ? 1 : 0,
               child: Container(
                 color: (scrollBarColors) ? Colors.green.withOpacity(0.5) : Colors.transparent,
                 height: widget.programaticScrollBarHeight,
@@ -245,7 +236,7 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
                   Stack(
                     children: <Widget>[
                       Opacity(
-                        opacity: (showSlider.value) ? 1 : 0,
+                        opacity: (widget.showSlider.value) ? 1 : 0,
                         child: Container(
                           width: 24,
                           height: widget.scrollThumbHeight,
