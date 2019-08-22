@@ -7,7 +7,7 @@
   <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" alt="PayPal Donate Button">
 </a>
 <br>
-
+<br>
 A Fully Featured Contact Picker for Flutter
 <br>
 <a href="https://drive.google.com/file/d/115UiE5IkwhYKzi-YUqcryfMY9SF-U1ts/view?usp=sharing">Link To Full Demo Video Here</a>
@@ -47,8 +47,8 @@ A Fully Featured Contact Picker for Flutter
 <br>
 <h3>Screen Shoots Below (you should watch the video above)</h3>
 <br>
-<img src="https://drive.google.com/file/d/11HmKQT9eAO_Ygd2-eUxNOtgTDDuUKkF_/view?usp=sharing" width="360"/>
-<img src="https://media.giphy.com/media/kBNoowA21gf9gsg69j/giphy.gif" width="360"/>
-<img src="https://media.giphy.com/media/kBNoowA21gf9gsg69j/giphy.gif" width="360"/>
-<img src="https://media.giphy.com/media/kBNoowA21gf9gsg69j/giphy.gif" width="360"/>
-<img src="https://media.giphy.com/media/kBNoowA21gf9gsg69j/giphy.gif" width="360"/>
+<img src="https://drive.google.com/uc?export=download&id=11HmKQT9eAO_Ygd2-eUxNOtgTDDuUKkF_" width="360"/>
+<img src="https://drive.google.com/open?id=11HJ7H45q5xIzf732XBqqvYPx070X06Ho" width="360"/>
+<img src="https://drive.google.com/open?id=118sdVH4nP4SNHxxI22U1HboscsGvtSJI" width="360"/>
+<img src="https://drive.google.com/open?id=117BJtWrcVH0wLgSFYqvurEThUwk2mVi_" width="360"/>
+<img src="https://drive.google.com/open?id=11LQyGoPBHWjBCS-Qvc75s3wE3Yrhfy2E" width="360"/>
