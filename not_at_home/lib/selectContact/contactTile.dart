@@ -124,9 +124,30 @@ class _TileImageState extends State<TileImage> {
     noImage = (theContact.avatar.length <= 0);
 
     if(noImage){
-      return Icon(
-        Icons.person,
-        color: Theme.of(context).primaryColor,
+      String letter = contactToName(theContact);
+      Widget center;
+
+      //if possible have a letter
+      if(letter.length == 0){
+        center = Icon(
+          Icons.person,
+          color: Colors.black,
+        );
+      }
+      else{
+        center = Text(
+          letter[0].toUpperCase(),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            color: Colors.black,
+          ),
+        );
+      }
+
+      //return
+      return Center(
+        child: center,
       );
     }
     else{

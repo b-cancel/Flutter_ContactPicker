@@ -368,7 +368,7 @@ class Title extends StatelessWidget {
                 child: Text(
                   name,
                   style: TextStyle(
-                    color: Theme.of(context).primaryColorLight,
+                    color: Theme.of(context).textTheme.subtitle.color,
                     fontSize: 20,
                   ),
                 ),
@@ -560,7 +560,7 @@ class LeftIcon extends StatelessWidget {
       iconColor = Colors.transparent;
     }
     else{
-      iconColor = Theme.of(context).primaryColorLight;
+      iconColor = Theme.of(context).textTheme.subtitle.color;
     }
 
     //return widget

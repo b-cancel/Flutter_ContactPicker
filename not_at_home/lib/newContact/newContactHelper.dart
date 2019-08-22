@@ -140,7 +140,7 @@ class NewContactOuterShell extends StatelessWidget {
                         ),
                         child: Icon(
                           Icons.edit,
-                          color: Theme.of(context).primaryColorLight,
+                          color: Theme.of(context).accentColor,
                         ),
                       ),
                     ),

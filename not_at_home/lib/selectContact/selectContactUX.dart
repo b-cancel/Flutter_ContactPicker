@@ -108,6 +108,7 @@ class _SelectContactUXState extends State<SelectContactUX>{
     //Styling of the User Question Prompt
     TextStyle questionStyle = TextStyle(
       fontWeight: FontWeight.bold,
+      color: Theme.of(context).textTheme.headline.color,
     );
 
     //build
@@ -330,7 +331,12 @@ class ToolBar extends StatelessWidget {
                 Expanded(
                   child: Container(
                     padding: EdgeInsets.all(8),
-                    child: Text("Select Contact"),
+                    child: Text(
+                      "Select Contact",
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.headline.color,
+                      ),
+                    ),
                   ),
                 ),
                 Material(

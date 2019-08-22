@@ -58,6 +58,8 @@ class _ContactListState extends State<ContactList> {
 
       //make contact list tile
       Widget tile = ContactListTile(
+        //needed to avoid issues with image transfering to wrong tile
+        key: UniqueKey(), 
         theContacts: widget.contacts,
         theContactID: i,
         thisColor: colorsForContacts[i],

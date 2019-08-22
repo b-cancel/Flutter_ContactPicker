@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 ThemeData ourDark = ThemeData.dark();
-ThemeData ourLight = ThemeData.light();
+ThemeData ourLight = ThemeData.light().copyWith(
+  primaryColorDark: Color(0xFFBCBCBC),
+  primaryColor: Color(0xFFF2F2F2),
+);
 
 /*
 //set changes on theme

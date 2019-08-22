@@ -72,6 +72,7 @@ class _ContactDisplayState extends State<ContactDisplay> {
     //build
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).dividerColor,
         title: Text("Page Requesting Contact"),
       ),
       body: Container(

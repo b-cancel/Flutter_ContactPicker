@@ -183,7 +183,7 @@ class AlphaScrollBarOverlay extends StatelessWidget {
                       child: Text(
                         String.fromCharCode(letterCodes[i]),
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Theme.of(context).textTheme.headline.color,
                         ),
                       ),
                     ),
