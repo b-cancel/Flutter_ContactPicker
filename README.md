@@ -48,7 +48,7 @@ A Fully Featured Contact Picker for Flutter
 <h3>Screen Shoots Below (you should watch the video above)</h3>
 <br>
 <img src="https://drive.google.com/uc?export=download&id=11HmKQT9eAO_Ygd2-eUxNOtgTDDuUKkF_" width="360"/>
-<img src="https://drive.google.com/open?id=11HJ7H45q5xIzf732XBqqvYPx070X06Ho" width="360"/>
-<img src="https://drive.google.com/open?id=118sdVH4nP4SNHxxI22U1HboscsGvtSJI" width="360"/>
-<img src="https://drive.google.com/open?id=117BJtWrcVH0wLgSFYqvurEThUwk2mVi_" width="360"/>
-<img src="https://drive.google.com/open?id=11LQyGoPBHWjBCS-Qvc75s3wE3Yrhfy2E" width="360"/>
+<img src="https://drive.google.com/uc?export=download&id=11HJ7H45q5xIzf732XBqqvYPx070X06Ho" width="360"/>
+<img src="https://drive.google.com/uc?export=download&id=118sdVH4nP4SNHxxI22U1HboscsGvtSJI" width="360"/>
+<img src="https://drive.google.com/uc?export=download&id=117BJtWrcVH0wLgSFYqvurEThUwk2mVi_" width="360"/>
+<img src="https://drive.google.com/uc?export=download&id=11LQyGoPBHWjBCS-Qvc75s3wE3Yrhfy2E" width="360"/>
