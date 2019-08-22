@@ -18,10 +18,12 @@ A Fully Featured Contact Picker for Flutter
   <li>Dark and Light Theme</li>
   <li>
     All permissions handled (even when the user tells the permission pop up to never pop up again)
+<ul>
     <li>Contact permission to display contacts</li>
     <li>Camera permission to take photo as new contact photo</li>
     <li>Gallery permission to select photo as new contact photo</li>
-  </li>
+  </ul>
+</li>
   <li>
     Select A Contact
     <ul>
