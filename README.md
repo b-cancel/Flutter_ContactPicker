@@ -21,6 +21,7 @@ Select, Create, and Delete Contacts.
 Handles permission requests for contacts, camera, and photo gallery.
  And allows you to quickly jump to a section of contacts with an adaptive scroll bar.
 <br>
+<br>
 <ul>
   <li>Contact Scrambler Boolean (enabled in video)</li>
   <li>Dark and Light Theme</li>
