@@ -1,4 +1,4 @@
-# Flutter_ContactPicker
+# Flutter Contact Picker
 
 <br>
 <h5>If this project helped you reduce developement time or you just want to help me continue making useful tools</h5>
@@ -7,11 +7,19 @@
   <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" alt="PayPal Donate Button">
 </a>
 <br>
+<p float="left">
+  <img src="https://media.giphy.com/media/Uqk7fPBnsNydSn2GZW/giphy.gif"/>
+  <img src="https://media.giphy.com/media/W0QwfdozN3AFnw1sWn/giphy.gif"/>
+  <img src="https://media.giphy.com/media/LM9EpmeAiYlIpSAcgH/giphy.gif"/>
+  <img src="https://media.giphy.com/media/Xbh1CLWME0plFA8g2G/giphy.gif"/>
+  <img src="https://media.giphy.com/media/UT4byKMOmrYWk8dTmb/giphy.gif"/>
+</p>
 <br>
 A Fully Featured Contact Picker for Flutter
 <br>
-<a href="https://drive.google.com/file/d/115UiE5IkwhYKzi-YUqcryfMY9SF-U1ts/view?usp=sharing">Link To Full Demo Video Here</a>
-<br>
+Select, Create, and Delete Contacts. 
+Handles permission requests for contacts, camera, and photo gallery.
+ And allows you to quickly jump to a section of contacts with an adaptive scroll bar.
 <br>
 <ul>
   <li>Contact Scrambler Boolean (enabled in video)</li>
@@ -47,11 +55,3 @@ A Fully Featured Contact Picker for Flutter
     </ul>
   </li>
 </ul>
-<br>
-<h3>Screen Shoots Below (you should watch the video above)</h3>
-<br>
-<img src="https://drive.google.com/uc?export=download&id=117BJtWrcVH0wLgSFYqvurEThUwk2mVi_" width="360"/>
-<img src="https://drive.google.com/uc?export=download&id=11LQyGoPBHWjBCS-Qvc75s3wE3Yrhfy2E" width="360"/>
-<img src="https://drive.google.com/uc?export=download&id=11HJ7H45q5xIzf732XBqqvYPx070X06Ho" width="360"/>
-<img src="https://drive.google.com/uc?export=download&id=118sdVH4nP4SNHxxI22U1HboscsGvtSJI" width="360"/>
-<img src="https://drive.google.com/uc?export=download&id=11HmKQT9eAO_Ygd2-eUxNOtgTDDuUKkF_" width="360"/>
